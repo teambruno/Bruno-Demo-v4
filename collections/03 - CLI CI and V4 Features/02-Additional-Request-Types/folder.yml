@@ -1,0 +1,7 @@
+info:
+  name: 02-Additional-Request-Types
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit

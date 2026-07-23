@@ -1,0 +1,122 @@
+info:
+  name: Variable Inspector
+  type: http
+  seq: 0
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{baseUrl}}/posts/{{postId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // ── Variable Inspector ──────────────────────────────────────────────────
+        // Bruno resolves variables in this priority order (highest wins):
+        //   3. --env-var       → overrides collection env vars at runtime
+        //   2. Collection env  → --env file (e.g. Production.yml)
+        //   1. Global env      → --global-env file (e.g. Globals.yml)  ← lowest priority
+        //
+        // To override a global env var from the CLI:
+        //   --env-var <key>=<value>  sets the value in the COLLECTION scope,
+        //   which has higher priority and shadows the global value.
+
+        const notSet   = "(not set)";
+        const noGlobal = "(no --global-env loaded)";
+
+        // releaseStage — exists in BOTH global env and collection env, so it
+        // demonstrates the full override chain clearly
+        const globalRelease = bru.getGlobalEnvVar("releaseStage") ?? noGlobal;
+        const colRelease    = bru.getEnvVar("releaseStage")        ?? notSet;
+
+        // Other collection env vars
+        const colBaseUrl = bru.getEnvVar("baseUrl") ?? notSet;
+        const colPostId  = bru.getEnvVar("postId")  ?? notSet;
+
+        // Other global env vars
+        const globalApiVer = bru.getGlobalEnvVar("apiVersion") ?? noGlobal;
+        const globalDebug  = bru.getGlobalEnvVar("debugMode")  ?? noGlobal;
+
+        const shadowed = globalRelease !== noGlobal && colRelease !== globalRelease;
+
+        console.log("── Variable Inspector ───────────────────────────────────────────");
+        console.log("");
+        console.log("  releaseStage");
+        console.log(`    Global env (--global-env)     → ${globalRelease}`);
+        console.log(`    Collection env (--env-var)    → ${colRelease}`);
+        console.log(`    ✦ Used in requests {{...}}    → ${colRelease}  ← collection wins`);
+        if (shadowed) {
+          console.log(`    ⚠ Global value unchanged — shadowed, NOT overridden`);
+          console.log(`      bru.getGlobalEnvVar("releaseStage") still returns "${globalRelease}"`);
+          console.log(`      To truly change the global, use --global-env Globals-Staging`);
+        }
+        console.log("");
+        console.log("  Other collection env vars");
+        console.log(`    baseUrl → ${colBaseUrl}`);
+        console.log(`    postId  → ${colPostId}`);
+        console.log("");
+        console.log("  Other global env vars (read-only from CLI via --env-var)");
+        console.log(`    apiVersion → ${globalApiVer}`);
+        console.log(`    debugMode  → ${globalDebug}`);
+        console.log("");
+        console.log("─────────────────────────────────────────────────────────────────");
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("baseUrl env var is set", () => {
+          expect(bru.getEnvVar("baseUrl")).to.be.a("string").and.not.be.empty;
+        });
+
+        test("postId env var is set", () => {
+          expect(bru.getEnvVar("postId")).to.be.a("string").and.not.be.empty;
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Variable Inspector
+
+  A diagnostic request that runs **before** the rest of the folder and prints
+  every key variable — its source and resolved value — to the console.
+
+  Variable resolution order — **highest priority wins**:
+  1. `--env-var`      overrides the collection env scope at runtime
+  2. Collection env   the `--env` file (e.g. `Production.yml`)
+  3. Global env       the `--global-env` file (e.g. `Globals.yml`) — lowest priority
+
+  `releaseStage` is defined in **both** the global env and the collection env,
+  making it the perfect variable to demonstrate the full override chain.
+
+  ```bash
+  # Baseline — releaseStage from collection env (Production.yml)
+  bru run "01-Basic-Requests" --env Production
+  # releaseStage = production  |  global = (not loaded)
+
+  # Load global env — collection env still wins for same-named vars
+  bru run "01-Basic-Requests" --env Production --global-env Globals
+  # releaseStage = production  |  global = production  (same; collection wins)
+
+  # Shadow the global at runtime — --env-var changes the COLLECTION scope only.
+  # The global env value is unchanged; {{releaseStage}} in requests uses "staging".
+  bru run "01-Basic-Requests" --env Production --global-env Globals --env-var releaseStage=staging
+  # releaseStage = staging (collection/runtime)  |  global still = production
+
+  # To truly change a global env variable, swap the --global-env file:
+  bru run "01-Basic-Requests" --env Production --global-env Globals-Staging
+  # releaseStage = staging  |  apiVersion = v2  |  debugMode = true
+  ```

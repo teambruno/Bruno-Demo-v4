@@ -1,0 +1,28 @@
+info:
+  name: Update lower rated product
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: https://dummyjson.com/products/{{productId}}
+  body:
+    type: json
+    data: |-
+      {
+        "discountPercentage": "{{updatedDiscountPercent}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        var currentDiscount = bru.getVar('discountPercent')
+        bru.setVar('updatedDiscountPercent', currentDiscount * 2)
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

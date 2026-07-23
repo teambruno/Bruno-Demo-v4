@@ -1,0 +1,64 @@
+info:
+  name: Get User by ID
+  type: http
+  seq: 1
+  tags:
+    - data-driven
+    - regression
+
+http:
+  method: GET
+  url: "{{baseUrl}}/users/{{userId}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const user = res.getBody();
+
+        // These variables come from the CSV row for this iteration
+        const expectedName  = bru.getVar("expectedName");
+        const expectedEmail = bru.getVar("expectedEmail");
+        const expectedId    = Number(bru.getVar("userId"));
+
+        test(`[userId=${expectedId}] status is 200`, () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test(`[userId=${expectedId}] name matches CSV row`, () => {
+          expect(user.name).to.equal(expectedName);
+        });
+
+        test(`[userId=${expectedId}] email matches CSV row`, () => {
+          expect(user.email).to.equal(expectedEmail);
+        });
+
+        test(`[userId=${expectedId}] id matches requested userId`, () => {
+          expect(user.id).to.equal(expectedId);
+        });
+
+        console.log(`✓ Row: userId=${expectedId} | ${user.name} | ${user.email}`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Data-Driven – Get User by ID
+
+  Each column in `users.csv` (`userId`, `expectedName`, `expectedEmail`) is injected
+  as a Bruno variable. The test assertions reference them directly, so this single
+  request file acts as a parameterized test that runs N times — once per CSV row.
+
+  ```bash
+  bru run "05-Data-Driven" --env Production \
+    --csv-file-path "05-Data-Driven/users.csv"
+  ```

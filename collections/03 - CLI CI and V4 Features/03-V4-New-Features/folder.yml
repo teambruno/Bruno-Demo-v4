@@ -1,0 +1,26 @@
+name: 03-V4-New-Features
+docs:
+  content: |-
+    # What's New in Bruno V4
+
+    This folder is a live tour of the breaking/notable changes shipping in
+    Bruno V4 (experimental builds: https://github.com/usebruno/bruno-experimental-builds).
+    Full release notes: https://www.usebruno.com/v4-release
+
+    1. **Secrets Manager Migration** - `secrets.json` moves into the environment
+       file under `externalSecrets`, and the reference syntax simplifies from
+       `{{$secrets.name.key}}` to `{{name.key}}`.
+    2. **setVar vs setEnvVar persistence** - `bru.setEnvVar()` /
+       `bru.setGlobalEnvVar()` now write to disk immediately. Use
+       `bru.setVar()` / `bru.deleteVar()` for anything sensitive or
+       run-scoped that should NOT be persisted.
+    3. **Descriptions & typed variables** - params, headers, multipart fields,
+       and variables can carry a description and a type (`@string`,
+       `@number`, `@boolean`, `@object`).
+    4. **Multiple WebSocket messages** - see `02-Additional-Request-Types/echo-websocket.yml`.
+    5. **CLI JUnit classname change** - the JUnit reporter's `classname` now
+       uses the collection path (e.g. `Users/Get Users`) instead of the
+       request URL, so results stay stable across environments in CI tools
+       like Xray/Azure DevOps. See `01-CLI-Runner-and-Reporters` for the
+       reporter commands this affects.
+  type: text/markdown

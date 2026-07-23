@@ -1,0 +1,27 @@
+info:
+  name: 03-Tests-and-Assertions
+  type: folder
+  seq: 4
+
+docs:
+  content: |-
+    ## 04 – Tests & Assertions
+
+    Showcases Bruno's dual assertion system:
+    - **Declarative assertions** – simple key/operator/value rules in the YAML
+    - **Scripted tests** – full Chai.js `expect()` chains in the `tests` block
+
+    ```bash
+    # Only run requests that have tests (skips pure smoke-check requests)
+    bru run "04-Tests-and-Assertions" --env Production --tests-only
+
+    # Stop the entire suite on the first failure
+    bru run "04-Tests-and-Assertions" --env Production --bail
+
+    # Generate all three report formats
+    bru run "04-Tests-and-Assertions" --env Production \
+      --reporter-json  reports/tests.json \
+      --reporter-junit reports/tests.xml \
+      --reporter-html  reports/tests.html
+    ```
+  type: text/markdown

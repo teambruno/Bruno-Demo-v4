@@ -1,0 +1,8 @@
+name: Globals
+variables:
+  - name: baseUrl
+    value: usebruno.com
+  - name: auto
+    value: ""
+  - name: apiVersion
+    value: ""

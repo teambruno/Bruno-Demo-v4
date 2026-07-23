@@ -1,0 +1,116 @@
+info:
+  name: Get all products
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: https://dummyjson.com/products
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        let productTotal = res.body.total
+         
+        // Accessing response properties
+        console.log("Total Products Returned :" + productTotal);
+        bru.setVar('productMaxTotal',productTotal)
+    - type: tests
+      code: |-
+        // Bruno Post-response Script — tests for /products payload
+
+        const resStatus = res.getStatus();
+        const body = res.getBody();
+        const products = body?.products ?? [];
+
+        //
+        // -------- Basic HTTP checks --------
+        //
+        test("status is 2xx", () => {
+          expect(resStatus).to.be.at.least(200);
+          expect(resStatus).to.be.below(300);
+        });
+
+        test("body has products array", () => {
+          expect(products).to.be.an("array");
+        });
+
+        //
+        // -------- Pagination & counters --------
+        //
+        test("pagination fields present & sane", () => {
+          expect(body).to.have.property("total").that.is.a("number");
+          expect(body).to.have.property("skip").that.is.a("number");
+          expect(body).to.have.property("limit").that.is.a("number");
+          expect(products.length).to.be.at.most(body.limit);          // last page tolerant
+          expect(body.total).to.be.at.least(products.length + body.skip);
+        });
+
+        //
+        // -------- IDs uniqueness --------
+        //
+        test("product ids are unique", () => {
+          const ids = products.map(p => p.id);
+          const uniq = new Set(ids);
+          expect(uniq.size).to.equal(ids.length);
+        });
+
+
+        //
+        // -------- Aggregates & flags you can reuse later --------
+        //
+        const count = products.length;
+        let avgRating = NaN;
+
+        if (count > 0) {
+          const sum = products.reduce((a, p) => a + (Number(p.rating) || 0), 0);
+          avgRating = Number((sum / count).toFixed(2));
+        }
+
+        // keep the rest of your script the same
+        bru.setVar("avgRatingPage", avgRating);
+
+        const lowRatedIds = products.filter(p => (Number(p.rating) || 0) < 3.0).map(p => p.id);
+        const lowStockIds = products.filter(p => p.stock <= 5).map(p => p.id);
+
+        bru.setVar("avgRatingPage", avgRating);
+        bru.setVar("lowRatedIds", JSON.stringify(lowRatedIds)); // e.g. "[1,10,23]"
+        bru.setVar("lowStockIds", JSON.stringify(lowStockIds));
+        bru.setVar("pageCount", products.length);
+
+        test("average rating is within bounds", () => {
+          expect(avgRating).to.be.a("number");
+          expect(avgRating).to.be.within(0, 5);
+        });
+
+        test("found at least one product in expected categories", () => {
+          const cats = new Set(products.map(p => p.category));
+          expect(cats.size).to.be.at.least(1);
+        });
+
+        //
+        // -------- Optional branching based on data (kept as tests + next step) --------
+        //
+        if (lowRatedIds.length > 0) {
+          // Route to a follow-up if you want:
+          // bru.setNextRequest("Product QA/Handle Low Ratings");
+          test("low-rated products present (< 3.0)", () => {
+            expect(lowRatedIds.length).to.be.greaterThan(0);
+          });
+        } else {
+          test("no low-rated products on this page", () => {
+            expect(lowRatedIds.length).to.equal(0);
+          });
+        }
+
+        // Helpful logs when debugging in Bruno's console
+        console.log("Products length:", products.length, "skip:", body.skip, "limit:", body.limit, "total:", body.total);
+        console.log("avgRatingPage:", avgRating, "lowRatedIds:", lowRatedIds, "lowStockIds:", lowStockIds);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,39 @@
+opencollection: 1.0.0
+
+info:
+  name: 02 - Auth and Scripting
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  variables:
+    - name: tokenVar
+      value: tokenCollection
+      disabled: true
+  scripts:
+    - type: before-request
+      code: // console.log('Collection Level Script Logic')
+
+docs:
+  content: |-
+    # 02 - Auth and Scripting
+
+    Auth flows (Basic, Bearer, OAuth2 client-credentials), pre/post-request
+    scripting, contract testing, and a product-update flow used for CI
+    runner demos.
+
+    Secrets in this collection use the V4 `externalSecrets` /
+    `{{name.keyname}}` pattern - see Demo-Env.yml and
+    "03 - CLI CI and V4 Features/03-V4-New-Features" for the before/after.
+  type: text/markdown
+bundled: false
+extensions: {}

@@ -1,0 +1,33 @@
+info:
+  name: Bruno Variable Precedence
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: https://www.httpfaker.com?token={{tokenVar}}
+  headers:
+    - name: ""
+      value: ""
+  params:
+    - name: token
+      value: "{{tokenVar}}"
+      type: query
+  auth: inherit
+
+runtime:
+  variables:
+    - name: tokenVar
+      value: tokenRequest
+  scripts:
+    - type: before-request
+      code: |-
+        const tokenValue = 'tokenRuntime';
+        bru.setVar('tokenVar',tokenValue);
+        bru.setVar(key,value)
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

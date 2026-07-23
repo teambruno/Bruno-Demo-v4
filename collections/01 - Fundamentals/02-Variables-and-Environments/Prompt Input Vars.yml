@@ -1,0 +1,21 @@
+info:
+  name: Prompt Input Vars
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: https://echo.usebruno.com
+  body:
+    type: json
+    data: |-
+      {
+        "fName":"{{?Enter first name}}",
+        "lName": "{{?Enter last name}}"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

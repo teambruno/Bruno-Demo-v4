@@ -1,0 +1,15 @@
+info:
+  name: echo-grpc
+  type: grpc
+  seq: 2
+
+grpc:
+  url: https://grpcb.in/
+  method: /addsvc.Add/Sum
+  methodType: unary
+  message: |-
+    {
+      "a": 988,
+      "b": 67
+    }
+  auth: inherit

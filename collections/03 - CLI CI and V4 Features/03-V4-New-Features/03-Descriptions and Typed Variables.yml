@@ -1,0 +1,48 @@
+info:
+  name: 03-Descriptions and Typed Variables
+  type: http
+  seq: 3
+  tags:
+    - v4-feature
+
+http:
+  method: GET
+  url: "{{baseUrl}}/posts/{{postId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+      description: Payload format for the request
+  params:
+    - name: postId
+      value: "{{postId}}"
+      type: query
+      description: ID of the post to fetch
+  auth: inherit
+
+runtime:
+  variables:
+    - name: baseUrl
+      value: https://jsonplaceholder.typicode.com
+      description: Base URL for all requests in this demo
+      type: string
+    - name: retryCount
+      value: "3"
+      description: Number of retries before failing the request
+      type: number
+
+docs:
+  content: |-
+    ### V4 feature: descriptions and typed variables
+
+    V4 lets you attach a description to any param, header, multipart field,
+    or variable, and assign a type (`@string`, `@number`, `@boolean`,
+    `@object`) to variables. Older Bruno versions (pre-3.4.0) may fail to
+    load requests that use this annotation syntax - coordinate upgrades
+    across mixed-version teams.
+  type: text/markdown
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

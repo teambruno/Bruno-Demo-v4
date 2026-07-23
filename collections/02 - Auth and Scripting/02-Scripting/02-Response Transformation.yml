@@ -1,0 +1,82 @@
+info:
+  name: Response Transformation
+  type: http
+  seq: 2
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{breweryUrl}}/breweries"
+  params:
+    - name: by_state
+      value: california
+      type: query
+    - name: per_page
+      value: "10"
+      type: query
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const breweries = res.getBody();
+
+        // Transform: group by brewery type
+        const grouped = breweries.reduce((acc, b) => {
+          const type = b.brewery_type ?? "unknown";
+          if (!acc[type]) acc[type] = [];
+          acc[type].push(b.name);
+          return acc;
+        }, {});
+
+        bru.setVar("brewerySummary", JSON.stringify(grouped));
+
+        console.log("=== CA Breweries by Type ===");
+        Object.entries(grouped).forEach(([type, names]) => {
+          console.log(`  ${type}: ${names.length} breweries`);
+        });
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("returns an array of breweries", () => {
+          expect(body).to.be.an("array").with.length.greaterThan(0);
+        });
+
+        test("each brewery has name and city", () => {
+          body.forEach((b, i) => {
+            expect(b, `brewery[${i}]`).to.have.property("name").that.is.a("string");
+            expect(b, `brewery[${i}]`).to.have.property("city");
+          });
+        });
+
+        test("brewerySummary variable was set", () => {
+          const summary = bru.getVar("brewerySummary");
+          expect(summary).to.be.a("string");
+          expect(JSON.parse(summary)).to.be.an("object");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Open Brewery DB – Response Transformation
+
+  Uses the **Open Brewery DB** free API (no auth required).
+
+  The `after-response` script groups breweries by type and stores a JSON summary
+  in a Bruno variable — showing how post-processing can enrich the data pipeline.

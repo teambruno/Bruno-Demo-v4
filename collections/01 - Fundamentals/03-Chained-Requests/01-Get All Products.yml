@@ -1,0 +1,65 @@
+info:
+  name: Get All Products
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{dummyUrl}}/products"
+  params:
+    - name: limit
+      value: "20"
+      type: query
+    - name: sortBy
+      value: rating
+      type: query
+    - name: order
+      value: desc
+      type: query
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const products = body.products ?? [];
+
+        if (products.length > 0) {
+          const top = products[0];
+          bru.setVar("topProductId", top.id);
+          bru.setVar("topProductTitle", top.title);
+          bru.setVar("topProductRating", top.rating);
+          console.log(`Top-rated product: [${top.id}] ${top.title} (rating: ${top.rating})`);
+        }
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("products array is not empty", () => {
+          expect(body.products).to.be.an("array").with.length.greaterThan(0);
+        });
+
+        test("first product has an id and rating", () => {
+          const first = body.products[0];
+          expect(first).to.have.property("id").that.is.a("number");
+          expect(first).to.have.property("rating").that.is.a("number");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.products
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5

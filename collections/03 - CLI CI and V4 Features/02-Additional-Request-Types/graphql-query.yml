@@ -1,0 +1,30 @@
+info:
+  name: graphql-query
+  type: graphql
+  seq: 1
+
+graphql:
+  method: POST
+  url: https://beta.pokeapi.co/graphql/v1beta
+  body:
+    query: |
+      query {
+        pokemon(name: "pikachu") {
+          id
+          name
+          height
+          weight
+          types {
+            type {
+              name
+            }
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

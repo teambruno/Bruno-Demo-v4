@@ -1,0 +1,17 @@
+info:
+  name: Use OAuth Token
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: https://echo.usebruno.com
+  auth:
+    type: bearer
+    token: "{{$oauth2.credentials.access_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

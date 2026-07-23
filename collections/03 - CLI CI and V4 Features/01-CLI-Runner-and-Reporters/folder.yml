@@ -1,0 +1,14 @@
+info:
+  name: 01-CLI-Runner-and-Reporters
+  type: folder
+  seq: 1
+
+docs:
+  content: |-
+    ## 01 - CLI Runner and Reporters
+
+    Tag-based filtering, data-driven runs, and multi-format reporters via
+    `bru run`. See the workspace root README for the full command cheat
+    sheet, and note the V4 CLI JUnit `classname` change in
+    03-V4-New-Features if you feed reports into CI tooling.
+  type: text/markdown

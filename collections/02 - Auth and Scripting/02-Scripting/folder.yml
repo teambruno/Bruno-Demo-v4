@@ -1,0 +1,14 @@
+info:
+  name: 02-Scripting
+  type: folder
+  seq: 2
+
+docs:
+  content: |-
+    ## 02 - Scripting
+
+    Pre/post-request scripting, dynamic variables, response transformation,
+    conditional flow control, contract testing, external JS libraries, and
+    fakejs data generation. Merged here from the old "CLI Showcase" and
+    "E2E Demo" collections so all scripting demos live in one place.
+  type: text/markdown

@@ -1,0 +1,73 @@
+info:
+  name: Schema Validation
+  type: http
+  seq: 1
+  tags:
+    - regression
+    - schema
+
+http:
+  method: GET
+  url: "{{baseUrl}}/users"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const users = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("response is a non-empty array", () => {
+          expect(users).to.be.an("array").with.length.greaterThan(0);
+        });
+
+        test("each user conforms to expected schema", () => {
+          const requiredFields = ["id", "name", "username", "email", "address", "phone", "website", "company"];
+          users.forEach((user, i) => {
+            requiredFields.forEach(field => {
+              expect(user, `user[${i}] missing field: ${field}`).to.have.property(field);
+            });
+          });
+        });
+
+        test("address sub-object has expected structure", () => {
+          users.forEach((user, i) => {
+            expect(user.address, `user[${i}].address`).to.have.all.keys(
+              "street", "suite", "city", "zipcode", "geo"
+            );
+            expect(user.address.geo, `user[${i}].address.geo`).to.have.all.keys("lat", "lng");
+          });
+        });
+
+        test("IDs are unique positive integers", () => {
+          const ids = users.map(u => u.id);
+          const unique = new Set(ids);
+          expect(unique.size).to.equal(ids.length);
+          ids.forEach(id => {
+            expect(id).to.be.a("number").and.be.greaterThan(0);
+          });
+        });
+
+        test("emails look valid", () => {
+          users.forEach((user, i) => {
+            expect(user.email, `user[${i}].email`).to.match(/@/);
+          });
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isArray
+    - expression: res.responseTime
+      operator: lte
+      value: "3000"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5

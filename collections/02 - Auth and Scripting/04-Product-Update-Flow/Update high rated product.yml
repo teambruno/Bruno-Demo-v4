@@ -1,0 +1,25 @@
+info:
+  name: Update high rated product
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: https://dummyjson.com/products/{{productId}}
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skipping request in collection runner flow
+        if (bru.getVar('lastRating') <= 3)
+        {
+          bru.runner.skipRequest();
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

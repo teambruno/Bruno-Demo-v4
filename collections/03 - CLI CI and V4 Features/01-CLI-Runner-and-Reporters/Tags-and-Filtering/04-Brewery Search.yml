@@ -1,0 +1,54 @@
+info:
+  name: Brewery Search
+  type: http
+  seq: 4
+  tags:
+    - regression
+    - slow
+
+http:
+  method: GET
+  url: "{{breweryUrl}}/breweries/search"
+  params:
+    - name: query
+      value: dogfish
+      type: query
+    - name: per_page
+      value: "5"
+      type: query
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const results = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isJson
+
+settings:
+  encodeUrl: true
+  timeout: 15000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Tag: `regression`, `slow`
+
+  Searches the Open Brewery DB. Tagged `slow` because the external API can vary in
+  latency — useful to demonstrate `--exclude-tags slow` for fast CI gates.
+
+  ```bash
+  # Include this request
+  bru run "06-Tags-and-Filtering" --env Production --tags regression
+
+  # Exclude this request (skip slow tests)
+  bru run "06-Tags-and-Filtering" --env Production --exclude-tags slow
+  ```

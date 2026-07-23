@@ -1,0 +1,44 @@
+info:
+  name: List Albums
+  type: http
+  seq: 3
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{baseUrl}}/albums"
+  params:
+    - name: userId
+      value: "1"
+      type: query
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const albums = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+
+        test("each album has id and title", () => {
+          albums.forEach((a, i) => {
+            expect(a, `album[${i}]`).to.have.property("id").that.is.a("number");
+            expect(a, `album[${i}]`).to.have.property("title").that.is.a("string");
+          });
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5

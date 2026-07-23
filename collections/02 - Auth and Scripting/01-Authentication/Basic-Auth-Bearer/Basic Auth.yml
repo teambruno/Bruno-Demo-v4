@@ -1,0 +1,43 @@
+info:
+  name: Basic Auth
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: https://httpbin.org/basic-auth/user/passwd
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: ""
+  auth:
+    type: basic
+    username: user
+    password: passwd
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        if (body && body.accessToken) {
+          bru.setVar("token", body.accessToken);
+        }
+
+        bru.setNextRequest("Get all products");
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("login ok", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(body).to.have.property("accessToken");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,43 @@
+info:
+  name: echo-websocket (V4 multi-message demo)
+  type: websocket
+  seq: 3
+  tags:
+    - v4-feature
+
+websocket:
+  url: wss://echo.websocket.events
+  message:
+    - title: Greeting
+      selected: true
+      message:
+        type: json
+        data: |-
+          {
+            "type": "message",
+            "content": "Hello from Bruno!",
+            "user": {
+              "id": 123,
+              "name": "{{nameVar}}"
+            }
+          }
+    - title: Ping
+      selected: false
+      message:
+        type: text
+        data: ping
+  auth: inherit
+
+docs:
+  content: |-
+    ### V4 feature: multiple WebSocket messages
+
+    Bruno V4 lets a single WebSocket request store more than one saved message
+    ("Greeting", "Ping" above) and switch between them with the `selected` flag,
+    instead of being limited to one payload per request.
+
+    Note: echo.websocket.org (the old Postman-run echo server) was
+    deprecated. This request points at echo.websocket.events, its
+    community-run successor - verify it's still live before a customer demo,
+    and swap in Bruno's own echo service if not.
+  type: text/markdown

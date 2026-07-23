@@ -1,0 +1,63 @@
+info:
+  name: Conditional Flow Control
+  type: http
+  seq: 3
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{baseUrl}}/users/{{userId}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const user = res.getBody();
+
+        // Store user info for downstream requests
+        bru.setVar("userName", user.name ?? "Unknown");
+        bru.setVar("userEmail", user.email ?? "");
+        bru.setVar("userCity", user?.address?.city ?? "");
+
+        console.log(`User: ${user.name} | City: ${user?.address?.city}`);
+
+        // Conditional flow: skip next if user not found
+        if (res.status !== 200) {
+          console.warn("User not found – skipping downstream request");
+          bru.setNextRequest(null); // stop the run
+        }
+    - type: tests
+      code: |-
+        const user = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("user has all required contact fields", () => {
+          expect(user).to.have.property("name").that.is.a("string");
+          expect(user).to.have.property("email").that.is.a("string");
+          expect(user).to.have.property("phone");
+          expect(user).to.have.property("address").that.is.an("object");
+        });
+
+        test("email looks valid", () => {
+          expect(user.email).to.match(/@/);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Conditional Flow Control
+
+  Demonstrates `bru.setNextRequest(null)` to conditionally halt execution when a
+  prerequisite check fails — a powerful pattern for defensive test pipelines in CI.

@@ -1,0 +1,21 @@
+name: Demo-Env
+color: "#6dd0cb"
+variables:
+  - name: username
+    value: jamesd
+  - name: password
+    value: jamesdpass
+  - name: env-ApiKey
+    value: "{{process.env.apikey}}"
+  - name: companyVar
+    value: Bruno
+  - name: nameVar
+    value: James Ha
+  - name: tokenVar
+    value: tokenEnvironment
+externalSecrets:
+  type: azure-key-vault
+  variables:
+    - name: azure-keys
+      vaultName: Demo-James
+      enabled: true

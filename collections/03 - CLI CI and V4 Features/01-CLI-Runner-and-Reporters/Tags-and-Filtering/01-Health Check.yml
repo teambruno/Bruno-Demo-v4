@@ -1,0 +1,45 @@
+info:
+  name: Health Check
+  type: http
+  seq: 1
+  tags:
+    - smoke
+
+http:
+  method: GET
+  url: "{{baseUrl}}/posts/1"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("API is reachable – status 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("response time under 2s (health gate)", () => {
+          expect(res.responseTime).to.be.below(2000);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.responseTime
+      operator: lte
+      value: "2000"
+
+settings:
+  encodeUrl: true
+  timeout: 5000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Tag: `smoke`
+
+  Fastest possible sanity check — one GET, two assertions.
+  Include in every CI pipeline gate.
+
+  ```bash
+  bru run --env Production --tags smoke
+  ```

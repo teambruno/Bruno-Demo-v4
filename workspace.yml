@@ -1,0 +1,14 @@
+opencollection: 1.0.0
+info:
+  name: "Bruno-V4-Demo-Kit"
+  type: workspace
+
+collections:
+  - name: "01 - Fundamentals"
+    path: "collections/01 - Fundamentals"
+  - name: "02 - Auth and Scripting"
+    path: "collections/02 - Auth and Scripting"
+  - name: "03 - CLI CI and V4 Features"
+    path: "collections/03 - CLI CI and V4 Features"
+
+docs: ''

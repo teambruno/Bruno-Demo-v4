@@ -1,0 +1,49 @@
+info:
+  name: Validating Pet Vaccines - JS File
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}"
+  body:
+    type: json
+    data: |
+      {
+        "pets": [
+          {
+            "id": "pet_002",
+            "name": "Jerry",
+            "age": 4,
+            "vaccinated": true,
+            "tags": ["friendly", "energetic"]
+          },
+          {
+            "id": "pet_005",
+            "name": "Sam",
+            "age": 2,
+            "vaccinated": false,
+            "tags": ["quiet", "food-motivated"]
+          }
+        ]
+      }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const { validateVaccinatedPetsResponse, checkAllPetsVaccinated } = require("./Scripting/contractTests.js");
+
+        test("Valid response structure for pets", () => {
+          validateVaccinatedPetsResponse(res.getBody());
+        });
+
+        test("All pets must be vaccinated", () => {
+          checkAllPetsVaccinated(res.getBody());
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

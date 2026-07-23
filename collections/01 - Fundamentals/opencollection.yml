@@ -1,0 +1,33 @@
+opencollection: 1.0.0
+
+info:
+  name: 01 - Fundamentals
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+docs:
+  content: |-
+    # 01 - Fundamentals
+
+    Start here. Basic CRUD requests, variable precedence, chained requests,
+    and a data-driven run - all against free public test APIs
+    (JSONPlaceholder, DummyJSON, NewsAPI, Bruno's echo service).
+
+    ```bash
+    bru run --env Production
+    bru run "01-Basic-Requests" --env Production
+    bru run --env Production --reporter-json reports/results.json --reporter-html reports/results.html --reporter-junit reports/results.xml
+    bru run "04-Data-Driven" --env Production --csv-file-path "04-Data-Driven/users.csv"
+    ```
+  type: text/markdown
+bundled: false
+extensions: {}

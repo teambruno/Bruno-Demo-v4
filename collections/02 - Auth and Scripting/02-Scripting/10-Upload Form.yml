@@ -1,0 +1,53 @@
+info:
+  name: 10-Upload Form
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: https://httpbin.org/post
+  body:
+    type: form-urlencoded
+    data:
+      - name: username
+        value: johndoe
+      - name: password
+        value: secret123
+  auth:
+    type: apikey
+    key: x-api-key
+    value: "{{api-key}}"
+    placement: header
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        console.log('before-request');
+        req.setHeader("X-Timestamp", Date.now());
+    - type: after-response
+      code: |-
+        console.log('after-response');
+        bru.setVar("token", res.body.form.username);
+    - type: tests
+      code: |-
+        test("should return 200", function() {
+          expect(res.status).to.equal(200);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs:
+  content: |-
+    Form-urlencoded POST + API key header + before/after scripts. Points at
+    httpbin.org/post (echoes the request back) instead of the placeholder
+    api.example.com used previously, which was never a real, reachable API.
+  type: text/markdown

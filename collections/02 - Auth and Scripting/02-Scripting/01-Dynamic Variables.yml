@@ -1,0 +1,87 @@
+info:
+  name: Dynamic Variables
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{weatherUrl}}/forecast"
+  params:
+    - name: latitude
+      value: "40.7128"
+      type: query
+    - name: longitude
+      value: "-74.0060"
+      type: query
+    - name: daily
+      value: temperature_2m_max,temperature_2m_min,precipitation_sum
+      type: query
+    - name: start_date
+      value: "{{forecastStart}}"
+      type: query
+    - name: end_date
+      value: "{{forecastEnd}}"
+      type: query
+    - name: timezone
+      value: America/New_York
+      type: query
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Dynamically compute a 7-day forecast window
+        const today = new Date();
+        const fmt = (d) => d.toISOString().split('T')[0];
+
+        const start = new Date(today);
+        const end   = new Date(today);
+        end.setDate(today.getDate() + 6);
+
+        bru.setVar('forecastStart', fmt(start));
+        bru.setVar('forecastEnd',   fmt(end));
+
+        console.log(`Forecast window: ${fmt(start)} → ${fmt(end)}`);
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const daily = body?.daily;
+
+        if (daily) {
+          const days = daily.time ?? [];
+          const maxTemps = daily.temperature_2m_max ?? [];
+          console.log("=== 7-Day NYC Forecast ===");
+          days.forEach((date, i) => {
+            console.log(`  ${date}: max ${maxTemps[i]}°C`);
+          });
+        }
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("forecastStart variable was set by before-request script", () => {
+          expect(bru.getVar("forecastStart")).to.be.a("string").and.match(/^\d{4}-\d{2}-\d{2}$/);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 15000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Open-Meteo Weather Forecast
+
+  Uses **Open-Meteo** — a free, no-auth weather API.
+
+  The `before-request` script computes today's date and injects `forecastStart` / `forecastEnd`
+  as runtime variables, so the date range is always current without manual editing.

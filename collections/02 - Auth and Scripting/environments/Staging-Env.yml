@@ -1,0 +1,22 @@
+name: Staging-Env
+variables:
+  - name: IdentityBaseUrl
+    value: https://<vanity_domain>.login.net
+  - name: clientID
+    value: <clientID>
+  - name: customerId
+    value: <customerId>
+  - name: ourAPIBaseUrl
+    value: https://api.ourapi.net
+  - name: DCCBase
+    value: /dcc/api/public
+  - name: DDXBase
+    value: /ddx/v1
+  - name: DPABase
+    value: /dpa
+  - name: DIABase
+    value: /dia/api/v1
+  - name: DTWBase
+    value: /dtw/api/v1
+  - secret: true
+    name: clientSecret

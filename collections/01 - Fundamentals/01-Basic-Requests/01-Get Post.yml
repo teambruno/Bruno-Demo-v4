@@ -1,0 +1,64 @@
+info:
+  name: Get Post
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{baseUrl}}/posts/{{postId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const globalVar = bru.getGlobalEnvVar('apiVersion');
+        console.log('apiV: ' + globalVar);
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("response has required fields", () => {
+          expect(body).to.have.property("id");
+          expect(body).to.have.property("title");
+          expect(body).to.have.property("body");
+          expect(body).to.have.property("userId");
+        });
+
+        test("id matches the requested postId", () => {
+          expect(body.id).to.equal(1);
+        });
+
+        // Store post userId for chaining in later requests
+        bru.setVar("postUserId", body.userId);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isJson
+    - expression: res.body.id
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## GET /posts/:id
+
+  Fetches a single blog post from JSONPlaceholder.
+
+  **CLI tip:** Run with `--env-var postId=5` to fetch a different post:
+  ```bash
+  bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=5
+  ```

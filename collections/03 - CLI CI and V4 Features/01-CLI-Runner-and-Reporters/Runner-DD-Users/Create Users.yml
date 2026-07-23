@@ -1,0 +1,50 @@
+info:
+  name: Create Users
+  type: http
+  seq: 2
+  tags:
+    - test-only
+
+http:
+  method: POST
+  url: https://echo.usebruno.com
+  body:
+    type: json
+    data: |-
+      {
+          "name": "{{name}}",
+          "job": "{{job}}"
+      }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // test("should have createdAt date in the past", function () {
+        //     const body = res.getBody();
+
+        //     expect(body).to.have.property('createdAt');
+
+        //     const createdAt = new Date(body.createdAt);
+        //     const now = new Date();
+
+        //     expect(isNaN(createdAt.getTime())).to.be.false;
+
+        //     // createdAt must be less than current time
+        //     expect(createdAt.getTime()).to.be.lessThan(
+        //       now.getTime(),
+        //       `Expected createdAt (${createdAt.toISOString()}) to be earlier than current time (${now.toISOString()})`
+        //     );
+        //   });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.name
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

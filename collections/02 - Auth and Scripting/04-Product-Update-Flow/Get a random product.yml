@@ -1,0 +1,72 @@
+info:
+  name: Get a random product
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: https://dummyjson.com/products/{{randomId}}
+  auth: inherit
+
+runtime:
+  variables:
+    - name: ""
+      value: ""
+  scripts:
+    - type: before-request
+      code: |-
+        // Get the upper bound from an environment or runtime variable
+        const max = parseInt(bru.getVar("productMaxTotal") || "100", 10);
+
+        // Generate a random integer between 1 and max (inclusive)
+        const randomInt = Math.floor(Math.random() * max) + 1;
+
+        // Save it as a runtime variable (so you can reference {{randomInt}})
+        bru.setVar("randomId", randomInt);
+
+        // Optional: log it for debugging
+        console.log(`Generated randomInt = ${randomInt} (1..${max})`);
+    - type: after-response
+      code: |-
+        // Post-response script in Bruno
+
+        const body = res.getBody();
+        const rating = Number.parseFloat(body?.rating);
+        const discountPercent = Number.parseFloat(body?.discountPercentage);
+        bru.setVar('productId',res.body.id)
+
+        console.log("=== Rating Check Script ===");
+        console.log("--- Product ---");
+        console.log("Product ID: ", body.id );
+        console.log("Product Title: ", body.title );
+        console.log("Discount %: ", body.discountPercentage);
+        console.log("Extracted rating:", rating);
+
+        if (!Number.isFinite(rating)) {
+          console.log("⚠️ Rating is missing or not a valid number. Skipping reroute.");
+        } else {
+          // Store rating 
+          bru.setVar("lastRating", rating);
+          bru.setVar("discountPercent", discountPercent)
+          console.log(`--- Stored runtime var lastRating = ${rating} ---`);
+
+          if (rating < 3.0) {
+            const next = "Update lowered rated product"; // 🔁 adjust path
+            console.log(`🚨 Rating (${rating}) is below 3.0 → setting next request to: ${next}`);
+            bru.setNextRequest(next);
+
+            test("Low rating triggers reroute", () => {
+              expect(rating).to.be.below(3.0);
+            });
+          } else {
+            const next = "Update high rated product"; // 🔁 adjust path
+            console.log(`✅ Rating (${rating}) is acceptable (>= 3.0) → setting next request to: ${next}`);
+            bru.setNextRequest(next);
+          }
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

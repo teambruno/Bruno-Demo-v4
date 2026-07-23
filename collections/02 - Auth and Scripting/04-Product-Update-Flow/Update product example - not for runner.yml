@@ -1,0 +1,20 @@
+info:
+  name: Update product example - not for runner
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: https://dummyjson.com/products/{{productId}}
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: bru.runner.skipRequest();
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

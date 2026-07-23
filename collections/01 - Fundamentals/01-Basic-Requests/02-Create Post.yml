@@ -1,0 +1,64 @@
+info:
+  name: Create Post
+  type: http
+  seq: 2
+  tags:
+    - regression
+
+http:
+  method: POST
+  url: "{{baseUrl}}/posts"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Bruno CLI Demo Post",
+        "body": "This post was created by a Bruno CLI collection run.",
+        "userId": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 201 Created", () => {
+          expect(res.status).to.equal(201);
+        });
+
+        test("response echoes back the posted data", () => {
+          expect(body).to.have.property("id");
+          expect(body.title).to.equal("Bruno CLI Demo Post");
+          expect(body.userId).to.equal(1);
+        });
+
+        // Save the new post id for the update/delete steps
+        bru.setVar("newPostId", body.id);
+        console.log("Created post with id:", body.id);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.id
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## POST /posts
+
+  Creates a new blog post. JSONPlaceholder echoes the body back with a new `id`.
+
+  **CLI tip:** Run only this folder to execute the full create flow:
+  ```bash
+  bru run "01-Basic-Requests" --env Production
+  ```

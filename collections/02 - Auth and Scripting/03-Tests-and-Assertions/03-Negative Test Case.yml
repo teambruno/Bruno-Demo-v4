@@ -1,0 +1,46 @@
+info:
+  name: Negative Test Case
+  type: http
+  seq: 3
+  tags:
+    - regression
+    - negative
+
+http:
+  method: GET
+  url: "{{baseUrl}}/posts/99999"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 404 for a non-existent resource", () => {
+          expect(res.status).to.equal(404);
+        });
+
+        test("body is an empty object (JSONPlaceholder 404 behaviour)", () => {
+          const body = res.getBody();
+          expect(body).to.be.an("object");
+          expect(Object.keys(body).length).to.equal(0);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Negative Test Case – 404 Handling
+
+  Intentionally requests a non-existent resource to verify the API returns
+  the correct error status. Negative tests are first-class citizens in Bruno.
+
+  **CLI tip:** Run _only_ tests (skips requests without a `tests` block):
+  ```bash
+  bru run "04-Tests-and-Assertions" --env Production --tests-only
+  ```

@@ -1,0 +1,33 @@
+opencollection: 1.0.0
+
+info:
+  name: 03 - CLI CI and V4 Features
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+docs:
+  content: |-
+    # 03 - CLI CI and V4 Features
+
+    CLI runner + reporter demos (tags, data-driven, multi-format reports),
+    protocol coverage beyond REST (SOAP, SSE, gRPC, GraphQL, WebSocket),
+    and a dedicated tour of what's new in Bruno V4.
+
+    ```bash
+    bru run --env Production --tags smoke
+    bru run --env Production --tags regression
+    bru run --env Production --exclude-tags slow
+    bru run --env Production --reporter-junit reports/results.xml
+    ```
+  type: text/markdown
+bundled: false
+extensions: {}
