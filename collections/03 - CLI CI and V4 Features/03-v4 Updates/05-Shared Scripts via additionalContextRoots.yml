@@ -1,0 +1,100 @@
+info:
+  name: 05-Shared Scripts via additionalContextRoots
+  type: http
+  seq: 5
+  tags:
+    - shared-scripts
+    - v4-feature
+
+http:
+  method: GET
+  url: https://httpbin.org/get?correlationId={{correlationId}}&runDate={{runDate}}
+  params:
+    - name: correlationId
+      value: "{{correlationId}}"
+      type: query
+      description: Built by shared-scripts/testData.js correlationId()
+    - name: runDate
+      value: "{{runDate}}"
+      type: query
+      description: Built by shared-scripts/testData.js today()
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Third collection, same two modules - zero duplication.
+        const { correlationId, today } = require('../../shared-scripts/testData.js');
+
+        bru.setVar('correlationId', correlationId('cli-ci'));
+        bru.setVar('runDate', today());
+    - type: tests
+      code: |-
+        const {
+          assertHealthyJsonResponse,
+          assertRequiredFields
+        } = require('../../shared-scripts/httpAsserts.js');
+
+        const body = res.getBody();
+
+        test('200, JSON, under 5s (shared helper)', () => {
+          assertHealthyJsonResponse(res, { status: 200, maxMs: 5000 });
+        });
+
+        test('httpbin echoed the query built from shared test data', () => {
+          assertRequiredFields(body.args, ['correlationId', 'runDate']);
+          expect(body.args.correlationId).to.match(/^cli-ci-/);
+          expect(body.args.runDate).to.match(/^\d{4}-\d{2}-\d{2}$/);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs:
+  content: |-
+    ### Shared scripts across collections (`additionalContextRoots`)
+
+    A `require()` in a Bruno script is sandboxed to its own collection. To
+    reuse a module across collections, add the directory to
+    `additionalContextRoots` in each collection's `opencollection.yml`
+    (`bruno.json` for BRU collections):
+
+    ```yml
+    extensions:
+      bruno:
+        scripts:
+          additionalContextRoots:
+            - "../../shared-scripts"
+    ```
+
+    All three collections in this workspace point at `/shared-scripts/`, so
+    `httpAsserts.js` and `testData.js` are written once and required from
+    `01 - Fundamentals`, `02 - Auth and Scripting`, and here.
+
+    **CLI gate to demo:** the feature only works in the developer sandbox.
+
+    ```bash
+    # Works
+    bru run "03-v4 Updates" --env Production --sandbox=developer
+
+    # Fails on the require() - Safe Mode blocks paths outside the collection
+    bru run "03-v4 Updates" --env Production
+
+    # Whole shared-scripts story across the workspace, with a JUnit report
+    bru run --env Production --tags shared-scripts --sandbox=developer \
+      --reporter-junit reports/shared-scripts.xml
+    ```
+
+    In the app the equivalent switch is Developer Mode in the collection's
+    script/sandbox settings.
+
+    Docs: https://docs.usebruno.com/testing/script/js-file
+  type: text/markdown

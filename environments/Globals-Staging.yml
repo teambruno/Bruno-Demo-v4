@@ -1,8 +1,30 @@
 name: Globals-Staging
+color: "#e5be7a"
 variables:
+  - name: baseUrl
+    value: https://jsonplaceholder.typicode.com
+    description: Fallback base URL - any collection environment shadows this
   - name: apiVersion
     value: v2
+    description: Staging runs ahead of production on v2
   - name: releaseStage
     value: staging
+    description: Also set in every collection env - demonstrates the precedence chain
   - name: debugMode
     value: "true"
+    description: Verbose console logging in pre/post-request scripts
+  - name: tenantId
+    value: bruno-demo-staging
+    description: Multi-tenant identifier, sent as the X-Tenant-Id header
+  - name: requestTimeout
+    value: "15000"
+    description: Staging is slower than production - allow a longer timeout
+  - name: retryCount
+    value: "1"
+    description: One retry to absorb staging deploy blips
+  - name: correlationIdPrefix
+    value: stg
+    description: Prefix for the generated X-Correlation-Id header
+  - secret: true
+    name: globalApiKey
+    description: Staging API key - value is never written to the repo

@@ -1,0 +1,30 @@
+name: Globals-Local
+color: "#2196F3"
+variables:
+  - name: baseUrl
+    value: http://localhost:3000
+    description: Local API server - any collection environment shadows this
+  - name: apiVersion
+    value: v2
+    description: Local dev tracks the same version as staging
+  - name: releaseStage
+    value: local
+    description: Also set in every collection env - demonstrates the precedence chain
+  - name: debugMode
+    value: "true"
+    description: Verbose console logging in pre/post-request scripts
+  - name: tenantId
+    value: bruno-demo-local
+    description: Multi-tenant identifier, sent as the X-Tenant-Id header
+  - name: requestTimeout
+    value: "60000"
+    description: Long timeout so a debugger breakpoint does not abort the request
+  - name: retryCount
+    value: "0"
+    description: Never retry locally - fail fast and surface the error
+  - name: correlationIdPrefix
+    value: dev
+    description: Prefix for the generated X-Correlation-Id header
+  - name: globalApiKey
+    value: "{{process.env.BRUNO_GLOBAL_API_KEY}}"
+    description: Read from your shell / .env file instead of the secrets manager

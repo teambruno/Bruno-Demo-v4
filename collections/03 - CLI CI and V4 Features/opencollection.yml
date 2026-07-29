@@ -27,7 +27,16 @@ docs:
     bru run --env Production --tags regression
     bru run --env Production --exclude-tags slow
     bru run --env Production --reporter-junit reports/results.xml
+
+    # Shared scripts (additionalContextRoots) need the developer sandbox
+    bru run "03-v4 Updates" --env Production --sandbox=developer
     ```
   type: text/markdown
 bundled: false
-extensions: {}
+extensions:
+  bruno:
+    scripts:
+      # Workspace-level shared JS modules, relative to this collection root.
+      # See /shared-scripts/README.md
+      additionalContextRoots:
+        - "../../shared-scripts"

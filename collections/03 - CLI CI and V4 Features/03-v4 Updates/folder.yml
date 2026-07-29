@@ -1,4 +1,8 @@
-name: 03-V4-New-Features
+info:
+  name: 03-v4 Updates
+  type: folder
+  seq: 3
+
 docs:
   content: |-
     # What's New in Bruno V4
@@ -18,7 +22,11 @@ docs:
        and variables can carry a description and a type (`@string`,
        `@number`, `@boolean`, `@object`).
     4. **Multiple WebSocket messages** - see `02-Additional-Request-Types/echo-websocket.yml`.
-    5. **CLI JUnit classname change** - the JUnit reporter's `classname` now
+    5. **Shared scripts across collections** - `additionalContextRoots` in
+       `opencollection.yml` lets a `require()` reach outside its own
+       collection. All three collections here share `/shared-scripts/`.
+       Developer Mode only (`--sandbox=developer` on the CLI).
+    6. **CLI JUnit classname change** - the JUnit reporter's `classname` now
        uses the collection path (e.g. `Users/Get Users`) instead of the
        request URL, so results stay stable across environments in CI tools
        like Xray/Azure DevOps. See `01-CLI-Runner-and-Reporters` for the

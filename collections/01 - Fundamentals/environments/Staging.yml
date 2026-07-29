@@ -1,17 +1,29 @@
-name: Production
-color: "#CE4F3B"
+name: Staging
+color: "#e5be7a"
 variables:
   - name: baseUrl
     value: https://jsonplaceholder.typicode.com
+    description: ""
   - name: breweryUrl
     value: https://api.openbrewerydb.org/v1
+    description: ""
   - name: dummyUrl
     value: https://dummyjson.com
+    description: ""
   - name: weatherUrl
     value: https://api.open-meteo.com/v1
+    description: ""
   - name: postId
     value: "1"
+    description: ""
   - name: userId
     value: "1"
+    description: ""
   - name: releaseStage
-    value: production
+    value: staging
+    description: ""
+externalSecrets:
+  type: azure-key-vault
+  variables:
+    - name: azure-secrets
+      vaultName: Demo-James

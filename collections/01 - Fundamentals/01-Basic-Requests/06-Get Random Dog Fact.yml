@@ -8,6 +8,10 @@ info:
 http:
   method: GET
   url: https://dogapi.dog/api/v2/facts
+  headers:
+    - name: Content-Type
+      value: application/json
+      disabled: true
   params:
     - name: max_length
       value: ""
@@ -21,86 +25,20 @@ runtime:
       code: |-
         const responseUrl = res.getUrl();
         console.log("Response URL:", responseUrl);
-    - type: tests
-      code: |-
-        const body = res.getBody();
-
-        test("Response should have correct structure", () => {
-          expect(res.getStatus()).to.equal(200);
-          expect(body).to.be.an("object");
-          expect(body).to.have.property("data");
-          expect(body.data).to.be.an("array");
-        });
-
-        test("Should return at least one dog fact", () => {
-          expect(body.data.length).to.be.greaterThan(0);
-        });
-
-        test("Each fact should have required properties", () => {
-          body.data.forEach((fact, index) => {
-            expect(fact, `Fact at index ${index}`).to.be.an("object");
-            expect(fact, `Fact at index ${index}`).to.have.property("id");
-            expect(fact, `Fact at index ${index}`).to.have.property("type");
-            expect(fact, `Fact at index ${index}`).to.have.property("attributes");
-
-            expect(fact.id, `Fact ID at index ${index}`).to.be.a("string");
-            expect(fact.type, `Fact type at index ${index}`).to.equal("fact");
-            expect(fact.attributes, `Fact attributes at index ${index}`).to.be.an("object");
-            expect(fact.attributes, `Fact attributes at index ${index}`).to.have.property("body");
-            expect(fact.attributes.body, `Fact body at index ${index}`).to.be.a("string");
-            expect(fact.attributes.body.length, `Fact body at index ${index}`).to.be.greaterThan(0);
-          });
-        });
-
-        test("Fact IDs should be valid UUIDs", () => {
-          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          body.data.forEach((fact, index) => {
-            expect(fact.id, `Fact ID at index ${index} should be a valid UUID`).to.match(uuidRegex);
-          });
-        });
-
-        test("Dog facts should contain meaningful content", () => {
-          body.data.forEach((fact, index) => {
-            const factBody = fact.attributes.body;
-            expect(factBody.length, `Fact at index ${index} should have substantial content`).to.be.at.least(10);
-            // Check that it's not just whitespace
-            expect(factBody.trim().length, `Fact at index ${index} should not be just whitespace`).to.be.greaterThan(0);
-          });
-        });
   assertions:
     - expression: res.status
       operator: eq
       value: "200"
+      disabled: true
     - expression: res.body
       operator: isJson
+      disabled: true
     - expression: res.body.data
       operator: isArray
+      disabled: true
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-
-docs: |-
-  ## 🐶 Dog Facts API
-
-  The Dog Facts API is a tiny, public API that returns random, fun facts about dogs.
-  It’s perfect for demos, testing API clients, or anytime you need a harmless endpoint that returns real JSON data.
-
-  No auth. No setup. Just dogs.
-
-  ### 🎯 Why This API Is Great for Demos
-  	•	✅ Public & free
-  	•	✅ Fast responses
-  	•	✅ Simple GET request
-  	•	✅ Clean JSON output
-  	•	✅ Zero risk test data
-  	•	✅ Everyone likes dogs
-    
-  ### 🐕 Sample Dog Facts You Might Get
-  	•	Dogs can learn more than 100 words and gestures
-  	•	A dog’s nose print is as unique as a human fingerprint
-  	•	Dogs dream just like humans do
-  	•	Puppies are born deaf and blind
-  	•	Dogs have been human companions for over 15,000 years

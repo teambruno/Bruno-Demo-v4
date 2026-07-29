@@ -19,6 +19,29 @@ Each collection folder has its own docs (visible in the Bruno app, or in
 each `opencollection.yml` / `folder.yml`) with the relevant `bru run`
 commands.
 
+## Shared scripts
+
+`/shared-scripts/` holds JS modules (`httpAsserts.js`, `testData.js`) used by
+**all three** collections. Each `opencollection.yml` opts in with:
+
+```yml
+extensions:
+  bruno:
+    scripts:
+      additionalContextRoots:
+        - "../../shared-scripts"
+```
+
+Requires Developer Mode in the app and `--sandbox=developer` on the CLI
+(v3.0.0+). Run the whole story in one command:
+
+```bash
+bru run --env Production --tags shared-scripts --sandbox=developer
+```
+
+Details and the local-vs-shared comparison: [`shared-scripts/README.md`](shared-scripts/README.md).
+Docs: https://docs.usebruno.com/testing/script/js-file
+
 ## What changed from the old workspace
 
 - `workspace.yml` used to reference four collections that didn't exist on
@@ -42,8 +65,9 @@ commands.
 
 ## Bruno V4 features covered
 
-See `03 - CLI CI and V4 Features/03-V4-New-Features` for runnable examples
+See `03 - CLI CI and V4 Features/03-v4 Updates` for runnable examples
 of: secrets manager migration, `bru.setVar()` vs `bru.setEnvVar()`
 persistence, descriptions + typed variables, multiple WebSocket messages
-(in `02-Additional-Request-Types/echo-websocket.yml`), and the CLI JUnit
-`classname` change. Full release notes: https://www.usebruno.com/v4-release
+(in `02-Additional-Request-Types/echo-websocket.yml`), shared scripts across
+collections via `additionalContextRoots`, and the CLI JUnit `classname`
+change. Full release notes: https://www.usebruno.com/v4-release

@@ -11,4 +11,18 @@ docs:
     conditional flow control, contract testing, external JS libraries, and
     fakejs data generation. Merged here from the old "CLI Showcase" and
     "E2E Demo" collections so all scripting demos live in one place.
+
+    ### JS files
+
+    - **07** - collection-local JS file: `require('./02-Scripting/contractTests.js')`.
+      No config needed, but only this collection can see it.
+    - **11** - workspace-shared JS files: `require('../../shared-scripts/*.js')`,
+      enabled by `additionalContextRoots` in `opencollection.yml` and shared
+      with the other two collections. Needs Developer Mode / `--sandbox=developer`.
+
+    ```bash
+    bru run "02-Scripting" --env Demo-Env --sandbox=developer
+    ```
+
+    Docs: https://docs.usebruno.com/testing/script/js-file
   type: text/markdown

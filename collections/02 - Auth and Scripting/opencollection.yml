@@ -33,7 +33,17 @@ docs:
 
     Secrets in this collection use the V4 `externalSecrets` /
     `{{name.keyname}}` pattern - see Demo-Env.yml and
-    "03 - CLI CI and V4 Features/03-V4-New-Features" for the before/after.
+    "03 - CLI CI and V4 Features/03-v4 Updates" for the before/after.
+
+    Scripting demos here use both flavours of JS file: `02-Scripting/contractTests.js`
+    (collection-local) and `/shared-scripts/*.js` (shared across all three
+    collections via `additionalContextRoots`).
   type: text/markdown
 bundled: false
-extensions: {}
+extensions:
+  bruno:
+    scripts:
+      # Workspace-level shared JS modules, relative to this collection root.
+      # See /shared-scripts/README.md
+      additionalContextRoots:
+        - "../../shared-scripts"

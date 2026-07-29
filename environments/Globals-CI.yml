@@ -1,0 +1,33 @@
+name: Globals-CI
+color: "#9C27B0"
+variables:
+  - name: baseUrl
+    value: https://jsonplaceholder.typicode.com
+    description: Fallback base URL - any collection environment shadows this
+  - name: apiVersion
+    value: v1
+    description: CI validates the same version production serves
+  - name: releaseStage
+    value: ci
+    description: Also set in every collection env - demonstrates the precedence chain
+  - name: debugMode
+    value: "false"
+    description: Keep CI logs readable - reporters carry the detail
+  - name: tenantId
+    value: bruno-demo-ci
+    description: Multi-tenant identifier, sent as the X-Tenant-Id header
+  - name: requestTimeout
+    value: "20000"
+    description: Shared CI runners are slow - allow generous headroom
+  - name: retryCount
+    value: "2"
+    description: Retry twice before failing the pipeline on a flaky endpoint
+  - name: correlationIdPrefix
+    value: ci
+    description: Prefix for the generated X-Correlation-Id header
+  - name: reportDir
+    value: reports
+    description: Where --reporter-junit / --reporter-html write output (gitignored)
+  - name: globalApiKey
+    value: "{{process.env.BRUNO_GLOBAL_API_KEY}}"
+    description: Injected by the CI runner from a repository secret

@@ -1,0 +1,85 @@
+info:
+  name: Shared Asserts
+  type: http
+  seq: 1
+  tags:
+    - shared-scripts
+
+http:
+  method: GET
+  url: "{{baseUrl}}/posts/{{postId}}"
+  headers:
+    - name: X-Correlation-Id
+      value: "{{correlationId}}"
+      description: Generated in the pre-request script by shared-scripts/testData.js
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Shared module from the workspace root - path is relative to the
+        // collection root and allowed by additionalContextRoots.
+        const { correlationId, today } = require('../../shared-scripts/testData.js');
+
+        // Run-scoped only: setVar does not persist to disk in V4.
+        bru.setVar('correlationId', correlationId('fundamentals'));
+        bru.setVar('runDate', today());
+
+        console.log(`Correlation ID: ${bru.getVar('correlationId')}`);
+    - type: tests
+      code: |-
+        const {
+          assertHealthyJsonResponse,
+          assertRequiredFields
+        } = require('../../shared-scripts/httpAsserts.js');
+
+        const body = res.getBody();
+
+        test('200, JSON, under 2s (one shared helper)', () => {
+          assertHealthyJsonResponse(res, { status: 200, maxMs: 2000 });
+        });
+
+        test('post payload has the contract fields', () => {
+          assertRequiredFields(body, ['id', 'userId', 'title', 'body']);
+        });
+
+        test('correlation ID was generated and echoed on the request', () => {
+          const sent = req.getHeader('X-Correlation-Id');
+          expect(sent).to.be.a('string');
+          expect(sent).to.match(/^fundamentals-/);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isJson
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ### Shared asserts from `/shared-scripts/`
+
+  Everything test-shaped in this request comes from two modules that live
+  **outside** this collection:
+
+  ```js
+  const { correlationId, today } = require('../../shared-scripts/testData.js');
+  const { assertHealthyJsonResponse } = require('../../shared-scripts/httpAsserts.js');
+  ```
+
+  Same two lines appear in `02 - Auth and Scripting` and
+  `03 - CLI CI and V4 Features` - one definition, three collections.
+
+  **Gotcha to demo:** runtime globals (`res`, `bru`, `expect`, `test`) are not
+  injected into a required module, which is why `res` is passed in as an
+  argument. Helpers throw a plain `Error`; the surrounding `test()` turns that
+  into a failed test with the message.
+
+  ```bash
+  bru run "05-Shared-Scripts" --env Production --sandbox=developer
+  ```

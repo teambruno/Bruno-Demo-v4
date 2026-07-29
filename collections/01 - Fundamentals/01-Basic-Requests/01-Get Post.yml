@@ -19,33 +19,52 @@ runtime:
         console.log('apiV: ' + globalVar);
     - type: tests
       code: |-
-        const body = res.getBody();
-
-        test("status is 200", () => {
-          expect(res.status).to.equal(200);
+        test("status code is 200", function() {
+          expect(res.getStatus()).to.equal(200);
         });
 
-        test("response has required fields", () => {
-          expect(body).to.have.property("id");
-          expect(body).to.have.property("title");
-          expect(body).to.have.property("body");
-          expect(body).to.have.property("userId");
+        test("content-type is JSON", function() {
+          expect(res.getHeader('content-type')).to.include('application/json');
         });
 
-        test("id matches the requested postId", () => {
-          expect(body.id).to.equal(1);
+        test("response time is below 2000ms", function() {
+          expect(res.getResponseTime()).to.be.below(2000);
         });
 
-        // Store post userId for chaining in later requests
-        bru.setVar("postUserId", body.userId);
+        test("response has userId as number", function() {
+          expect(res.getBody()).to.have.property('userId');
+          expect(res.getBody().userId).to.be.a('number');
+        });
+
+        test("response has id as number", function() {
+          expect(res.getBody()).to.have.property('id');
+          expect(res.getBody().id).to.be.a('number');
+        });
+
+        test("response has title as string", function() {
+          expect(res.getBody()).to.have.property('title');
+          expect(res.getBody().title).to.be.a('string');
+        });
+
+        test("response has body as string", function() {
+          expect(res.getBody()).to.have.property('body');
+          expect(res.getBody().body).to.be.a('string');
+        });
+
+        test("post id matches requested postId", function() {
+          expect(res.getBody().id).to.equal(Number(bru.getEnvVar('postId')));
+        });
   assertions:
     - expression: res.status
       operator: eq
       value: "200"
+      disabled: true
     - expression: res.body
       operator: isJson
+      disabled: true
     - expression: res.body.id
       operator: isNumber
+      disabled: true
 
 settings:
   encodeUrl: true
