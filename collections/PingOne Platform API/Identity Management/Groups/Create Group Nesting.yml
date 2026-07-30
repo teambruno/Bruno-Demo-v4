@@ -1,0 +1,38 @@
+info:
+  name: Create Group Nesting
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/groups/{{groupID}}/memberOfGroups"
+  body:
+    type: json
+    data: |-
+      {
+          "id": "{{groupNestedID}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("nestedGroupID", jsonData.id);
+            console.log("nestedGroupID is now: " + bru.getEnvVar("nestedGroupID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Group Nesting](https://developer.pingidentity.com/pingone-api/platform/groups/create-nested-group.html).

@@ -1,0 +1,139 @@
+info:
+  name: Creates list of users with given input array.
+  type: http
+  seq: 2
+  tags:
+    - user
+
+http:
+  method: POST
+  url: "{{baseUrl}}/user/createWithList"
+  body:
+    type: json
+    data: |-
+      [
+        {
+          "id": 10,
+          "username": "theUser",
+          "firstName": "John",
+          "lastName": "James",
+          "email": "john@email.com",
+          "password": "12345",
+          "phone": "12345",
+          "userStatus": 1
+        }
+      ]
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Response
+    description: Successful operation
+    request:
+      url: "{{baseUrl}}/user/createWithList"
+      method: POST
+      body:
+        type: json
+        data: |-
+          [
+            {
+              "id": 10,
+              "username": "theUser",
+              "firstName": "John",
+              "lastName": "James",
+              "email": "john@email.com",
+              "password": "12345",
+              "phone": "12345",
+              "userStatus": 1
+            }
+          ]
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "id": 10,
+            "username": "theUser",
+            "firstName": "John",
+            "lastName": "James",
+            "email": "john@email.com",
+            "password": "12345",
+            "phone": "12345",
+            "userStatus": 1
+          }
+  - name: 200 Response
+    description: Successful operation
+    request:
+      url: "{{baseUrl}}/user/createWithList"
+      method: POST
+      body:
+        type: json
+        data: |-
+          [
+            {
+              "id": 10,
+              "username": "theUser",
+              "firstName": "John",
+              "lastName": "James",
+              "email": "john@email.com",
+              "password": "12345",
+              "phone": "12345",
+              "userStatus": 1
+            }
+          ]
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/xml
+      body:
+        type: xml
+        data: |-
+          <?xml version="1.0" encoding="UTF-8"?>
+          <root>
+            <id>10</id>
+            <username>theUser</username>
+            <firstName>John</firstName>
+            <lastName>James</lastName>
+            <email>john@email.com</email>
+            <password>12345</password>
+            <phone>12345</phone>
+            <userStatus>1</userStatus>
+          </root>
+  - name: default Response
+    description: Unexpected error
+    request:
+      url: "{{baseUrl}}/user/createWithList"
+      method: POST
+      body:
+        type: json
+        data: |-
+          [
+            {
+              "id": 10,
+              "username": "theUser",
+              "firstName": "John",
+              "lastName": "James",
+              "email": "john@email.com",
+              "password": "12345",
+              "phone": "12345",
+              "userStatus": 1
+            }
+          ]
+    response:
+      body:
+        type: text
+        data: ""
+
+docs: Creates list of users with given input array.

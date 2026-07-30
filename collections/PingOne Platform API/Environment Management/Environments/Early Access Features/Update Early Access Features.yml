@@ -1,0 +1,30 @@
+info:
+  name: Update Early Access Features
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/earlyAccessFeatures"
+  body:
+    type: json
+    data: |
+      {
+        "features": [
+         {
+              "name": "Token Fulfillment from Authentication Context",
+              "description": "Token Fulfillment from Authentication Context enables administrators to fulfill access and ID tokens based on the authentication JWT including claims within the authentication JWT by exposing the authentication context in the expression builder of the claims mapping. This feature improves interoperability with OpenID Connect (OIDC) applications by dynamically adapting token claims to match the token issuance requirements of different services.",
+              "segmentKey": "token-fulfillment-from-authentication-context",
+              "value": true
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Early Access Features](https://developer.pingidentity.com/pingone-api/platform/environments/early-access-features/update-early-access-features.html).

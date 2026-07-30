@@ -1,0 +1,29 @@
+info:
+  name: Update Administrator Security Populations (Hybrid)
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/adminConfig"
+  body:
+    type: json
+    data: |-
+      {
+          "authenticationMethod": "HYBRID",
+          "recovery": true,
+          "mfaStatus": "ENFORCE",
+          "populations": [
+              "{{popID}}",
+              "{{popID-2}}"
+          ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Administrator Security Populations (Hybrid)](https://developer.pingidentity.com/pingone-api/platform/administrator-security/update-admin-config-populations-hybrid.html).

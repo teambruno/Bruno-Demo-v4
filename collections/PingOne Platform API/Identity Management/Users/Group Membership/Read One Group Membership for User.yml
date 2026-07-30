@@ -1,0 +1,21 @@
+info:
+  name: Read One Group Membership for User
+  type: http
+  seq: 9
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/memberOfGroups/{{groupID}}?expand=group"
+  params:
+    - name: expand
+      value: group
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read One Group Membership for User](https://developer.pingidentity.com/pingone-api/platform/users/group-membership/read-one-group-membership-for-user.html).

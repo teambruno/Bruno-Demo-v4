@@ -1,0 +1,35 @@
+info:
+  name: Update Notification Policy
+  type: http
+  seq: 8
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/notificationsPolicies/{{notificationPolicyID}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Per-User - used/not used - Notification Policy",
+        "quotas": [
+          {
+            "type": "USER",
+            "deliveryMethods": [
+              "SMS",
+              "Voice"
+            ],
+            "claimed": 35,
+            "unclaimed": 45
+          }
+        ],
+        "default": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Notification Policy](https://developer.pingidentity.com/pingone-api/platform/notifications/notification-policies/update_notification_policy.html).

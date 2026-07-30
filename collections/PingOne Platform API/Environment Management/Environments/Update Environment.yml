@@ -1,0 +1,37 @@
+info:
+  name: Update Environment
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "Updated-Environment-Name",
+          "region": "NA",
+          "type": "SANDBOX",
+          "description": "Updated Description",
+          "billOfMaterials": {
+             "products": [
+              {
+                "type": "PING_ONE_BASE",
+                 "description": "New environment product description",
+                 "console": {
+                "href": "https://example.com"
+              }
+            }
+          ]
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Environment](https://developer.pingidentity.com/pingone-api/platform/environments/update-environment.html).

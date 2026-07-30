@@ -1,0 +1,44 @@
+info:
+  name: Update Inbound Traffic Policy
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/inboundTrafficPolicies/{{trafficPolicyID}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Updated Test Connection Config",
+        "clientIpRule": {
+          "type": "HEADER_CSV",
+          "name": "X-Custom-Header",
+          "index": 1,
+          "cardinality": 3
+        },
+        "headerRules": [
+          {
+            "name": "Content-Policy",
+            "required": true
+          },
+          {
+            "name": "Content-Type",
+            "required": true
+          }
+        ],
+        "trafficRule": {
+          "type": "ALLOW"
+        },
+        "priority": 100,
+        "enabled": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Inbound Traffic Policy](https://developer.pingidentity.com/pingone-api/platform/inbound-traffic/update-inbound-traffic-policy.html).

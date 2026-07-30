@@ -1,0 +1,23 @@
+opencollection: 1.0.0
+
+info:
+  name: PingOne Platform API
+
+request:
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
+
+docs:
+  content: |-
+    This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [developer.pingidentity.com](https://developer.pingidentity.com/pingone-api/introduction.html).
+
+    Platform SSO APIs collections use [Postman Collection-Level Authorization](https://developer.pingidentity.com/pingone-api/foundations/authentication-concepts/postman-collection-level-authorization.html) of type `bearer`. All requests that use bearer token authorization are set to `Inherit authorization from parent`.
+    (2026-04-20 14:39)
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

@@ -1,0 +1,23 @@
+info:
+  name: Update Branding Theme Default
+  type: http
+  seq: 8
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/themes/{{themeID}}/default"
+  body:
+    type: json
+    data: |-
+      {  
+          "default": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Branding Theme Default](https://developer.pingidentity.com/pingone-api/platform/branding/branding-themes/update-branding-theme-default.html).

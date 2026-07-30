@@ -1,0 +1,47 @@
+info:
+  name: Update Phone Delivery Settings
+  type: http
+  seq: 11
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/notificationsSettings/phoneDeliverySettings/{{phoneDeliverySettingsID}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "UPdatedCustomProviderName",
+        "provider":"CUSTOM_PROVIDER",
+        "authentication":{
+            "method":"BASIC",
+            "username":"{{username}}",
+            "password":"{{password}}"
+          },
+        "requests":[{
+            "deliveryMethod":"SMS",
+            "url":"https://api-vendor.com/message",
+            "method":"POST",
+            "messageType":"ARN&message=${message}&phoneNumber=${to}&sender=${from}"
+          },
+        {
+            "deliveryMethod":"VOICE",
+            "url":"https://api-vendor.com/voice",
+            "method":"POST",
+            "messageType":"ARN&message=${message}&phoneNumber=${to}&sender=${from}"
+          }],
+          "numbers":[
+              {"type":"PHONE_NUMBER",
+              "number":"+1 222 333",
+              "capabilities":["SMS", "VOICE"]
+              }
+          ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Phone Delivery Settings](https://developer.pingidentity.com/pingone-api/platform/notifications/phone-delivery-settings/update-phone-delivery-settings.html).

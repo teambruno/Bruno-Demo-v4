@@ -1,0 +1,26 @@
+info:
+  name: Read Early Access Features
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/earlyAccessFeatures"
+  params:
+    - name: limit
+      value: "1"
+      type: query
+      disabled: true
+    - name: expand
+      value: billOfMaterials
+      type: query
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read Early Access Features](https://developer.pingidentity.com/pingone-api/platform/environments/early-access-features/read-early-access-features.html).

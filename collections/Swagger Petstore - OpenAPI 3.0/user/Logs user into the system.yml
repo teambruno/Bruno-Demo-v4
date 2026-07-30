@@ -1,0 +1,124 @@
+info:
+  name: Logs user into the system.
+  type: http
+  seq: 3
+  tags:
+    - user
+
+http:
+  method: GET
+  url: "{{baseUrl}}/user/login"
+  params:
+    - name: username
+      value: ""
+      type: query
+      description: The user name for login
+      disabled: true
+    - name: password
+      value: ""
+      type: query
+      description: The password for login in clear text
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Response
+    description: successful operation
+    request:
+      url: "{{baseUrl}}/user/login"
+      method: GET
+      params:
+        - name: username
+          value: ""
+          type: query
+          description: The user name for login
+          disabled: true
+        - name: password
+          value: ""
+          type: query
+          description: The password for login in clear text
+          disabled: true
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/xml
+      body:
+        type: xml
+        data: ""
+  - name: 200 Response
+    description: successful operation
+    request:
+      url: "{{baseUrl}}/user/login"
+      method: GET
+      params:
+        - name: username
+          value: ""
+          type: query
+          description: The user name for login
+          disabled: true
+        - name: password
+          value: ""
+          type: query
+          description: The password for login in clear text
+          disabled: true
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: ""
+  - name: 400 Response
+    description: Invalid username/password supplied
+    request:
+      url: "{{baseUrl}}/user/login"
+      method: GET
+      params:
+        - name: username
+          value: ""
+          type: query
+          description: The user name for login
+          disabled: true
+        - name: password
+          value: ""
+          type: query
+          description: The password for login in clear text
+          disabled: true
+    response:
+      status: 400
+      statusText: Bad Request
+      body:
+        type: text
+        data: ""
+  - name: default Response
+    description: Unexpected error
+    request:
+      url: "{{baseUrl}}/user/login"
+      method: GET
+      params:
+        - name: username
+          value: ""
+          type: query
+          description: The user name for login
+          disabled: true
+        - name: password
+          value: ""
+          type: query
+          description: The password for login in clear text
+          disabled: true
+    response:
+      body:
+        type: text
+        data: ""
+
+docs: Log into the system.

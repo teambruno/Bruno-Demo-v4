@@ -1,0 +1,52 @@
+info:
+  name: Read All Direct-mapped Users
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{scimPath}}/environments/{{envID}}/v2/DirectMappedUsers"
+  params:
+    - name: count
+      value: ""
+      type: query
+      disabled: true
+    - name: filter
+      value: name.formatted eq "test"
+      type: query
+      disabled: true
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 200", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Response body JSON's _embedded:users is an array of objs w/ id and username strings", function () {
+          const jsonData = res.getBody();
+          if (jsonData.totalResults > 0) {
+            const userList = jsonData.Resources;
+            expect(userList).to.be.an('array');
+            console.log("Found " + userList.length + " User(s)");
+            userList.forEach((elem) => {
+              expect(elem.id).to.be.a('string');
+            });
+            bru.setEnvVar("username", userList[0].username);
+            console.log("username is now: " + bru.getEnvVar("username"));
+            bru.setEnvVar("userID", userList[0].id);
+            console.log("userID is now: " + bru.getEnvVar("userID"));
+          } else {
+            console.log("No Users!");
+          }
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read All Direct-mapped Users](https://developer.pingidentity.com/pingone-api/platform/scim/direct-mapped-users/read-all-direct-mapped-users.html).

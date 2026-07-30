@@ -1,0 +1,64 @@
+info:
+  name: Update LDAP Gateway
+  type: http
+  seq: 11
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/gateways/{{gatewayID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "LDAP-Gateway-MyTest",
+          "description": "My LDAP gateway",
+          "type": "LDAP",
+          "enabled": false,
+          "vendor": "PingDirectory",
+          "serversHostAndPort": [
+              "host1:389",
+              "host.domain.com:389",
+              "10.10.10.10:333",
+              "2001:0db8:85a3:0000:0000:8a2e:0370:7334:389"
+          ],
+          "bindDN": "cn=svc-account",
+          "bindPassword": "{{bindPassword}}",
+          "searchBaseDN": "o=example",
+          "userCorrelationFilterPattern": "(|(uid=$username$)(mail=$username$))",
+          "userTypes": [
+              {
+                  "id": "{{userTypeID}}",
+                  "name": "myType",
+                  "passwordAuthority": "LDAP",
+                  "searchBaseDn": "dc=example,dc=com",
+                  "orderedCorrelationAttributes": [
+                      "externalid",
+                      "uid",
+                      "username"
+                  ],
+                  "allowPasswordChanges": true,
+                  "updateUserOnSuccessfulAuthentication": true,
+                  "newUserLookup": {
+                      "ldapFilterPattern": "(|(uid=${identifier})(mail=${identifier}))",
+                      "population": {
+                          "id": "{{popID}}"
+                      },
+                      "attributeMappings": [
+                          {
+                              "name": "username",
+                              "value": "${ldapAttributes.uid}"
+                          }
+                      ]
+                  }
+              }
+          ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update LDAP Gateway](https://developer.pingidentity.com/pingone-api/platform/gateway-management/gateways/update-gateway.html).

@@ -1,0 +1,55 @@
+info:
+  name: Test Push Notifications
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/notifications?sync=true"
+  params:
+    - name: expand
+      value: attributes
+      type: query
+      disabled: true
+    - name: sync
+      value: "true"
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+          "title": "PingOne test",
+          "body": "Test push successful",
+          "deliveryMethod": "Google",
+          "pushToken": "{{pushToken}}",
+          "application": {
+              "id": "{{appID}}"
+          },
+          "data": {
+              "type": "DRY"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("appID", jsonData.id);
+            console.log("appID is now: " + bru.getEnvVar("appID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Test Push Notifications](https://developer.pingidentity.com/pingone-api/platform/notifications/send-notifications/test_push_notifications.html).

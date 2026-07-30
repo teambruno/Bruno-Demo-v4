@@ -1,0 +1,93 @@
+info:
+  name: Create Notification Policy / Environment
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/notificationsPolicies"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "Notification policy with environment limit and country limitation and notification cooldown periods",
+          "quotas": [
+              {
+                  "type": "ENVIRONMENT",
+                  "deliveryMethods": [
+                      "SMS",
+                      "Voice"
+                  ],
+                  "total": 1000
+              }
+          ],
+          "countryLimit": {
+              "type": "ALLOWED",
+              "deliveryMethods": [
+                  "SMS",
+                  "Voice"
+              ],
+              "countries": [
+                  "US",
+                  "CA"
+              ]
+          },
+          "cooldownConfiguration":{
+              "sms":{
+                  "enabled":true,
+                  "periods":[
+                      {"duration":30,"timeUnit":"SECONDS"},
+                      {"duration":2,"timeUnit":"MINUTES"},
+                      {"duration":3,"timeUnit":"MINUTES"}
+                  ],
+                  "resendLimit":5
+              },
+              "email":{
+                  "enabled":true,
+                  "periods":[
+                      {"duration":30,"timeUnit":"SECONDS"},
+                      {"duration":1,"timeUnit":"MINUTES"},
+                      {"duration":2,"timeUnit":"MINUTES"}
+                  ],
+                  "resendLimit":4
+              },
+              "voice":{
+                  "enabled":true,
+                  "periods":[
+                      {"duration":40,"timeUnit":"SECONDS"},
+                      {"duration":2,"timeUnit":"MINUTES"},
+                      {"duration":4,"timeUnit":"MINUTES"}
+                  ],
+                  "groupBy":"USER_ID",
+                  "resendLimit":6
+              },
+              "whatsApp":{
+                  "enabled":false
+              }
+          },
+          "default": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("notificationPolicyID", jsonData.id);
+            console.log("notificationPolicyID is now: " + bru.getEnvVar("notificationPolicyID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Notification Policy / Environment](https://developer.pingidentity.com/pingone-api/platform/notifications/notification-policies/create_env_notification_policy_total.html).

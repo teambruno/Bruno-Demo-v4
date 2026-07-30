@@ -1,0 +1,30 @@
+info:
+  name: Update Administrator Security (Enhanced)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/adminConfig"
+  body:
+    type: json
+    data: |-
+      {
+          "authenticationMethod": "PINGONE",
+          "recovery": true,
+          "mfaStatus": "ENFORCE",
+          "allowedMethods": {
+              "TOTP": "{\"enabled\":true}",
+              "FIDO2": "{\"enabled\":true}",
+              "EMAIL": "{\"enabled\":true}"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Administrator Security (Enhanced)](https://developer.pingidentity.com/pingone-api/platform/administrator-security/update-admin-config-enhanced.html).

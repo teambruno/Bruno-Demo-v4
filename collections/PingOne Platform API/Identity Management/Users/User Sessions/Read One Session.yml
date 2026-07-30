@@ -1,0 +1,17 @@
+info:
+  name: Read One Session
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/sessions/{{sessionID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read One Session](https://developer.pingidentity.com/pingone-api/platform/users/user-sessions/read-a-session.html).

@@ -1,0 +1,26 @@
+info:
+  name: Update Attribute (Patch)
+  type: http
+  seq: 7
+
+http:
+  method: PATCH
+  url: "{{apiPath}}/environments/{{envID}}/schemas/{{schemaID}}/attributes/{{schemaAttrID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "officeLocation",
+          "type": "STRING",
+          "unique": true,
+          "enabled": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Attribute (Patch)](https://developer.pingidentity.com/pingone-api/platform/schemas/update-attribute-patch.html).

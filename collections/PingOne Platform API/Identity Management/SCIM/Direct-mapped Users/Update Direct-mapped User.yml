@@ -1,0 +1,38 @@
+info:
+  name: Update Direct-mapped User
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{scimPath}}/environments/{{envID}}/v2/DirectMappedUsers/{{userID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "schemas": [
+              "urn:pingidentity:schemas:2.0:DirectMappedUser"
+          ],
+          "name": {
+              "formatted": "Rawnald Gregory Erickson II",
+              "given": "Rawnald",
+              "family": "Erickson",
+              "honorificPrefix": "Mr.",
+              "honorificSuffix": "II"
+          },
+          "nickname": "Ronnie",
+          "population": {
+              "id": "{{popID}}"
+          },
+          "primaryPhone": "1234567890",
+          "username": "tmp-dm-user-1-UPDATED"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Direct-mapped User](https://developer.pingidentity.com/pingone-api/platform/scim/direct-mapped-users/update-direct-mapped-user.html).

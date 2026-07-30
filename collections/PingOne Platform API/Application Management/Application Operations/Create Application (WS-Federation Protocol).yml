@@ -1,0 +1,59 @@
+info:
+  name: Create Application (WS-Federation Protocol)
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/applications"
+  body:
+    type: json
+    data: |-
+      {
+          "enabled": true,
+          "name": "WS_FED App-2",
+          "description": "Incredible",
+          "type": "WEB_APP",
+          "protocol": "WS_FED",
+          "homePageUrl": "https://www.microsoft.com/en-ca/microsoft-365",
+          "loginPageUrl": "https://portal.office.com",
+          "icon": {
+              "id": "{{iconID}}",
+              "href": "https://uploads.pingone.com/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/images/492cf828-14a8-4794-83c2-b9bf4fe796c6_843714e5-1590-4585-8aec-085e33141dbf_original.png"
+          },
+          "domainName": "my.office365.domain",
+          "replyUrl": "https://login.microsoftonline.com/login.srf",
+          "userAttributeUsernameMatch": "email",
+          "sloEndpoint": "https://example.com/slo",
+          "subjectNameIdentifierFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+          "idpSigning": {
+              "algorithm": "SHA256withRSA",
+              "key": {
+                  "id": "{{keyID}}"
+              }
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("appID", jsonData.id);
+            console.log("appID is now: " + bru.getEnvVar("appID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Application (WS-Federation Protocol)](https://developer.pingidentity.com/pingone-api/platform/applications/applications-1/create-application-ws-federation-protocol.html).

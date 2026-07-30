@@ -1,0 +1,50 @@
+info:
+  name: Update Custom Admin Role
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/roles/{{customRoleID}}"
+  body:
+    type: json
+    data: |
+      {
+      "name" : "Custom_Role_D",
+      "description" : "Custom Role for something ",
+      "applicableTo" : ["ENVIRONMENT"],
+      "canBeAssignedBy": [
+            {
+                "id" : "{{envAdmRole}}"
+            }
+      ],
+      "permissions" : [
+         {
+           "id": "permissions:read:userRoleAssignments"
+          }
+      ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("customRoleID", jsonData.id);
+            console.log("customRoleID is now: " + bru.getEnvVar("customRoleID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Custom Admin Role](https://developer.pingidentity.com/pingone-api/platform/roles/custom-roles/update-custom-role.html).

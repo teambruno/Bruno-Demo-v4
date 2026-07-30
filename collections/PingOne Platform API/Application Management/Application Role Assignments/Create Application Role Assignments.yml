@@ -1,0 +1,44 @@
+info:
+  name: Create Application Role Assignments
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/applications/{{appID}}/roleAssignments"
+  body:
+    type: json
+    data: |-
+      {
+          "role": {
+              "id": "{{roleID}}"
+          },
+          "scope": {
+              "id": "{{orgID}}",
+              "type": "ORGANIZATION"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("roleAssignmentID", jsonData.id);
+            console.log("roleAssignmentID is now: " + bru.getEnvVar("roleAssignmentID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Application Role Assignments](https://developer.pingidentity.com/pingone-api/platform/applications/application-role-assignments/create-application-role-assignments.html).

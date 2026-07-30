@@ -1,0 +1,153 @@
+info:
+  name: Update user resource.
+  type: http
+  seq: 6
+  tags:
+    - user
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/user/:username"
+  params:
+    - name: username
+      value: ""
+      type: path
+      description: name that need to be deleted
+  body:
+    type: json
+    data: |-
+      {
+        "id": 10,
+        "username": "theUser",
+        "firstName": "John",
+        "lastName": "James",
+        "email": "john@email.com",
+        "password": "12345",
+        "phone": "12345",
+        "userStatus": 1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Response
+    description: successful operation
+    request:
+      url: "{{baseUrl}}/user/:username"
+      method: PUT
+      params:
+        - name: username
+          value: ""
+          type: path
+          description: name that need to be deleted
+      body:
+        type: json
+        data: |-
+          {
+            "id": 10,
+            "username": "theUser",
+            "firstName": "John",
+            "lastName": "James",
+            "email": "john@email.com",
+            "password": "12345",
+            "phone": "12345",
+            "userStatus": 1
+          }
+    response:
+      status: 200
+      statusText: OK
+      body:
+        type: text
+        data: ""
+  - name: 400 Response
+    description: bad request
+    request:
+      url: "{{baseUrl}}/user/:username"
+      method: PUT
+      params:
+        - name: username
+          value: ""
+          type: path
+          description: name that need to be deleted
+      body:
+        type: json
+        data: |-
+          {
+            "id": 10,
+            "username": "theUser",
+            "firstName": "John",
+            "lastName": "James",
+            "email": "john@email.com",
+            "password": "12345",
+            "phone": "12345",
+            "userStatus": 1
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      body:
+        type: text
+        data: ""
+  - name: 404 Response
+    description: user not found
+    request:
+      url: "{{baseUrl}}/user/:username"
+      method: PUT
+      params:
+        - name: username
+          value: ""
+          type: path
+          description: name that need to be deleted
+      body:
+        type: json
+        data: |-
+          {
+            "id": 10,
+            "username": "theUser",
+            "firstName": "John",
+            "lastName": "James",
+            "email": "john@email.com",
+            "password": "12345",
+            "phone": "12345",
+            "userStatus": 1
+          }
+    response:
+      status: 404
+      statusText: Not Found
+      body:
+        type: text
+        data: ""
+  - name: default Response
+    description: Unexpected error
+    request:
+      url: "{{baseUrl}}/user/:username"
+      method: PUT
+      params:
+        - name: username
+          value: ""
+          type: path
+          description: name that need to be deleted
+      body:
+        type: json
+        data: |-
+          {
+            "id": 10,
+            "username": "theUser",
+            "firstName": "John",
+            "lastName": "James",
+            "email": "john@email.com",
+            "password": "12345",
+            "phone": "12345",
+            "userStatus": 1
+          }
+    response:
+      body:
+        type: text
+        data: ""
+
+docs: This can only be done by the logged in user.

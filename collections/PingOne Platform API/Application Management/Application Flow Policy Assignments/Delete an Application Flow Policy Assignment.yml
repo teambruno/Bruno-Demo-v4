@@ -1,0 +1,17 @@
+info:
+  name: Delete an Application Flow Policy Assignment
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/applications/{{appID}}/flowPolicyAssignments/{{flowPolicyAssignmentID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete an Application Flow Policy Assignment](https://developer.pingidentity.com/pingone-api/platform/applications/application-flow-policy-assignments/delete-flow-policy-assignment.html).

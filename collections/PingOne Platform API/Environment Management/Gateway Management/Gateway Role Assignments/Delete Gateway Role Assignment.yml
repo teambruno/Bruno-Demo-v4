@@ -1,0 +1,17 @@
+info:
+  name: Delete Gateway Role Assignment
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/gateways/{{gatewayID}}/roleAssignments/{{gatewayRoleAssignmentsID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Gateway Role Assignment](https://developer.pingidentity.com/pingone-api/platform/gateway-management/gateway-role-assignments/delete-gateway-role-assignment.html).

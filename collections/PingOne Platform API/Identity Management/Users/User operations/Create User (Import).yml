@@ -1,0 +1,57 @@
+info:
+  name: Create User (Import)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/users"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.user.import+json
+  body:
+    type: json
+    data: |-
+      {
+          "email": "{{email}}",
+          "name": {
+              "given": "Test",
+              "family": "User"
+          },
+          "population": {
+              "id": "{{popID}}"
+          },
+          "lifecycle": {
+            "status": "VERIFICATION_REQUIRED",
+            "suppressVerificationCode": false
+        },
+          "username": "import-user_{{$timestamp}}",
+          "password": {
+              "value": "{{userPassword}}",
+              "forceChange": false
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("userID", jsonData.id);
+            console.log("userID is now: " + bru.getEnvVar("userID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create User (Import)](https://developer.pingidentity.com/pingone-api/platform/users/users-1/create-user-import.html).

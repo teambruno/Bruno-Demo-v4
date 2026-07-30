@@ -10,5 +10,11 @@ collections:
     path: "collections/02 - Auth and Scripting"
   - name: "03 - CLI CI and V4 Features"
     path: "collections/03 - CLI CI and V4 Features"
+  - name: "PingOne Platform API"
+    path: "collections/PingOne Platform API"
+  - name: "Swagger Petstore - OpenAPI 3.0"
+    path: "collections/Swagger Petstore - OpenAPI 3.0"
+
+specs:
 
 docs: ''

@@ -1,0 +1,28 @@
+info:
+  name: Update Alert Channel
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/alertChannels/{{alertChannelID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "channelType":"EMAIL",
+          "alertName":"Cert Expired Alert",
+          "includeSeverities":["WARNING"],
+          "includeAlertTypes":["CERTIFICATE_EXPIRED"],
+          "excludeAlertTypes":[],
+          "addresses":["tom@example.com"]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Alert Channel](https://developer.pingidentity.com/pingone-api/platform/alerting/update-alert-channel.html).

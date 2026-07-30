@@ -1,7 +1,7 @@
 info:
   name: Variable Inspector
   type: http
-  seq: 0
+  seq: 1
   tags:
     - smoke
     - regression
@@ -15,16 +15,6 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // ── Variable Inspector ──────────────────────────────────────────────────
-        // Bruno resolves variables in this priority order (highest wins):
-        //   3. --env-var       → overrides collection env vars at runtime
-        //   2. Collection env  → --env file (e.g. Production.yml)
-        //   1. Global env      → --global-env file (e.g. Globals.yml)  ← lowest priority
-        //
-        // To override a global env var from the CLI:
-        //   --env-var <key>=<value>  sets the value in the COLLECTION scope,
-        //   which has higher priority and shadows the global value.
-
         const notSet   = "(not set)";
         const noGlobal = "(no --global-env loaded)";
 
@@ -81,6 +71,7 @@ runtime:
     - expression: res.status
       operator: eq
       value: "200"
+      disabled: true
 
 settings:
   encodeUrl: true

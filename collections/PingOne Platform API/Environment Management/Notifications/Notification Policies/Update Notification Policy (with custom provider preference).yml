@@ -1,0 +1,131 @@
+info:
+  name: Update Notification Policy (with custom provider preference)
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/notificationsPolicies/{{notificationPolicyID}}"
+  body:
+    type: json
+    data: |
+      {
+          "name": "Environment-level notification policy with country limitation and custom provider preference",
+          "quotas": [
+              {
+                  "type": "ENVIRONMENT",
+                  "deliveryMethods": [
+                      "SMS",
+                      "Voice"
+                  ],
+                  "total": 1000
+              }, 
+              {
+                  "type" : "ENVIRONMENT",
+                  "deliveryMethods" : [
+                      "Email"
+                  ],
+                  "total" : 100
+              }
+          ],
+          "countryLimit": {
+              "type": "ALLOWED",
+              "deliveryMethods": [
+                  "SMS",
+                  "Voice"
+              ],
+              "countries": [
+                  "CA",
+                  "SE",
+                  "JP"
+              ]
+          },
+          "providerConfiguration" : {
+              "conditions" : [ 
+                  {
+                      "deliveryMethods" : [ "VOICE", "SMS" ],
+                      "countries" : [
+                          "CA"
+                      ],
+                      "fallbackChain" : [ 
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          }
+                      ]
+                  },
+                  {
+                    "deliveryMethods" : [
+                      "VOICE",
+                      "SMS"
+                     ],
+                    "countries" : [
+                      "SE"
+                     ],
+                    "fallbackChain" : [
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          }
+                      ]
+                  },
+                  {
+                      "deliveryMethods" : [
+                          "VOICE",
+                          "SMS"
+                      ],
+                      "countries" : [
+                          "JP"
+                      ],
+                      "fallbackChain" : [
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          }
+                      ]
+                  },
+                  {
+                      "deliveryMethods" : [
+                           "VOICE",
+                           "SMS"
+                      ],
+                      "fallbackChain" : [
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          }
+                      ]
+                  }
+              ]
+          },
+          "default": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Notification Policy (with custom provider preference)](https://developer.pingidentity.com/pingone-api/platform/notifications/notification-policies/update_env_notification_policy_custom_providers.html).

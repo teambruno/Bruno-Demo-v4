@@ -1,0 +1,53 @@
+info:
+  name: Create Email Content
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/templates/{{templateName}}/contents"
+  body:
+    type: json
+    data: |-
+      {
+          "locale": "en",
+          "subject": "PingOne: Finish pairing your device",
+          "variant": "variant_C",
+          "body": "To finish pairing your device, enter this code: ${otp}",
+          "deliveryMethod": "Email",
+          "template": {
+              "id": "device_pairing"
+          },
+          "from": {
+              "name": "Someone",
+              "address": "someone@domain.com"
+          },
+          "replyTo": {
+              "name": "Reply",
+              "address": "reply@domain.com"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("contentID", jsonData.id);
+            console.log("contentID is now: " + bru.getEnvVar("contentID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Email Content](https://developer.pingidentity.com/pingone-api/platform/notifications/notifications-templates/create-email-content.html).

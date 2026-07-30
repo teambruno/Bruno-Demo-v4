@@ -1,0 +1,105 @@
+info:
+  name: Create Application (OIDC Protocol - Native App)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/applications"
+  params:
+    - name: expand
+      value: attributes
+      type: query
+      disabled: true
+  body:
+    type: json
+    data: |-
+      {
+          "enabled": true,
+          "name": "Native app with number matching and modified grace period",
+          "description": "Native app that includes configuration of number-matching option",
+          "type": "NATIVE_APP",
+          "protocol": "OPENID_CONNECT",
+          "homePageUrl": "https://example.com/homePage",
+          "loginPageUrl": "https://example.com/loginPage",
+          "icon": {
+              "id": "{{imageID}}",
+              "href": "https://upload.image.org/image.jpg"
+          },
+          "grantTypes": [
+              "AUTHORIZATION_CODE",
+              "IMPLICIT"
+          ],
+          "postLogoutRedirectUris": [
+              "https://example.com/logout"
+          ],
+          "redirectUris": [
+              "https://example.com"
+          ],
+          "responseTypes": [
+              "CODE",
+              "TOKEN",
+              "ID_TOKEN"
+          ],
+          "signing": {
+              "keyRotationPolicy": {
+                  "id": "{{krpID}}"
+              }
+          },
+          "tokenEndpointAuthMethod": "NONE",
+          "pkceEnforcement": "REQUIRED",
+          "refreshTokenDuration": 86400,
+          "refreshTokenRollingDuration": 86400,
+          "mobile": {
+              "bundleId": "myAppleBundle9.myApp",
+              "packageName": "myAndroidPackage10.myApp",
+              "huaweiAppId": "120240988",
+              "huaweiPackageName": "com.company.huaweiPackage_2",
+              "integrityDetection": {
+                  "mode": "ENABLED",
+                  "cacheDuration": {
+                      "amount": 10,
+                      "units": "MINUTES"
+                  },
+                  "googlePlay":{
+                      "verificationType":"INTERNAL",
+                      "decryptionKey":"{{integrityDecryptionKey}}",
+                      "verificationKey":"{{integrityVerificationKey}}"
+                  }
+              },
+              "push": {
+                  "numberMatching": {
+                      "type":"ENTER_MANUALLY"
+                  }
+              },
+              "passcodeRefreshDuration": {
+                  "duration": 50,
+                  "timeUnit": "SECONDS"
+              },
+              "passcodeGracePeriod" : 8
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("appID", jsonData.id);
+            console.log("appID is now: " + bru.getEnvVar("appID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Application (OIDC Protocol - Native App)](https://developer.pingidentity.com/pingone-api/platform/applications/applications-1/create-application-oidc-protocol---native-app.html).

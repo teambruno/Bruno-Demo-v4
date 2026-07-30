@@ -1,0 +1,32 @@
+info:
+  name: Update User Using JSON Array
+  type: http
+  seq: 12
+
+http:
+  method: PATCH
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.user.scim.patch+json
+  body:
+    type: json
+    data: |-
+      {
+         "Operations":[
+            {
+               "op":"replace",
+               "path":"email",
+               "value":"test@test.com"
+            }
+         ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update User Using JSON Array](https://developer.pingidentity.com/pingone-api/platform/users/users-1/update-user-patch-json-array.html).

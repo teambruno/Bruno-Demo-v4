@@ -1,0 +1,21 @@
+info:
+  name: Read All Group IDs for User
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}?include=memberOfGroupIDs"
+  params:
+    - name: include
+      value: memberOfGroupIDs
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read All Group IDs for User](https://developer.pingidentity.com/pingone-api/platform/users/group-membership/read-all-group-ids-for-user.html).

@@ -1,0 +1,23 @@
+info:
+  name: Update Application Resource
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/resources/{{resourceID}}/applicationResources/{{appResourceID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "accounts2"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Application Resource](https://developer.pingidentity.com/pingone-api/platform/resources/application-resources/update-application-resource.html).

@@ -1,0 +1,44 @@
+info:
+  name: Create Group
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/groups"
+  body:
+    type: json
+    data: |-
+      {
+         "name": "Managers",
+         "description": "This is a test group",
+         "customData": {
+             "groupOwner": "Tom Jones",
+             "securityGroup": true
+         },
+         "userFilter": "title eq \"Manager\""
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("groupID", jsonData.id);
+            console.log("groupID is now: " + bru.getEnvVar("groupID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Group](https://developer.pingidentity.com/pingone-api/platform/groups/create-group.html).

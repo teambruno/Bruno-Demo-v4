@@ -1,0 +1,56 @@
+info:
+  name: Create Notification Policy / User
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/notificationsPolicies"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Per-User Notification Policy - SMS/voice and email limits",
+        "quotas": [
+          {
+            "type": "USER",
+            "deliveryMethods": [
+              "SMS",
+              "Voice"
+            ],
+            "total": 30
+          },
+          {
+            "type": "USER",
+            "deliveryMethods": [
+              "Email"
+            ],
+            "total": 25
+          }
+        ],
+        "default": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("notificationPolicyID", jsonData.id);
+            console.log("notificationPolicyID is now: " + bru.getEnvVar("notificationPolicyID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Notification Policy / User](https://developer.pingidentity.com/pingone-api/platform/notifications/notification-policies/create_user_notification_policy_total.html).

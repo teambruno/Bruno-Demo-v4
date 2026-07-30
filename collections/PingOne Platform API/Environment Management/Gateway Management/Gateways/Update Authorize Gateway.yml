@@ -1,0 +1,29 @@
+info:
+  name: Update Authorize Gateway
+  type: http
+  seq: 13
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/gateways/{{gatewayID}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "My new Authorize Gateway",
+        "type": "AUTHORIZE",
+        "authorizationVersion": {
+          "id": "{{authorizationVersionId}}"
+        },
+        "description": "A new authorize gateway",
+        "enabled": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Authorize Gateway](https://developer.pingidentity.com/pingone-api/platform/gateway-management/gateways/update-authorize-gateway.html).

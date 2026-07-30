@@ -1,0 +1,17 @@
+info:
+  name: Delete Identity Provider
+  type: http
+  seq: 18
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/identityProviders/{{providerID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Identity Provider](https://developer.pingidentity.com/pingone-api/platform/identity-provider-management/identity-providers/delete-identity-provider.html).

@@ -1,0 +1,72 @@
+info:
+  name: Create Phone Delivery Settings (custom, OAUTH2)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/notificationsSettings/phoneDeliverySettings"
+  body:
+    type: json
+    data: |-
+      {
+        "name": "CustomProviderOAUTH2",
+        "provider":"CUSTOM_PROVIDER",
+        "authentication": {
+              "authUrl": "https://login.example.com/oauth/token",
+              "clientId": "idForAccount",
+              "clientSecret": "{{customProviderClientSecret}}",
+              "method": "OAUTH2"
+          },
+        "requests":[{
+            "deliveryMethod":"SMS",
+            "url":"https://example.com/message",
+            "method":"POST",
+            "messageType":"ARN&message=${message}&phoneNumber=${to}&sender=${from}"
+          },
+        {
+            "deliveryMethod":"VOICE",
+            "url":"https://example.com/voice",
+            "method":"POST",
+            "messageType":"ARN&message=${message}&phoneNumber=${to}&sender=${from}"
+          }],
+          "numbers":[
+              {"type":"PHONE_NUMBER",
+              "number":"+1 222 333",
+              "selected": true,
+              "available": true,
+              "capabilities":["SMS", "VOICE"]
+              },
+              {"type": "TOLL_FREE",
+              "number": "+18544440099",
+              "selected": false,
+              "available": true,
+              "capabilities": ["SMS", "VOICE"],
+              "supportedCountries": ["US", "CA"]
+              }
+          ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("phoneDeliverySettingsId", jsonData.id);
+            console.log("phoneDeliverySettingsId is now: " + bru.getEnvVar("phoneDeliverySettingsId"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Phone Delivery Settings (custom, OAUTH2)](https://developer.pingidentity.com/pingone-api/platform/notifications/phone-delivery-settings/create_phone_delivery_settings_oauth.html).

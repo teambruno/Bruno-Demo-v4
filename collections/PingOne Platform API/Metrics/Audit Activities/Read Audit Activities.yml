@@ -1,0 +1,38 @@
+info:
+  name: Read Audit Activities
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/activities"
+  body:
+    type: json
+    data: |-
+      {
+          "filter": "recordedat gt \"2019-01-01T22:54:12.988Z\" AND recordedat lt \"2019-01-31T22:54:12.988Z\" AND actors.user.name eq \"Bill\""
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 200) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("activityID", jsonData.id);
+            console.log("activityID is now: " + bru.getEnvVar("activityID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read Audit Activities](https://developer.pingidentity.com/pingone-api/platform/audit-activities/get-user-activities-1.html).

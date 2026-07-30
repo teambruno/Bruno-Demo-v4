@@ -1,0 +1,62 @@
+info:
+  name: Create Linked Account
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/linkedAccounts"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.account.link+json
+  body:
+    type: json
+    data: |-
+      {
+          "identityProvider": {
+              "id": "{{idpID}}"
+          },
+          "externalId": "3249023841",
+          "attributes": {
+              "username": {
+                  "value": "{{username}}",
+                  "update": "EMPTY_ONLY"
+              },
+              "email": {
+                  "value": "{{email}}",
+                  "update": "EMPTY_ONLY"
+              },
+              "name.first": {
+                  "value": "leslie",
+                  "update": "ALWAYS"
+              },
+              "name.last": {
+                  "value": "Jones",
+                  "update": "EMPTY_ONLY"
+              }
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 200) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("linkedAccountID", jsonData.id);
+            console.log("linkedAccountID is now: " + bru.getEnvVar("linkedAccountID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Linked Account](https://developer.pingidentity.com/pingone-api/platform/users/linked-accounts/create-linked-account.html).

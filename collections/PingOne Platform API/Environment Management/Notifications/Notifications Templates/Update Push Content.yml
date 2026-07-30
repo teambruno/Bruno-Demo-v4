@@ -1,0 +1,26 @@
+info:
+  name: Update Push Content
+  type: http
+  seq: 15
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/templates/{{templateName}}/contents/{{contentID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "locale": "en-gb",
+          "title": "Push Message",
+          "body": "${user.username}, you have a new authentication request.",
+          "deliveryMethod": "Push"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Push Content](https://developer.pingidentity.com/pingone-api/platform/notifications/notifications-templates/update-push-content.html).

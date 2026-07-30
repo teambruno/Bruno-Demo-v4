@@ -1,0 +1,422 @@
+name: PingOne Postman Environment Template (release- 2026-04-15)
+variables:
+  - name: tld
+    value: com
+  - name: accessToken
+    value: ""
+  - name: accessTokenForEmailProvider
+    value: ""
+  - name: actionID
+    value: ""
+  - name: activityID
+    value: ""
+  - name: actToken
+    value: ""
+  - name: adminAppID
+    value: ""
+  - name: adminAppSecret
+    value: ""
+  - name: adminPassword
+    value: ""
+  - name: adminUsername
+    value: ""
+  - name: agreementID
+    value: ""
+  - name: alertChannelID
+    value: ""
+  - name: apiPath
+    value: https://api.pingone.{{tld}}/v1
+  - name: appID
+    value: ""
+  - name: appIdentifier
+    value: ""
+  - name: appResourceID
+    value: ""
+  - name: appRoleID
+    value: ""
+  - name: appSecret
+    value: ""
+  - name: appUrl
+    value: ""
+  - name: assertionFromBrowser
+    value: ""
+  - name: attributeID
+    value: ""
+  - name: authCode
+    value: ""
+  - name: authorizationVersionId
+    value: ""
+  - name: authorizeGatewayID
+    value: ""
+  - name: authPath
+    value: https://auth.pingone.{{tld}}
+  - name: base64encodedCredentials
+    value: ""
+  - name: basicAuthPassword
+    value: ""
+  - name: basicAuthUsername
+    value: ""
+  - name: bindPassword
+    value: ""
+  - name: capabilityName
+    value: ""
+  - name: certID
+    value: ""
+  - name: certificate
+    value: ""
+  - name: cibaAuthID
+    value: ""
+  - name: cibaHint
+    value: ""
+  - name: client_id
+    value: ""
+  - name: clientID
+    value: ""
+  - name: clientSecretJWT
+    value: ""
+  - name: code
+    value: ""
+  - name: companyID
+    value: ""
+  - name: configurationID
+    value: ""
+  - name: connectionID
+    value: ""
+  - name: contentID
+    value: ""
+  - name: credentialID
+    value: ""
+  - name: currency
+    value: ""
+  - name: currentPassword
+    value: ""
+  - name: customDomainID
+    value: ""
+  - name: customProviderClientSecret
+    value: ""
+  - name: customRoleID
+    value: ""
+  - name: date
+    value: ""
+  - name: davinciApiKey
+    value: ""
+  - name: davinciAppClientSecret
+    value: ""
+  - name: davinciAppID
+    value: ""
+  - name: davinciFlowPolicyID
+    value: ""
+  - name: deviceAppID
+    value: ""
+  - name: deviceCode
+    value: ""
+  - name: deviceID
+    value: ""
+  - name: dvResponse
+    value: ""
+  - name: email
+    value: ""
+  - name: emailDomainID
+    value: ""
+  - name: envAdmRole
+    value: ""
+  - name: envID
+    value: "1000"
+  - name: EnvIDConverged
+    value: ""
+  - name: externalAuthCode
+    value: ""
+  - name: externalProviderState
+    value: ""
+  - name: extIdpID
+    value: ""
+  - name: fallbackChainID
+    value: ""
+  - name: fallbackChainID-2
+    value: ""
+  - name: fallbackChainID-3
+    value: ""
+  - name: flowChallengeID
+    value: ""
+  - name: flowID
+    value: ""
+  - name: flowPolicyAssignmentID
+    value: ""
+  - name: flowPolicyId
+    value: ""
+  - name: flowPolicyID
+    value: ""
+  - name: formID
+    value: ""
+  - name: from
+    value: ""
+  - name: gatewayCredential
+    value: ""
+  - name: gatewayCredID
+    value: ""
+  - name: gatewayID
+    value: ""
+  - name: gatewayRoleAssignmentsID
+    value: ""
+  - name: googleCredentialsJsonContent
+    value: ""
+  - name: grantID
+    value: ""
+  - name: groupID
+    value: ""
+  - name: groupID_2
+    value: ""
+  - name: groupNestedID
+    value: ""
+  - name: headerValueForCustomAuthHeader
+    value: ""
+  - name: iconID
+    value: ""
+  - name: identifier
+    value: ""
+  - name: idpAttrID
+    value: ""
+  - name: idpID
+    value: ""
+  - name: idToken
+    value: ""
+  - name: imageID
+    value: ""
+  - name: imageUrl
+    value: ""
+  - name: instanceID
+    value: ""
+  - name: integrationID
+    value: ""
+  - name: integrationVersionID
+    value: ""
+  - name: integrityDecryptionKey
+    value: ""
+  - name: integrityVerificationKey
+    value: ""
+  - name: interactionID
+    value: ""
+  - name: interactionToken
+    value: ""
+  - name: intermediateCertificate
+    value: ""
+  - name: inviteCode
+    value: ""
+  - name: kerberosToken
+    value: ""
+  - name: keyID
+    value: ""
+  - name: krpID
+    value: ""
+  - name: l10nStatusID
+    value: ""
+  - name: languageID
+    value: ""
+  - name: licenseID
+    value: ""
+  - name: linkedAccountID
+    value: ""
+  - name: locale
+    value: ""
+  - name: loginHintJwt
+    value: ""
+  - name: mailFromSubdomain
+    value: ""
+  - name: mappingID
+    value: ""
+  - name: member
+    value: ""
+  - name: message
+    value: ""
+  - name: mfaPolicyID
+    value: ""
+  - name: nestedGroupID
+    value: ""
+  - name: newPassword
+    value: ""
+  - name: nextToken
+    value: ""
+  - name: nonce
+    value: ""
+  - name: notificationPolicyID
+    value: ""
+  - name: oauthAccountId
+    value: ""
+  - name: oauthClientId
+    value: ""
+  - name: oauthClientSecret
+    value: ""
+  - name: oauthConsentID
+    value: ""
+  - name: oauthToken
+    value: ""
+  - name: objectguid
+    value: ""
+  - name: orchestratePath
+    value: https://orchestrate-api.pingone.{{tld}}/v1
+  - name: orgID
+    value: ""
+  - name: otp
+    value: ""
+  - name: parentRuleID
+    value: ""
+  - name: password
+    value: ""
+  - name: passwordPolicyID
+    value: ""
+  - name: phoneDeliverySettingsID
+    value: ""
+  - name: pingAppID
+    value: ""
+  - name: planID
+    value: ""
+  - name: policyID
+    value: ""
+  - name: popID
+    value: ""
+  - name: popID-2
+    value: ""
+  - name: populationID
+    value: ""
+  - name: previousRevisionID
+    value: ""
+  - name: privateKey
+    value: ""
+  - name: privateKeyJWT
+    value: ""
+  - name: providerID
+    value: ""
+  - name: providerType
+    value: ""
+  - name: provisioningSyncID
+    value: ""
+  - name: pushCredID
+    value: ""
+  - name: pushToken
+    value: ""
+  - name: recaptchaSecretKey
+    value: ""
+  - name: recaptchaSiteKey
+    value: ""
+  - name: redirect_uri
+    value: ""
+  - name: refreshToken
+    value: ""
+  - name: refreshToken4AuthCode
+    value: ""
+  - name: relayState
+    value: ""
+  - name: requestString
+    value: ""
+  - name: requestURI
+    value: ""
+  - name: resourceAttrID
+    value: ""
+  - name: resourceID
+    value: ""
+  - name: resourceSecret
+    value: ""
+  - name: revisionID
+    value: ""
+  - name: roleAssignmentID
+    value: ""
+  - name: roleID
+    value: ""
+  - name: ruleID
+    value: ""
+  - name: samlAttrID
+    value: ""
+  - name: SAMLRequest
+    value: ""
+  - name: schemaAttrID
+    value: ""
+  - name: schemaID
+    value: ""
+  - name: scimPath
+    value: https://scim-api.pingone.{{tld}}
+  - name: scopeID
+    value: ""
+  - name: scopeID_2
+    value: ""
+  - name: sessionID
+    value: ""
+  - name: sessionToken
+    value: ""
+  - name: SOPAssignmentID
+    value: ""
+  - name: sourceStoreID
+    value: ""
+  - name: spEntityIdValue
+    value: ""
+  - name: spSigningID
+    value: ""
+  - name: SSHA512
+    value: ""
+  - name: startToken
+    value: ""
+  - name: state
+    value: ""
+  - name: storeID
+    value: ""
+  - name: subscriptionID
+    value: ""
+  - name: subToken
+    value: ""
+  - name: sum
+    value: ""
+  - name: syniverseAuthToken
+    value: ""
+  - name: syniverseChannelsSenderId
+    value: ""
+  - name: targetStoreID
+    value: ""
+  - name: teamID
+    value: ""
+  - name: templateName
+    value: ""
+  - name: themeID
+    value: ""
+  - name: to
+    value: ""
+  - name: token
+    value: ""
+  - name: trafficPolicyID
+    value: ""
+  - name: trustedEmailID
+    value: ""
+  - name: twilioVerifyAuthToken
+    value: ""
+  - name: twilioVerifyPhoneDeliverySettingsID
+    value: ""
+  - name: twilioVerifyServiceId
+    value: ""
+  - name: twilioVerifySid
+    value: ""
+  - name: uniqueId
+    value: ""
+  - name: urlForEmailProvider
+    value: ""
+  - name: userCode
+    value: ""
+  - name: userID
+    value: ""
+  - name: username
+    value: ""
+  - name: userPassword
+    value: ""
+  - name: userTypeID
+    value: ""
+  - name: variantName
+    value: ""
+  - name: verificationCode
+    value: ""
+  - name: whatsAppAppID
+    value: ""
+  - name: whatsAppBusinessID
+    value: ""
+  - name: whatsAppSecret
+    value: ""
+  - name: whatsAppToken
+    value: ""
+  - name: writebackStoreID
+    value: ""

@@ -1,0 +1,33 @@
+info:
+  name: Update SCIM User
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{scimPath}}/environments/{{envID}}/v2/Users/{{userID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "schemas": [
+              "urn:ietf:params:scim:schemas:core:2.0:User",
+              "urn:pingidentity:schemas:extension:2.0:PingOneUser"
+          ],
+          "userName": "tmp-Isabella-Updated",
+          "emails": [
+              {
+                  "value": "IsabellaOfCastile@example.com",
+                  "primary": true
+              }
+          ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update SCIM User](https://developer.pingidentity.com/pingone-api/platform/scim/scim-users/update-scim-user.html).

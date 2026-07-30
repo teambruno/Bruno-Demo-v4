@@ -1,0 +1,42 @@
+info:
+  name: Create OpenID Connect resource scope
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/resources/{{resourceID}}/scopes"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "Scope_{{$timestamp}}",
+          "description": "My scope with a mapped claim",
+          "mappedClaims": [
+              "{{resourceAttrID}}"
+          ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("scopeID", jsonData.id);
+            console.log("scopeID is now: " + bru.getEnvVar("scopeID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create OpenID Connect resource scope](https://developer.pingidentity.com/pingone-api/platform/resources/resource-scopes/create-openid-connect-resource-scope.html).

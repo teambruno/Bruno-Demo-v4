@@ -1,0 +1,30 @@
+info:
+  name: Update Group
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/groups/{{groupID}}"
+  body:
+    type: json
+    data: |-
+      {
+      "name": "MyGroupName1",
+      "description": "This is a group for testing.",
+      "externalId": "cn=Some Group,ou=groups,dc=some,dc=active-directory,dc=domain",
+      "customData": {
+          "groupOwnwer": "Bill Sample",
+          "securityGroup": true
+          },
+      "userFilter": "title eq \"Manager\""
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Group](https://developer.pingidentity.com/pingone-api/platform/groups/update-group.html).

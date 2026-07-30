@@ -1,0 +1,57 @@
+info:
+  name: Create Store (PingOne)
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/stores"
+  body:
+    type: json
+    data: |-
+      {
+          "type": "PingOne",
+          "name": "PingOneTest",
+          "configuration": {
+              "ENVIRONMENT_ID": "{{envID}}",
+              "REGION": "North America",
+              "DEFAULT_AUTH_METHOD": "Email 1",
+              "CREATE_USERS": true,
+              "UPDATE_USERS": true,
+              "DISABLE_USERS": true,
+              "REMOVE_ACTION": "Disable",
+              "MFA_USER_DEVICE_MANAGEMENT": "Merge with devices in PingOne",
+              "PROVISION_DISABLED_USERS_PROV_OPT": true,
+              "CLIENT_ID": "yourClientId",
+              "CLIENT_SECRET": "yourClientSecret"
+          },
+          "image": {
+              "href": "https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("storeID", jsonData.id);
+            console.log("storeID is now: " + bru.getEnvVar("storeID"));
+            bru.setEnvVar("targetStoreID", jsonData.id);
+            console.log("targetStoreID is now: " + bru.getEnvVar("targetStoreID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Store (PingOne)](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-stores/create-store-pingone.html).

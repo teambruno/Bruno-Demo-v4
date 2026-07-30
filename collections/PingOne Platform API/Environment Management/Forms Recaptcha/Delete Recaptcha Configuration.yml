@@ -1,0 +1,17 @@
+info:
+  name: Delete Recaptcha Configuration
+  type: http
+  seq: 3
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/recaptchaV2Config"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Recaptcha Configuration](https://developer.pingidentity.com/pingone-api/platform/forms-recaptcha/delete-recaptcha-configuration.html).

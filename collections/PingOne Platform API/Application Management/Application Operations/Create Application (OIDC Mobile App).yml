@@ -1,0 +1,70 @@
+info:
+  name: Create Application (OIDC Mobile App)
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/applications"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "SALES APPLICATION",
+          "description": "Description for my sales application.",
+          "enabled": true,
+          "type": "NATIVE_APP",
+          "loginPageUrl": "https://example.com",
+          "protocol": "OPENID_CONNECT",
+          "responseTypes": [
+              "TOKEN",
+              "ID_TOKEN"
+          ],
+          "grantTypes": [
+              "IMPLICIT"
+          ],
+          "tokenEndpointAuthMethod": "CLIENT_SECRET_BASIC",
+          "postLogoutRedirectUris": [
+              "https://example.com"
+          ],
+          "redirectUris": [
+              "https://example.com:3000/response",
+              "https://example.com:3000/code/response",
+              "https://example.com"
+          ],
+          "mobile": {
+              "bundleId": "com.pingidentity.bundleId",
+              "packageName": "com.pingidentity.packageName",
+              "integrityDetection": {
+                  "mode": "DISABLED"
+              },
+              "passcodeRefreshDuration": {
+                  "duration": 30,
+                  "timeUnit": "SECONDS"
+              }
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("appID", jsonData.id);
+            console.log("appID is now: " + bru.getEnvVar("appID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Application (OIDC Mobile App)](https://developer.pingidentity.com/pingone-api/platform/applications/applications-1/create-application-oidc-mobile-app.html).

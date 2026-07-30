@@ -1,0 +1,17 @@
+info:
+  name: Read All Flow Policies
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/flowPolicies"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read All Flow Policies](https://developer.pingidentity.com/pingone-api/platform/flow-policies/read-all-flow-policies.html).

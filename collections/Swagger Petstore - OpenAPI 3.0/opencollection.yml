@@ -1,0 +1,29 @@
+opencollection: 1.0.0
+
+info:
+  name: Swagger Petstore - OpenAPI 3.0
+  version: "1"
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
+    openapi:
+      - sourceUrl: https://raw.githubusercontent.com/swagger-api/swagger-petstore/refs/heads/master/src/main/resources/openapi.yaml
+        groupBy: tags
+        lastSyncDate: 2026-07-30T19:03:10.842Z
+        specHash: 2b954e7534cd2f35841cb8e2fcf342dc
+        autoCheck: true
+        autoCheckInterval: 5

@@ -1,0 +1,41 @@
+info:
+  name: Patch Direct-mapped User
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{scimPath}}/environments/{{envID}}/v2/DirectMappedUsers/{{userID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "schemas": [
+              "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+          ],
+          "Operations": [
+              {
+                  "op": "replace",
+                  "path": "username",
+                  "value": "tmp-dm-user-1-PATCHED"
+              },
+              {
+                  "op": "remove",
+                  "path": "nickname"
+              },
+              {
+                  "op": "add",
+                  "path": "name.middle",
+                  "value": "midNofDMU"
+              }
+          ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Patch Direct-mapped User](https://developer.pingidentity.com/pingone-api/platform/scim/direct-mapped-users/patch-direct-mapped-user.html).

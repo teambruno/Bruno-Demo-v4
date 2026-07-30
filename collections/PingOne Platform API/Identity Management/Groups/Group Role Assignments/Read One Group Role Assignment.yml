@@ -1,0 +1,17 @@
+info:
+  name: Read One Group Role Assignment
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/groups/{{groupID}}/roleAssignments/{{roleAssignmentID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read One Group Role Assignment](https://developer.pingidentity.com/pingone-api/platform/group-role-assignments/read-one-group-role-assignment.html).

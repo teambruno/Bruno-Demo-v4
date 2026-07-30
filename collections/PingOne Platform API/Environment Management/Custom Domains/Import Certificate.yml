@@ -1,0 +1,43 @@
+info:
+  name: Import Certificate
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/customDomains/{{customDomainID}}"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.certificate.import+json
+  body:
+    type: json
+    data: |-
+      {
+        "certificate": "{{certificate}}",
+        "intermediateCertificates": "{{intermediateCertificate}}",
+        "privateKey": "{{privateKey}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 200) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("domCertificateID", jsonData.id);
+            console.log("domCertificateID is now: " + bru.getEnvVar("domCertificateID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Import Certificate](https://developer.pingidentity.com/pingone-api/platform/custom-domains/import-certificate.html).

@@ -1,0 +1,82 @@
+info:
+  name: Update Phone Delivery Settings (select Syniverse channels)
+  type: http
+  seq: 13
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/notificationsSettings/phoneDeliverySettings/{{syniverseChannelsSenderId}}"
+  body:
+    type: json
+    data: |-
+      {
+          "id": "0d1f49b8-aab3-4181-b4e3-26a9290f314f",
+          "name": "Syniverse Channels notification sender",
+          "provider": "CUSTOM_SYNIVERSE_CHANNELS",
+          "authToken": "{{syniverseAuthToken}}",
+          "channels": [
+              {
+                  "selected": true,
+                  "available": true,
+                  "createdAt": "2026-01-26T09:04:18.916Z",
+                  "name": "Voice Channel",
+                  "priority": "NORMAL",
+                  "id": "GXq1CJDblpOpwKFKWI3kG1",
+                  "capabilities": [
+                      "VOICE"
+                  ]
+              },
+              {
+                  "selected": false,
+                  "available": true,
+                  "createdAt": "2026-01-26T09:04:18.949Z",
+                  "name": "SMS Channel",
+                  "priority": "NORMAL",
+                  "id": "cuOvbtxLJ9Wtv118vmXRi3",
+                  "capabilities": [
+                      "SMS"
+                  ]
+              },
+              {
+                  "selected": false,
+                  "available": true,
+                  "createdAt": "2026-01-26T09:04:19.033Z",
+                  "name": "Test Channel",
+                  "priority": "NORMAL",
+                  "id": "X9S8jjBwgdK4yy1E9pMWi2"
+              }
+          ],
+         "deliveryConfigurationsExist": true,
+          "smsTopicSubscription": {
+              "subscribed": true,
+              "startDateStr": "2026-03-10T08:30:49Z"
+          },
+          "voiceTopicSubscription": {
+              "subscribed": true,
+              "startDateStr": "2026-03-10T08:31:04Z"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("phoneDeliverySettingsId", jsonData.id);
+            console.log("phoneDeliverySettingsId is now: " + bru.getEnvVar("phoneDeliverySettingsId"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Phone Delivery Settings (select Syniverse channels)](https://developer.pingidentity.com/pingone-api/platform/notifications/phone-delivery-settings/update-phone-delivery-settings-syniverse-channels.html).

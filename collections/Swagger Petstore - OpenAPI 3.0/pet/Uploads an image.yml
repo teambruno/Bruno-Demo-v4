@@ -1,0 +1,151 @@
+info:
+  name: Uploads an image.
+  type: http
+  seq: 8
+  tags:
+    - pet
+
+http:
+  method: POST
+  url: "{{baseUrl}}/pet/:petId/uploadImage"
+  params:
+    - name: petId
+      value: ""
+      type: path
+      description: ID of pet to update
+    - name: additionalMetadata
+      value: ""
+      type: query
+      description: Additional Metadata
+      disabled: true
+  body:
+    type: text
+    data: ""
+  auth:
+    type: oauth2
+    flow: implicit
+    authorizationUrl: https://petstore3.swagger.io/oauth/authorize
+    callbackUrl: "{{oauth_callback_url}}"
+    credentials:
+      clientId: "{{oauth_client_id}}"
+    scope: write:pets read:pets
+    state: "{{oauth_state}}"
+    tokenConfig:
+      placement:
+        header: Bearer
+      source: access_token
+    settings:
+      autoFetchToken: false
+      autoRefreshToken: true
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: 200 Response
+    description: successful operation
+    request:
+      url: "{{baseUrl}}/pet/:petId/uploadImage"
+      method: POST
+      params:
+        - name: petId
+          value: ""
+          type: path
+          description: ID of pet to update
+        - name: additionalMetadata
+          value: ""
+          type: query
+          description: Additional Metadata
+          disabled: true
+      body:
+        type: text
+        data: ""
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "code": 0,
+            "type": "",
+            "message": ""
+          }
+  - name: 400 Response
+    description: No file uploaded
+    request:
+      url: "{{baseUrl}}/pet/:petId/uploadImage"
+      method: POST
+      params:
+        - name: petId
+          value: ""
+          type: path
+          description: ID of pet to update
+        - name: additionalMetadata
+          value: ""
+          type: query
+          description: Additional Metadata
+          disabled: true
+      body:
+        type: text
+        data: ""
+    response:
+      status: 400
+      statusText: Bad Request
+      body:
+        type: text
+        data: ""
+  - name: 404 Response
+    description: Pet not found
+    request:
+      url: "{{baseUrl}}/pet/:petId/uploadImage"
+      method: POST
+      params:
+        - name: petId
+          value: ""
+          type: path
+          description: ID of pet to update
+        - name: additionalMetadata
+          value: ""
+          type: query
+          description: Additional Metadata
+          disabled: true
+      body:
+        type: text
+        data: ""
+    response:
+      status: 404
+      statusText: Not Found
+      body:
+        type: text
+        data: ""
+  - name: default Response
+    description: Unexpected error
+    request:
+      url: "{{baseUrl}}/pet/:petId/uploadImage"
+      method: POST
+      params:
+        - name: petId
+          value: ""
+          type: path
+          description: ID of pet to update
+        - name: additionalMetadata
+          value: ""
+          type: query
+          description: Additional Metadata
+          disabled: true
+      body:
+        type: text
+        data: ""
+    response:
+      body:
+        type: text
+        data: ""
+
+docs: Upload image of the pet.

@@ -1,0 +1,27 @@
+info:
+  name: Patch Bulk Variant Contents
+  type: http
+  seq: 17
+
+http:
+  method: PATCH
+  url: "{{apiPath}}/environments/{{envID}}/templates/{{templateName}}/contents?filter=variant%20eq%20{{variantName}}"
+  params:
+    - name: filter
+      value: variant%20eq%20{{variantName}}
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+      "variant": "variant_D"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Patch Bulk Variant Contents](https://developer.pingidentity.com/pingone-api/platform/notifications/notifications-templates/patch-bulk-variant-contents.html).

@@ -1,0 +1,58 @@
+info:
+  name: Create Identity Provider (OpenID Connect)
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/identityProviders"
+  params:
+    - name: expand
+      value: attributes
+      type: query
+      description: Shows the details for the core attribute mapping created by the request.
+      disabled: true
+  body:
+    type: json
+    data: |-
+      {
+          "description": "Custom OpenID Connect Provider",
+          "enabled": true,
+          "name": "OpenIDConnectIdP",
+          "type": "OPENID_CONNECT",
+          "clientId": "OPENID_CONNECT_ID",
+          "clientSecret": "OPENID_CONNECT_SECRET",
+          "authorizationEndpoint": "https://OPENID_CONNECT_AUTH_ENDPOINT",
+          "tokenEndpoint": "https://OPENID_CONNECT_TOKEN_ENDPOINT",
+          "userInfoEndpoint": "https://OPENID_CONNECT_USER_INFO_ENDPOINT",
+          "jwksEndpoint": "https://OPENID_CONNECT_JWKS_ENDPOINT",
+          "issuer": "https://OPENID_CONNECT_ISSUER",
+          "scopes": ["openid", "CUSTOM_SCOPE"],
+          "tokenEndpointAuthMethod": "CLIENT_SECRET_BASIC",
+          "discoveryEndpoint": "https://OPENID_CONNECT_DISCOVERY_ENDPOINT"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 201", function() {
+            expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains createdAt and id strings", function() {
+            const jsonData = res.getBody();
+            expect(jsonData.createdAt).to.be.a('string');
+            expect(jsonData.id).to.be.a('string');
+            bru.setEnvVar("providerID", jsonData.id);
+            console.log("providerID is now: " + bru.getEnvVar("providerID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Identity Provider (OpenID Connect)](https://developer.pingidentity.com/pingone-api/platform/identity-provider-management/identity-providers/create-identity-provider-openid-connect.html).

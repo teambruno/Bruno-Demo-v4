@@ -1,0 +1,24 @@
+info:
+  name: Update Resource Attribute
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/resources/{{resourceID}}/attributes/{{resourceAttrID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "nickname",
+          "value": "${user.nickname}"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Resource Attribute](https://developer.pingidentity.com/pingone-api/platform/resources/resource-attributes/update-resource-attribute.html).

@@ -1,0 +1,42 @@
+info:
+  name: Read All Direct-mapped Users (search)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{scimPath}}/environments/{{envID}}/v2/DirectMappedUsers/.search"
+  body:
+    type: json
+    data: |-
+      {
+          "filter": "username sw \"cicerone\"",
+          "count": 100
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains username and id strings", function () {
+          const jsonData = res.getBody();
+          expect(jsonData.username).to.be.a('string');
+          bru.setEnvVar("username", jsonData.username);
+          console.log("username is now: " + bru.getEnvVar("username"));
+          expect(jsonData.id).to.be.a('string');
+          bru.setEnvVar("userID", jsonData.id);
+          console.log("userID is now: " + bru.getEnvVar("userID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read All Direct-mapped Users (search)](https://developer.pingidentity.com/pingone-api/platform/scim/direct-mapped-users/read-all-direct-mapped-users-search.html).

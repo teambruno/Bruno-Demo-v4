@@ -1,0 +1,34 @@
+info:
+  name: Delete Translation
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/translations/{{locale}}?module=forms&block=customMessages"
+  params:
+    - name: module
+      value: forms
+      type: query
+      description: Specifies the interface module key value. See documentation for usage.
+    - name: block
+      value: customMessages
+      type: query
+      description: Specifies a key for a logical group of strings, such as a form or a tab.
+  body:
+    type: json
+    data: |
+      [     
+            "forms.fields.customkey1",
+            "forms.fields.customkey2",
+            "forms.fields.customkey3"
+      ]
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Translation](https://developer.pingidentity.com/pingone-api/platform/language-management/language-translations/delete-translation.html).

@@ -1,0 +1,30 @@
+info:
+  name: Read Authentications Per Application
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/applicationSignons?filter=occurredAt%20ge%20%222019-09-01T19%3A00%3A00Z%22&limit=2&samplePeriod=24&samplePeriodCount=2"
+  params:
+    - name: filter
+      value: occurredAt%20ge%20%222019-09-01T19%3A00%3A00Z%22
+      type: query
+    - name: limit
+      value: "2"
+      type: query
+    - name: samplePeriod
+      value: "24"
+      type: query
+    - name: samplePeriodCount
+      value: "2"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read Authentications Per Application](https://developer.pingidentity.com/pingone-api/platform/authentications-per-application/read-authentications-per-application.html).

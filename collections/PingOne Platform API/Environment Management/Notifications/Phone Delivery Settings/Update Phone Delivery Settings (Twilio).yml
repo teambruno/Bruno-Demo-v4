@@ -1,0 +1,88 @@
+info:
+  name: Update Phone Delivery Settings (Twilio)
+  type: http
+  seq: 12
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/notificationsSettings/phoneDeliverySettings/{{phoneDeliverySettingsID}}"
+  body:
+    type: json
+    data: |-
+      {
+        "id": "updatedTwilioPhoneDeliverySettingsId",
+        "sid": "updatedSid",
+        "provider": "CUSTOM_TWILIO",
+        "numbers": [
+          {
+            "type": "SHORT_CODE",
+            "capabilities": [
+              "SMS"
+            ],
+            "selected": true,
+            "available": true,
+            "number": "894546"
+          },
+          {
+            "type": "SHORT_CODE",
+            "capabilities": [
+              "SMS"
+            ],
+            "selected": false,
+            "available": true,
+            "number": "894545",
+            "supportedCountries": ["CA"]
+          },
+          {
+            "type": "TOLL_FREE",
+            "capabilities": [
+              "SMS",
+              "VOICE"
+            ],
+            "selected": true,
+            "available": true,
+            "number": "+18544440099",
+            "supportedCountries": ["US", "CA"]
+          },
+          {
+            "type": "TOLL_FREE",
+            "capabilities": [
+              "SMS",
+              "VOICE"
+            ],
+            "selected": false,
+            "available": true,
+            "number": "+18544440098",
+            "supportedCountries": ["ALL"]
+          },
+          {
+            "type": "PHONE_NUMBER",
+            "capabilities": [
+              "SMS",
+              "VOICE"
+            ],
+            "selected": true,
+            "available": true,
+            "number": "+172544440091"
+          },
+          {
+            "type": "PHONE_NUMBER",
+            "capabilities": [
+              "SMS",
+              "VOICE"
+            ],
+            "selected": true,
+            "available": true,
+            "number": "+972544440099"
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Phone Delivery Settings (Twilio)](https://developer.pingidentity.com/pingone-api/platform/notifications/phone-delivery-settings/update-phone-delivery-settings-twilio.html).

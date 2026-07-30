@@ -1,0 +1,41 @@
+info:
+  name: Patch SCIM User
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{scimPath}}/environments/{{envID}}/v2/Users/{{userID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "schemas": [
+              "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+          ],
+          "Operations": [
+              {
+                  "op": "replace",
+                  "path": "userName",
+                  "value": "Isabella_Patched"
+              },
+              {
+                  "op": "remove",
+                  "path": "nickName"
+              },
+              {
+                  "op": "add",
+                  "path": "name.middleName",
+                  "value": "midN"
+              }
+          ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Patch SCIM User](https://developer.pingidentity.com/pingone-api/platform/scim/scim-users/patch-scim-user.html).

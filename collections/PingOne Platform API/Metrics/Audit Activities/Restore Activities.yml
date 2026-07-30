@@ -1,0 +1,39 @@
+info:
+  name: Restore Activities
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/activityRestores"
+  body:
+    type: json
+    data: |-
+      {
+      "minTimestamp": "2025-09-01T00:00:00.000Z",
+      "maxTimestamp": "2025-09-17T00:09:59.999Z"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 200) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("activityID", jsonData.id);
+            console.log("activityID is now: " + bru.getEnvVar("activityID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Restore Activities](https://developer.pingidentity.com/pingone-api/platform/audit-activities/post-restore-activities.html).

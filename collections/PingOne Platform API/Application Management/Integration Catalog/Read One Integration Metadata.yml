@@ -1,0 +1,22 @@
+info:
+  name: Read One Integration Metadata
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/integrations/{{integrationID}}"
+  params:
+    - name: expand
+      value: attributes or versions
+      type: query
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read One Integration Metadata](https://developer.pingidentity.com/pingone-api/platform/integration-catalog/get-one-integration.html).

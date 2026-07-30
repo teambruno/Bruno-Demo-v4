@@ -1,0 +1,24 @@
+info:
+  name: Identity Propagation Store Metadata (PingOne)
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/storeMetadata/PingOne"
+  body:
+    type: json
+    data: |-
+      {
+          "ENVIRONMENT_ID": "{{envID}}",
+          "REGION": "North America"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Identity Propagation Store Metadata (PingOne)](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-store-metadata/identity-propagation-store-metadata-pingone.html).
