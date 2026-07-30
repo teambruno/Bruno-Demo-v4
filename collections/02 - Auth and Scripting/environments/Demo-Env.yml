@@ -13,6 +13,26 @@ variables:
     value: James Ha
   - name: tokenVar
     value: tokenEnvironment
+  - name: tokenTtlSeconds
+    value:
+      type: number
+      data: "3600"
+    description: number - compare against Date.now() without parseInt()
+  - name: autoRefreshToken
+    value:
+      type: boolean
+      data: "true"
+    description: boolean - drives the refresh branch in the pre-request script
+  - name: oauthConfig
+    value:
+      type: object
+      data: |-
+        {
+          "grantType": "client_credentials",
+          "scope": "read write",
+          "audience": "https://api.usebruno.com"
+        }
+    description: object - one variable instead of three, e.g. oauthConfig.scope
 externalSecrets:
   type: azure-key-vault
   variables:

@@ -15,3 +15,23 @@ variables:
     value: "1"
   - name: releaseStage
     value: production
+  - name: retryLimit
+    value:
+      type: number
+      data: "3"
+    description: number - arrives in scripts as 3, not "3", so arithmetic just works
+  - name: verboseLogging
+    value:
+      type: boolean
+      data: "false"
+    description: boolean - use it directly in an if(), no string comparison needed
+  - name: featureFlags
+    value:
+      type: object
+      data: |-
+        {
+          "betaSearch": false,
+          "newAuthFlow": false,
+          "maxBatchSize": 100
+        }
+    description: object - read nested keys, e.g. bru.getEnvVar("featureFlags").betaSearch

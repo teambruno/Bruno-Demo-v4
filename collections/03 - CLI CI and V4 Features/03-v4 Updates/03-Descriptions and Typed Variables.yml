@@ -23,22 +23,54 @@ runtime:
   variables:
     - name: baseUrl
       value: https://jsonplaceholder.typicode.com
-      description: Base URL for all requests in this demo
-      type: string
+      description: Base URL for all requests in this demo - string is the implicit default
     - name: retryCount
-      value: "3"
-      description: Number of retries before failing the request
-      type: number
+      value:
+        type: number
+        data: "3"
+      description: Number of retries before failing the request - a real number, not "3"
+    - name: dryRun
+      value:
+        type: boolean
+        data: "false"
+      description: Usable directly in an if() - no string comparison needed
+    - name: clientConfig
+      value:
+        type: object
+        data: |-
+          {
+            "host": "jsonplaceholder.typicode.com",
+            "port": 443,
+            "keepAlive": true
+          }
+      description: Structured config read as clientConfig.host
 
 docs:
   content: |-
     ### V4 feature: descriptions and typed variables
 
     V4 lets you attach a description to any param, header, multipart field,
-    or variable, and assign a type (`@string`, `@number`, `@boolean`,
-    `@object`) to variables. Older Bruno versions (pre-3.4.0) may fail to
-    load requests that use this annotation syntax - coordinate upgrades
-    across mixed-version teams.
+    or variable, and give variables a data type: `string` (the default),
+    `number`, `boolean`, or `object`.
+
+    In `.yml` files a typed variable nests its type alongside the raw data:
+
+    ```yaml
+    - name: retryCount
+      value:
+        type: number
+        data: "3"
+    ```
+
+    The same types are available on environment variables - pick the type
+    from the dropdown in the Value column, or see the typed examples in
+    this collection's `Local` and `Production` environments.
+
+    Scripts then receive the parsed value: `bru.getVar("retryCount")` is
+    `3`, `bru.getVar("dryRun")` is `false`, and `bru.getVar("clientConfig")`
+    is an object you can read keys off directly. Older Bruno versions
+    (pre-3.4.0) may fail to load requests that use this syntax - coordinate
+    upgrades across mixed-version teams.
   type: text/markdown
 
 settings:

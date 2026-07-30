@@ -11,20 +11,36 @@ variables:
     value: production
     description: Also set in every collection env - demonstrates the precedence chain
   - name: debugMode
-    value: "false"
-    description: Verbose console logging in pre/post-request scripts
+    value:
+      type: boolean
+      data: "false"
+    description: Verbose console logging in pre/post-request scripts - a real boolean
   - name: tenantId
     value: bruno-demo
     description: Multi-tenant identifier, sent as the X-Tenant-Id header
   - name: requestTimeout
-    value: "10000"
-    description: Default per-request timeout in milliseconds
+    value:
+      type: number
+      data: "10000"
+    description: Default per-request timeout in milliseconds - a real number
   - name: retryCount
-    value: "0"
-    description: Script-level retry attempts for flaky endpoints
+    value:
+      type: number
+      data: "0"
+    description: Script-level retry attempts for flaky endpoints - a real number
   - name: correlationIdPrefix
     value: prod
     description: Prefix for the generated X-Correlation-Id header
+  - name: httpDefaults
+    value:
+      type: object
+      data: |-
+        {
+          "followRedirects": true,
+          "maxRedirects": 5,
+          "keepAlive": true
+        }
+    description: Transport defaults as one object - read keys off httpDefaults directly
   - secret: true
     name: globalApiKey
     description: Workspace-wide API key - value is never written to the repo

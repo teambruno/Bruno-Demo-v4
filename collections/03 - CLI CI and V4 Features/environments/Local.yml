@@ -15,3 +15,23 @@ variables:
     value: "1"
   - name: releaseStage
     value: production
+  - name: retryLimit
+    value:
+      type: number
+      data: "0"
+    description: number - fail fast locally, no arithmetic on strings
+  - name: failFast
+    value:
+      type: boolean
+      data: "true"
+    description: boolean - stop the run on the first failing assertion
+  - name: reporterConfig
+    value:
+      type: object
+      data: |-
+        {
+          "junit": false,
+          "html": true,
+          "outputDir": "reports"
+        }
+    description: object - reporter switches grouped into one typed variable

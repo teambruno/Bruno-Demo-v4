@@ -22,6 +22,26 @@ variables:
   - name: releaseStage
     value: staging
     description: ""
+  - name: retryLimit
+    value:
+      type: number
+      data: "1"
+    description: number - arrives in scripts as 1, not "1", so arithmetic just works
+  - name: verboseLogging
+    value:
+      type: boolean
+      data: "true"
+    description: boolean - use it directly in an if(), no string comparison needed
+  - name: featureFlags
+    value:
+      type: object
+      data: |-
+        {
+          "betaSearch": true,
+          "newAuthFlow": true,
+          "maxBatchSize": 50
+        }
+    description: object - read nested keys, e.g. bru.getEnvVar("featureFlags").betaSearch
 externalSecrets:
   type: azure-key-vault
   variables:

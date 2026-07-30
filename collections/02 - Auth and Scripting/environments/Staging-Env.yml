@@ -18,5 +18,25 @@ variables:
     value: /dia/api/v1
   - name: DTWBase
     value: /dtw/api/v1
+  - name: tokenTtlSeconds
+    value:
+      type: number
+      data: "900"
+    description: number - compare against Date.now() without parseInt()
+  - name: autoRefreshToken
+    value:
+      type: boolean
+      data: "false"
+    description: boolean - drives the refresh branch in the pre-request script
+  - name: oauthConfig
+    value:
+      type: object
+      data: |-
+        {
+          "grantType": "authorization_code",
+          "scope": "openid profile",
+          "audience": "https://staging.ourapi.net"
+        }
+    description: object - one variable instead of three, e.g. oauthConfig.scope
   - secret: true
     name: clientSecret

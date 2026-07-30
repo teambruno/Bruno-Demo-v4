@@ -11,20 +11,36 @@ variables:
     value: staging
     description: Also set in every collection env - demonstrates the precedence chain
   - name: debugMode
-    value: "true"
-    description: Verbose console logging in pre/post-request scripts
+    value:
+      type: boolean
+      data: "true"
+    description: Verbose console logging in pre/post-request scripts - a real boolean
   - name: tenantId
     value: bruno-demo-staging
     description: Multi-tenant identifier, sent as the X-Tenant-Id header
   - name: requestTimeout
-    value: "15000"
+    value:
+      type: number
+      data: "15000"
     description: Staging is slower than production - allow a longer timeout
   - name: retryCount
-    value: "1"
+    value:
+      type: number
+      data: "1"
     description: One retry to absorb staging deploy blips
   - name: correlationIdPrefix
     value: stg
     description: Prefix for the generated X-Correlation-Id header
+  - name: httpDefaults
+    value:
+      type: object
+      data: |-
+        {
+          "followRedirects": true,
+          "maxRedirects": 5,
+          "keepAlive": true
+        }
+    description: Transport defaults as one object - read keys off httpDefaults directly
   - secret: true
     name: globalApiKey
     description: Staging API key - value is never written to the repo
