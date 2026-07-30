@@ -2,6 +2,7 @@ opencollection: 1.0.0
 
 info:
   name: 01 - Fundamentals
+  version: v1.0.0
 config:
   proxy:
     inherit: true
@@ -16,27 +17,69 @@ config:
 
 docs:
   content: |-
-    # 01 - Fundamentals
+    # 🎓 01 - Fundamentals
 
-    Start here. Basic CRUD requests, variable precedence, chained requests,
-    and a data-driven run - all against free public test APIs
-    (JSONPlaceholder, DummyJSON, NewsAPI, Bruno's echo service).
+    > **Start here.** Basic CRUD requests, variable precedence, chained requests, and a data-driven run — all against free public test APIs (JSONPlaceholder, DummyJSON, NewsAPI, Bruno's echo service).
 
+    ---
+
+    ## 📚 What's Inside
+
+    | # | Folder | Requests | Focus |
+    |---|--------|:--------:|-------|
+    | 01 | 🌐 **Basic-Requests** | 8 | Core CRUD operations & HTTP verbs |
+    | 02 | 🔧 **Variables-and-Environments** | 2 | Variable precedence & scoping |
+    | 03 | 🔗 **Chained-Requests** | 2 | Passing data between requests |
+    | 04 | 📊 **Data-Driven** | 1 | CSV-driven iterations |
+    | 05 | 🧩 **Shared-Scripts** | 1 | Reusable workspace scripts |
+
+    ---
+
+    ## 🚀 Quick Start
+
+    ### ▶️ Run the entire collection
     ```bash
     bru run --env Production
-    bru run "01-Basic-Requests" --env Production
-    bru run --env Production --reporter-json reports/results.json --reporter-html reports/results.html --reporter-junit reports/results.xml
-    bru run "04-Data-Driven" --env Production --csv-file-path "04-Data-Driven/users.csv"
+    ```
 
+    ### 📁 Run a specific folder
+    ```bash
+    bru run "01-Basic-Requests" --env Production
+    ```
+
+    ### 📈 Generate reports (JSON + HTML + JUnit)
+    ```bash
+    bru run --env Production \
+      --reporter-json reports/results.json \
+      --reporter-html reports/results.html \
+      --reporter-junit reports/results.xml
+    ```
+
+    ### 🔄 Data-driven run from CSV
+    ```bash
+    bru run "04-Data-Driven" --env Production \
+      --csv-file-path "04-Data-Driven/users.csv"
+    ```
+
+    ### 🛠️ Shared scripts (requires developer sandbox)
+    ```bash
     # Folders that require() workspace shared scripts need the developer sandbox
     bru run "05-Shared-Scripts" --env Production --sandbox=developer
     ```
+
+    ---
+
+    ## 💡 Tips
+
+    - 🧪 Use `--env Production` to load the correct `baseUrl` and other environment variables.
+    - 🔐 Secrets like `password` and `globalApiKey` are stored as secret variables — never hard-code them.
+    - 📝 Add `--verbose` for detailed logs while debugging.
+
+    Happy testing! 🎉
   type: text/markdown
 bundled: false
 extensions:
   bruno:
     scripts:
-      # Workspace-level shared JS modules, relative to this collection root.
-      # See /shared-scripts/README.md
       additionalContextRoots:
-        - "../../shared-scripts"
+        - ../../shared-scripts

@@ -2,6 +2,7 @@ opencollection: 1.0.0
 
 info:
   name: 02 - Auth and Scripting
+  version: v1.0.0
 config:
   proxy:
     inherit: true
@@ -43,7 +44,5 @@ bundled: false
 extensions:
   bruno:
     scripts:
-      # Workspace-level shared JS modules, relative to this collection root.
-      # See /shared-scripts/README.md
       additionalContextRoots:
-        - "../../shared-scripts"
+        - ../../shared-scripts
