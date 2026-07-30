@@ -1,7 +1,0 @@
-# The pipeline itself lives in bruno-cli.gitlab-ci.yml.
-# GitLab only auto-detects .gitlab-ci.yml, so this file just pulls it in.
-#
-# Prefer a single file? Point Settings > CI/CD > "CI/CD configuration file"
-# at bruno-cli.gitlab-ci.yml and delete this one.
-include:
-  - local: bruno-cli.gitlab-ci.yml
