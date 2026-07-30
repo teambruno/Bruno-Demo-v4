@@ -12,7 +12,7 @@ http:
       {
         "Title": "{{$randomNamePrefix}}",
         "Name": "{{$randomFullName}}",
-        "Role": "{{$random}}"
+        "Role": "{{$randomJobTitle}}"
       }
   auth: inherit
 

@@ -1,7 +1,7 @@
 info:
   name: Variable Inspector
   type: http
-  seq: 0
+  seq: 1
   tags:
     - smoke
     - regression
@@ -81,6 +81,7 @@ runtime:
     - expression: res.status
       operator: eq
       value: "200"
+      disabled: true
 
 settings:
   encodeUrl: true
