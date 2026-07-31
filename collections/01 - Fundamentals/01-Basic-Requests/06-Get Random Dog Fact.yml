@@ -41,3 +41,74 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  # Get Dog Facts
+
+  Retrieve a list of random dog facts from the Dog API.
+
+  ## Overview
+
+  This endpoint returns an array of dog facts. Each fact includes an identifier, resource type, and the fact text itself. You can optionally constrain results by the maximum length of the fact body.
+
+  ## Endpoint
+
+  ```http
+  GET https://dogapi.dog/api/v2/facts
+  ```
+
+  ## Authentication
+
+  None required. This is a public API.
+
+  ## Query Parameters
+
+  | Name | Type | Required | Description |
+  |------|------|----------|-------------|
+  | `max_length` | integer | No | Maximum character length of each fact's body. Leave empty to return facts of any length. |
+
+  ## Example Request
+
+  ```bash
+  curl -X GET "https://dogapi.dog/api/v2/facts?max_length=100"
+  ```
+
+  ## Example Response
+
+  **Status:** `200 OK`
+
+  ```json
+  {
+    "data": [
+      {
+        "id": "8d281c0f-a962-4f9d-b3a2-a1e6c2c5a6a1",
+        "type": "fact",
+        "attributes": {
+          "body": "The Basenji is the only barkless dog in the world."
+        }
+      }
+    ]
+  }
+  ```
+
+  ## Response Fields
+
+  | Field | Type | Description |
+  |-------|------|-------------|
+  | `data` | array | List of dog fact resources. |
+  | `data[].id` | string | Unique identifier for the fact. |
+  | `data[].type` | string | Resource type (e.g. `fact`). |
+  | `data[].attributes.body` | string | The dog fact text. |
+
+  ## Status Codes
+
+  | Code | Meaning |
+  |------|---------|
+  | `200 OK` | Facts returned successfully. |
+  | `4xx` | Malformed request or invalid parameter value. |
+  | `5xx` | Upstream Dog API error. |
+
+  ## Notes
+
+  - If `max_length` is provided as an empty value, the API behaves as if the parameter were omitted.
+  - The response follows a JSON:API-style envelope with `data` at the root.
