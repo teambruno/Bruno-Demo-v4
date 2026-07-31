@@ -1,0 +1,340 @@
+# Bruno CLI x GitHub Actions - Bruno V4 Demo Kit
+#
+# The GitHub twin of bruno-cli.gitlab-ci.yml. Same three stages, same three
+# reporters, same collections - so a prospect on either platform sees their own
+# CI. ("03 - Secrets and Vaults" is app-only - see the note on the matrix.)
+#
+# Unlike GitLab, the workflow path is fixed: GitHub only reads
+# .github/workflows/, so there is no custom-CI-path setting to point at a
+# bruno-cli.github.yml at the repo root.
+#
+#   Overview  https://docs.usebruno.com/bru-cli/overview
+#   Docker    https://docs.usebruno.com/bru-cli/docker
+#   Options   https://docs.usebruno.com/bru-cli/commandOptions
+#   Reporters https://docs.usebruno.com/bru-cli/builtInReporters
+#
+# Optional repository secret (Settings > Secrets and variables > Actions):
+#   BRUNO_GLOBAL_API_KEY - read by environments/Globals-CI.yml as
+#                          {{process.env.BRUNO_GLOBAL_API_KEY}}
+#
+# Optional repository variable, same screen:
+#   PUBLISH_PAGES = true - also publish the HTML reports to GitHub Pages
+#                          (the equivalent of GitLab's `pages:` job)
+
+name: Bruno CLI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# GitLab's `interruptible: true`
+concurrency:
+  group: bruno-cli-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Official image, pinned. Also published as ghcr.io/usebruno/cli, and as
+  # :4, :latest and :4.0.0-debian if you'd rather track a moving tag.
+  BRUNO_CLI_IMAGE: usebruno/cli:4.0.0
+  # Workspace-level environment: environments/Globals-CI.yml
+  BRU_GLOBAL_ENV: Globals-CI
+  # Path back to the workspace root from a collection root, so --global-env resolves
+  BRU_WORKSPACE_PATH: "../.."
+  REPORT_DIR: reports
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Stage 1 - fast gate: only requests tagged `smoke`, stop at the first failure
+  # ---------------------------------------------------------------------------
+  smoke:
+    name: smoke (${{ matrix.slug }})
+    runs-on: ubuntu-latest
+    strategy:
+      # false so one red collection still shows you the other two, which reads
+      # better on a call than GitHub cancelling the siblings mid-demo.
+      fail-fast: false
+      matrix:
+        include:
+          - slug: fundamentals
+            collection: "01 - Fundamentals"
+            env: Production
+          - slug: auth-scripting
+            collection: "02 - Auth and Scripting"
+            env: Prod-Env
+            # "02 - Auth and Scripting"'s Prod-Env.yml is deliberately bare in
+            # this demo workspace, so CI injects the endpoints it needs with
+            # --env-var (repeatable).
+            env_vars: >-
+              --env-var weatherUrl=https://api.open-meteo.com/v1
+              --env-var breweryUrl=https://api.openbrewerydb.org/v1
+              --env-var userId=1
+          - slug: v4-features
+            collection: "04 - CLI CI and V4 Features"
+            env: Production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: bru run
+        env:
+          BRUNO_GLOBAL_API_KEY: ${{ secrets.BRUNO_GLOBAL_API_KEY }}
+          BRU_COLLECTION: ${{ matrix.collection }}
+          BRU_ENV: ${{ matrix.env }}
+          BRU_NAME: smoke-${{ matrix.slug }}
+          BRU_TARGET: ""
+          BRU_ARGS: "-r --tags smoke --bail"
+          BRU_ENV_VARS: ${{ matrix.env_vars }}
+        run: |
+          set -uo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/$REPORT_DIR"
+
+          # --user root: the image's default user is uid 1000 (node) but the
+          # runner workspace is owned by uid 1001, so the container cannot
+          # write its reports into the mount otherwise.
+          cmd=(docker run --rm --user root
+               -v "$GITHUB_WORKSPACE:/ws"
+               -w "/ws/collections/$BRU_COLLECTION"
+               -e "BRUNO_GLOBAL_API_KEY=${BRUNO_GLOBAL_API_KEY:-}"
+               "$BRUNO_CLI_IMAGE" run)
+
+          # Quoted: folder names in this workspace contain spaces.
+          if [[ -n "$BRU_TARGET" ]]; then cmd+=("$BRU_TARGET"); fi
+          # Deliberately unquoted - multi-flag strings that must split into
+          # separate argv entries, same as $BRU_ARGS in the GitLab file.
+          if [[ -n "$BRU_ARGS" ]];     then cmd+=($BRU_ARGS);     fi
+          if [[ -n "$BRU_ENV_VARS" ]]; then cmd+=($BRU_ENV_VARS); fi
+
+          cmd+=(--env "$BRU_ENV"
+                --global-env "$BRU_GLOBAL_ENV"
+                --workspace-path "$BRU_WORKSPACE_PATH"
+                --reporter-html  "/ws/$REPORT_DIR/$BRU_NAME.html"
+                --reporter-json  "/ws/$REPORT_DIR/$BRU_NAME.json"
+                --reporter-junit "/ws/$REPORT_DIR/$BRU_NAME.xml"
+                --reporter-skip-headers authorization
+                --reporter-skip-headers x-api-key)
+
+          "${cmd[@]}"; status=$?
+          # Reports come back root-owned; hand them to the runner user so
+          # upload-artifact can read them.
+          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/$REPORT_DIR" || true
+          exit $status
+
+      - uses: actions/upload-artifact@v4
+        if: always() # keep the reports even when the run goes red
+        with:
+          name: bruno-reports-smoke-${{ matrix.slug }}
+          path: ${{ env.REPORT_DIR }}/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Stage 2 - the suite, one job per collection, all running in parallel
+  #
+  # GitLab expresses this as four jobs that each `extends: .all-collections`.
+  # Actions has no `extends:`, so the same fan-out is one matrix whose entries
+  # carry what the GitLab job-level `variables:` blocks carried.
+  #
+  # "03 - Secrets and Vaults" is deliberately NOT in this matrix. Its three
+  # environments bind to live secret managers (Azure Key Vault, AWS Secrets
+  # Manager, HashiCorp Vault) and every request needs data-plane credentials
+  # the pipeline does not hold. Give the runner an OIDC identity and add it
+  # here if you ever want it gated in CI.
+  # ---------------------------------------------------------------------------
+  test:
+    name: ${{ matrix.slug }}
+    needs: smoke
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # -- regression: --tags matches requests with ALL listed tags,
+          #    --exclude-tags drops ANY
+          - slug: regression-fundamentals
+            collection: "01 - Fundamentals"
+            env: Production
+            args: "-r --tags regression --exclude-tags slow"
+          - slug: regression-auth-scripting
+            collection: "02 - Auth and Scripting"
+            env: Prod-Env
+            args: "-r --tags regression --exclude-tags slow"
+            env_vars: >-
+              --env-var weatherUrl=https://api.open-meteo.com/v1
+              --env-var breweryUrl=https://api.openbrewerydb.org/v1
+              --env-var userId=1
+          - slug: regression-v4-features
+            collection: "04 - CLI CI and V4 Features"
+            env: Production
+            args: "-r --tags regression --exclude-tags slow"
+
+          # -- shared-scripts: require()-ing /shared-scripts via
+          #    additionalContextRoots needs the developer sandbox
+          #    (default is `safe` since CLI 3.0.0)
+          - slug: shared-scripts-fundamentals
+            collection: "01 - Fundamentals"
+            env: Production
+            args: "-r --tags shared-scripts --sandbox developer"
+          - slug: shared-scripts-auth-scripting
+            collection: "02 - Auth and Scripting"
+            env: Prod-Env
+            args: "-r --tags shared-scripts --sandbox developer"
+            env_vars: >-
+              --env-var weatherUrl=https://api.open-meteo.com/v1
+              --env-var breweryUrl=https://api.openbrewerydb.org/v1
+              --env-var userId=1
+          - slug: shared-scripts-v4-features
+            collection: "04 - CLI CI and V4 Features"
+            env: Production
+            args: "-r --tags shared-scripts --sandbox developer"
+
+          # -- data-driven: 3 CSV rows -> 3 iterations, each one a row in the
+          #    report. Swap the flag for --json-file-path 05-Data-Driven/req-users.json
+          #    to drive the same three iterations from JSON instead.
+          - slug: data-driven
+            collection: "02 - Auth and Scripting"
+            env: Prod-Env
+            target: "05-Data-Driven"
+            args: "-r --csv-file-path 05-Data-Driven/req-users.csv"
+
+          # -- v4-features: scoped to this folder on purpose.
+          #    02-Additional-Request-Types holds WebSocket/gRPC/SSE requests,
+          #    which the CLI can't execute ("Unsupported protocol wss:") -
+          #    those stay app-only demos.
+          - slug: v4-updates
+            collection: "04 - CLI CI and V4 Features"
+            env: Production
+            target: "03-v4 Updates"
+            args: "-r --sandbox developer"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: bru run
+        env:
+          BRUNO_GLOBAL_API_KEY: ${{ secrets.BRUNO_GLOBAL_API_KEY }}
+          BRU_COLLECTION: ${{ matrix.collection }}
+          BRU_ENV: ${{ matrix.env }}
+          BRU_NAME: ${{ matrix.slug }}
+          BRU_TARGET: ${{ matrix.target }}
+          BRU_ARGS: ${{ matrix.args }}
+          BRU_ENV_VARS: ${{ matrix.env_vars }}
+        run: |
+          set -uo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/$REPORT_DIR"
+
+          cmd=(docker run --rm --user root
+               -v "$GITHUB_WORKSPACE:/ws"
+               -w "/ws/collections/$BRU_COLLECTION"
+               -e "BRUNO_GLOBAL_API_KEY=${BRUNO_GLOBAL_API_KEY:-}"
+               "$BRUNO_CLI_IMAGE" run)
+
+          if [[ -n "$BRU_TARGET" ]]; then cmd+=("$BRU_TARGET"); fi
+          if [[ -n "$BRU_ARGS" ]];     then cmd+=($BRU_ARGS);     fi
+          if [[ -n "$BRU_ENV_VARS" ]]; then cmd+=($BRU_ENV_VARS); fi
+
+          cmd+=(--env "$BRU_ENV"
+                --global-env "$BRU_GLOBAL_ENV"
+                --workspace-path "$BRU_WORKSPACE_PATH"
+                --reporter-html  "/ws/$REPORT_DIR/$BRU_NAME.html"
+                --reporter-json  "/ws/$REPORT_DIR/$BRU_NAME.json"
+                --reporter-junit "/ws/$REPORT_DIR/$BRU_NAME.xml"
+                --reporter-skip-headers authorization
+                --reporter-skip-headers x-api-key)
+
+          "${cmd[@]}"; status=$?
+          sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/$REPORT_DIR" || true
+          exit $status
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bruno-reports-${{ matrix.slug }}
+          path: ${{ env.REPORT_DIR }}/
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Stage 3 - collect every report into one artifact and a run summary
+  #
+  # GitHub has no native JUnit viewer, so where GitLab feeds the MR "Tests" tab
+  # with `reports: junit:`, this builds the same numbers into the run summary
+  # from the JSON reporter. No third-party action required.
+  # ---------------------------------------------------------------------------
+  report:
+    needs: [smoke, test]
+    if: always() # the report matters most when the suite failed
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bruno-reports-*
+          merge-multiple: true
+          path: reports
+
+      - name: Build summary and index
+        run: |
+          set -uo pipefail
+          mkdir -p public
+          cp reports/* public/ 2>/dev/null || true
+
+          {
+            echo "## Bruno CLI reports"
+            echo
+            echo "\`${GITHUB_REF_NAME}\` @ \`${GITHUB_SHA:0:7}\`"
+            echo
+            echo "| Job | Status | Requests | Tests | Assertions |"
+            echo "|---|---|---:|---:|---:|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # The JSON reporter emits an array of iterations, each with its own
+          # .summary - so a data-driven run with 3 CSV rows has 3 entries.
+          # Totals are summed across them.
+          for f in reports/*.json; do
+            [ -e "$f" ] || continue
+            name=$(basename "$f" .json)
+            jq -r --arg n "$name" '
+              [.[].summary] |
+              (map(.failedRequests + .errorRequests) | add) as $fail |
+              (map(.failedTests + .failedAssertions) | add) as $tfail |
+              "| \($n) | \(if ($fail + $tfail) > 0 then "❌ fail" else "✅ pass" end) " +
+              "| \(map(.passedRequests)|add)/\(map(.totalRequests)|add) " +
+              "| \(map(.passedTests)|add)/\(map(.totalTests)|add) " +
+              "| \(map(.passedAssertions)|add)/\(map(.totalAssertions)|add) |"
+            ' "$f" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          {
+            echo "<!doctype html><meta charset=\"utf-8\">"
+            echo "<title>Bruno CLI reports - ${GITHUB_SHA:0:7}</title>"
+            echo "<h1>Bruno CLI reports</h1>"
+            echo "<p><a href=\"${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\">Run #${GITHUB_RUN_NUMBER}</a>"
+            echo " &middot; ${GITHUB_REF_NAME} @ ${GITHUB_SHA:0:7}</p><ul>"
+            for f in public/*.html; do
+              [ -e "$f" ] || continue
+              name=$(basename "$f")
+              [ "$name" = "index.html" ] && continue
+              echo "<li><a href=\"$name\">$name</a></li>"
+            done
+            echo "</ul>"
+          } > public/index.html
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bruno-reports-all
+          path: public/
+          retention-days: 30
+
+      # GitLab's `pages:` job. Off unless you set the PUBLISH_PAGES repository
+      # variable to "true" AND enable Pages (Settings > Pages > Source: Actions)
+      # - so a repo without Pages configured never goes red over it.
+      - uses: actions/configure-pages@v5
+        if: vars.PUBLISH_PAGES == 'true' && github.ref == 'refs/heads/main'
+      - uses: actions/upload-pages-artifact@v3
+        if: vars.PUBLISH_PAGES == 'true' && github.ref == 'refs/heads/main'
+        with:
+          path: public/
+      - uses: actions/deploy-pages@v4
+        if: vars.PUBLISH_PAGES == 'true' && github.ref == 'refs/heads/main'
