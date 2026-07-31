@@ -1,0 +1,17 @@
+info:
+  name: Delete Language Localization Status
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/languages/{{languageID}}/status/{{l10nStatusID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Language Localization Status](https://developer.pingidentity.com/pingone-api/platform/language-management/language-localization-status/delete-language-localization-status.html).

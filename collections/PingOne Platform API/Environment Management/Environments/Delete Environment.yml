@@ -1,0 +1,17 @@
+info:
+  name: Delete Environment
+  type: http
+  seq: 8
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Environment](https://developer.pingidentity.com/pingone-api/platform/environments/delete-environment.html).

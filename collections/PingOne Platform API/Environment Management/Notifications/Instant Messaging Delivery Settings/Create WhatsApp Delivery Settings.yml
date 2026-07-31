@@ -1,0 +1,27 @@
+info:
+  name: Create WhatsApp Delivery Settings
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/notificationsSettings/instantMessagingDeliverySettings/whatsApp"
+  body:
+    type: json
+    data: |-
+      {
+          "provider":"CUSTOM_WHATSAPP",
+          "whatsAppAccountBusinessId": "{{whatsAppBusinessID}}",
+          "appId":"{{whatsAppAppID}}",
+          "userAccessToken":"{{whatsAppToken}}",
+          "appSecret":"{{whatsAppSecret}}"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create WhatsApp Delivery Settings](https://developer.pingidentity.com/pingone-api/platform/notifications/instant-messaging-delivery-settings/create_whatsapp_delivery_settings.html).

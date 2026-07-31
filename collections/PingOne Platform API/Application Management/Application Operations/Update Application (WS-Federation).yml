@@ -1,0 +1,44 @@
+info:
+  name: Update Application (WS-Federation)
+  type: http
+  seq: 16
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/applications/{{appID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "enabled": true,
+          "name": "WS_FED App-2",
+          "description": "Incredible",
+          "type": "WEB_APP",
+          "protocol": "WS_FED",
+          "homePageUrl": "https://www.microsoft.com/en-ca/microsoft-365",
+          "loginPageUrl": "https://portal.office.com",
+          "icon": {
+              "id": "{{iconID}}",
+              "href": "https://uploads.pingone.com/environments/abfba8f6-49eb-49f5-a5d9-80ad5c98f9f6/images/492cf828-14a8-4794-83c2-b9bf4fe796c6_843714e5-1590-4585-8aec-085e33141dbf_original.png"
+          },
+          "domainName": "my.office365.domain",
+          "replyUrl": "https://login.microsoftonline.com/login.srf",
+          "userAttributeUsernameMatch": "email",
+          "sloEndpoint": "https://example.com/slo",
+          "subjectNameIdentifierFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+          "idpSigning": {
+              "algorithm": "SHA256withRSA",
+              "key": {
+                  "id": "{{keyID}}"
+              }
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Application (WS-Federation)](https://developer.pingidentity.com/pingone-api/platform/applications/applications-1/update-application-ws-federation.html).

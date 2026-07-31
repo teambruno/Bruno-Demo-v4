@@ -1,0 +1,28 @@
+info:
+  name: Update Administrator Security (External IdP)
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/adminConfig"
+  body:
+    type: json
+    data: |-
+      {
+          "authenticationMethod": "EXTERNAL",
+          "recovery": true,
+          "mfaStatus": "ENFORCE",
+          "provider": {
+              "id": "{{providerID}}"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Administrator Security (External IdP)](https://developer.pingidentity.com/pingone-api/platform/administrator-security/update-admin-config.html).

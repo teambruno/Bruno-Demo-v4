@@ -1,0 +1,26 @@
+info:
+  name: Update an Application Flow Policy Assignment
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/applications/{{appID}}/flowPolicyAssignments/{{flowPolicyAssignmentID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "priority": 3,
+          "flowPolicy": {
+              "id": "{{flowPolicyID}}"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update an Application Flow Policy Assignment](https://developer.pingidentity.com/pingone-api/platform/applications/application-flow-policy-assignments/update-flow-policy-assignment.html).

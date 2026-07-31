@@ -1,0 +1,74 @@
+info:
+  name: Import External Groups
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/provisioningSyncs/{{provisioningSyncID}}"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.propagation.provisioningsync.groupimport+json
+  body:
+    type: json
+    data: |-
+      {
+        "startToken": "{{startToken}}",
+        "nextToken": "{{nextToken}}",
+        "groups": [
+          {
+            "operation": "DELETED",
+            "attributes": {
+              "name": "DemoUsers2024\nDEL:6e04f620-1742-4d83-9828-b94433856b9a",
+              "objectguid": [
+                "{{objectguid}}"
+              ],
+              "member": [
+                "{{member}}"
+              ],
+              "active": "true",
+              "dn": "CN=DemoUsers2024,OU=Demo-BLR,DC=prov-ldap-mli2,DC=global"
+            },
+            "uniqueId": "{{uniqueId}}"
+          },
+          {
+            "operation": "DELETED",
+            "attributes": {
+              "name": "TestAccounts\nDEL:7ca065e3-cdf6-4ab0-add3-31563799ec27",
+              "objectguid": [
+                "{{objectguid}}"
+              ],
+              "member": [
+                "{{member}}"
+              ],
+              "active": "true",
+              "dn": "CN=TestAccounts,OU=Demo-BLR,DC=prov-ldap-mli2,DC=global"
+            },
+            "uniqueId": "{{uniqueId}}"
+          }
+        ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("ruleID", jsonData.id);
+            console.log("ruleID is now: " + bru.getEnvVar("ruleID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Import External Groups](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/external-groups/import-external-groups.html).

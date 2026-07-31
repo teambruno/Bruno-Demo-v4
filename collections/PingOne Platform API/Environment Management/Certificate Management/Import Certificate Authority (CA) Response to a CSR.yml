@@ -1,0 +1,24 @@
+info:
+  name: Import Certificate Authority (CA) Response to a CSR
+  type: http
+  seq: 15
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/keys/{{keyID}}/csr"
+  body:
+    type: multipart-form
+    data:
+      - name: file
+        type: file
+        value:
+          - /Users/kbentley/workspace/ca_rsa.resp.crt
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Import Certificate Authority (CA) Response to a CSR](https://developer.pingidentity.com/pingone-api/platform/certificate-management/import-certificate-authority-ca-response-to-a-csr.html).

@@ -1,0 +1,57 @@
+info:
+  name: Create Store (Zoom)
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/stores"
+  body:
+    type: json
+    data: |-
+      {
+          "type": "Zoom",
+          "name": "zoom connection",
+          "status": "ACTIVE",
+          "configuration": {
+              "AUTHENTICATION_METHOD": "OAuth Bearer Token",
+              "CREATE_USERS": true,
+              "UPDATE_USERS": true,
+              "DEPROVISION_USERS": true,
+              "DISABLE_USERS": true,
+              "SCIM_URL": "https://api.zoom.us/scim2",
+              "OAUTH_TOKEN_URL" : "https://zoom.us/oauth/token",
+              "OAUTH_ACCOUNT_ID" : "{{oauthAccountId}}",
+              "OAUTH_CLIENT_ID" : "{{oauthClientId}}",
+              "OAUTH_CLIENT_SECRET" : "{{oauthClientSecret}}",
+              "REMOVE_ACTION": "Delete"
+          },
+          "managed": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains name and id strings", function () {
+          const jsonData = res.getBody();
+          expect(jsonData.name).to.be.a('string');
+          expect(jsonData.id).to.be.a('string');
+          bru.setEnvVar("storeID", jsonData.id);
+          console.log("storeID is now: " + bru.getEnvVar("storeID"));
+          bru.setEnvVar("targetStoreID", jsonData.id);
+          console.log("targetStoreID is now: " + bru.getEnvVar("targetStoreID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Store (Zoom)](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-stores/create-store-zoom.html).

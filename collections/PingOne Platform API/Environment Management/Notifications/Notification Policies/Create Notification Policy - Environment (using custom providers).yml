@@ -1,0 +1,145 @@
+info:
+  name: Create Notification Policy / Environment (using custom providers)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/notificationsPolicies"
+  body:
+    type: json
+    data: |
+      {
+          "name": "Environment-level notification policy with country limitation and custom provider preference",
+          "quotas": [
+              {
+                  "type": "ENVIRONMENT",
+                  "deliveryMethods": [
+                      "SMS",
+                      "Voice"
+                  ],
+                  "total": 1000
+              }, 
+              {
+                  "type" : "ENVIRONMENT",
+                  "deliveryMethods" : [
+                      "Email"
+                  ],
+                  "total" : 100
+              }
+          ],
+          "countryLimit": {
+              "type": "ALLOWED",
+              "deliveryMethods": [
+                  "SMS",
+                  "Voice"
+              ],
+              "countries": [
+                  "CA",
+                  "SE",
+                  "JP"
+              ]
+          },
+          "providerConfiguration" : {
+              "conditions" : [ 
+                  {
+                      "deliveryMethods" : [ "VOICE", "SMS" ],
+                      "countries" : [
+                          "CA"
+                      ],
+                      "fallbackChain" : [ 
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          }
+                      ]
+                  },
+                  {
+                    "deliveryMethods" : [
+                      "VOICE",
+                      "SMS"
+                     ],
+                    "countries" : [
+                      "SE"
+                     ],
+                    "fallbackChain" : [
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          }
+                      ]
+                  },
+                  {
+                      "deliveryMethods" : [
+                          "VOICE",
+                          "SMS"
+                      ],
+                      "countries" : [
+                          "JP"
+                      ],
+                      "fallbackChain" : [
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          }
+                      ]
+                  },
+                  {
+                      "deliveryMethods" : [
+                          "SMS"
+                      ],
+                      "fallbackChain" : [
+                          {
+                              "id" : "{{fallbackChainID-3}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID-2}}"
+                          },
+                          {
+                              "id" : "{{fallbackChainID}}"
+                          }
+                      ]
+                  }
+              ]
+          },
+          "default": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("notificationPolicyID", jsonData.id);
+            console.log("notificationPolicyID is now: " + bru.getEnvVar("notificationPolicyID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Notification Policy / Environment (using custom providers)](https://developer.pingidentity.com/pingone-api/platform/notifications/notification-policies/create_env_notification_policy_custom_providers.html).

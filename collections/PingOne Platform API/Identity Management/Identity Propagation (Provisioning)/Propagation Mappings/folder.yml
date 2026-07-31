@@ -1,0 +1,11 @@
+info:
+  name: Propagation Mappings
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Propagation Mappings](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-mappings.html).
+  type: text/markdown

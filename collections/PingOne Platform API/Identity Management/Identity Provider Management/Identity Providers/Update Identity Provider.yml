@@ -1,0 +1,43 @@
+info:
+  name: Update Identity Provider
+  type: http
+  seq: 17
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/identityProviders/{{providerID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "SAMLIdP",
+          "description": "This is s SAML IdP test",
+          "type": "SAML",
+          "enabled": false,
+          "spEntityId": "sp-{$timestamp}",
+          "idpEntityId": "idp-{$timestamp}",
+          "ssoBinding": "HTTP_POST",
+          "ssoEndpoint": "https://idp.com/sso",
+          "authnRequestSigned": "false",
+          "idpVerification": {
+              "certificates": [
+                  {
+                      "id": "{{certID}}"
+                  }
+              ]
+          },
+          "spSigning": {
+              "key": {
+                  "id": "{{spSigningID}}"
+              }
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Identity Provider](https://developer.pingidentity.com/pingone-api/platform/identity-provider-management/identity-providers/update-identity-provider.html).

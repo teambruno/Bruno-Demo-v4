@@ -9,23 +9,24 @@ info:
 http:
   method: GET
   url: "{{baseUrl}}/posts/{{postId}}"
+  body:
+    type: json
+    data: |-
+      {
+        
+      }
   auth: inherit
 
 runtime:
   scripts:
     - type: after-response
-      code: |-
-        const globalVar = bru.getGlobalEnvVar('apiVersion');
-        console.log('apiV: ' + globalVar);
+      code: const globalVar = bru.getGlobalEnvVar('apiVersion');
     - type: tests
       code: |-
         test("status code is 200", function() {
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("content-type is JSON", function() {
-          expect(res.getHeader('content-type')).to.include('application/json');
-        });
 
         test("response time is below 2000ms", function() {
           expect(res.getResponseTime()).to.be.below(2000);

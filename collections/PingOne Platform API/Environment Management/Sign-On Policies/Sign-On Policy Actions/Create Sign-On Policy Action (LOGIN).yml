@@ -1,0 +1,51 @@
+info:
+  name: Create Sign-On Policy Action (LOGIN)
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/signOnPolicies/{{policyID}}/actions"
+  body:
+    type: json
+    data: |-
+      {
+          "priority": 10,
+          "type": "LOGIN",
+          "condition": {
+              "not": {
+                  "ipRange": [
+                      "10.1.1.1/8",
+                      "10.0.0.0/8"
+                  ],
+                  "contains": "${flow.request.http.remoteIp}"
+              }
+          },
+          "recovery": {
+              "enabled": true
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("actionID", jsonData.id);
+            console.log("actionID is now: " + bru.getEnvVar("actionID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Sign-On Policy Action (LOGIN)](https://developer.pingidentity.com/pingone-api/platform/sign-on-policies/sign-on-policy-actions/create-sign-on-policy-action-login.html).

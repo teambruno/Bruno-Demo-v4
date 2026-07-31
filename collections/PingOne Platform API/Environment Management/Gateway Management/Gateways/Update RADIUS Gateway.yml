@@ -1,0 +1,37 @@
+info:
+  name: Update RADIUS Gateway
+  type: http
+  seq: 12
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/gateways/{{gatewayID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "New RADIUS Gateway",
+          "description": "Gateway with updated Davinci flow policy ID",
+          "type": "RADIUS",
+          "radiusClients": [
+              {
+                  "ip": "127.0.0.1",
+                  "sharedSecret": null
+              }
+          ],
+          "defaultSharedSecret": "secret",
+          "davinci": {
+              "policy": {
+                  "id": "567a3443878d406e3fb22f5307059e0b"
+              }
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update RADIUS Gateway](https://developer.pingidentity.com/pingone-api/platform/gateway-management/gateways/update-radius-gateway.html).

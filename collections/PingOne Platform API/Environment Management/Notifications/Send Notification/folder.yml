@@ -1,0 +1,11 @@
+info:
+  name: Send Notification
+  type: folder
+  seq: 9
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Send Notification](https://developer.pingidentity.com/pingone-api/platform/notifications/send-notifications.html).
+  type: text/markdown

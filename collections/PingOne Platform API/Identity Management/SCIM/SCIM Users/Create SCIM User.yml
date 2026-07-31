@@ -1,0 +1,79 @@
+info:
+  name: Create SCIM User
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{scimPath}}/environments/{{envID}}/v2/Users"
+  body:
+    type: json
+    data: |-
+      {
+          "userName": "tmp-IsabellaI-12",
+          "name": {
+              "formatted": "Isabella",
+              "familyName": "Castile",
+              "givenName": "Isabella",
+              "middleName": "of",
+              "honorificPrefix": "Ms."
+          },
+          "nickName": "Isa",
+          "title": "Principal Engineer",
+          "preferredLanguage": "en",
+          "emails": [
+              {
+                  "value": "IsabellaOfCastile@example.com",
+                  "primary": true
+              }
+          ],
+          "phoneNumbers": [
+              {
+                  "value": "+1.215-987-6543",
+                  "type": "primary",
+                  "primary": true
+              }
+          ],
+          "addresses": [
+              {
+                  "streetAddress": "8 Mile Rd.",
+                  "locality": "Detroit",
+                  "region": "MI",
+                  "postalCode": "48203",
+                  "country": "US",
+                  "primary": true
+              }
+          ],
+          "urn:pingidentity:schemas:extension:2.0:PingOneUser": {
+              "population": {
+                  "id": "{{popID}}"
+              }
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains username and id strings", function () {
+          const jsonData = res.getBody();
+          expect(jsonData.username).to.be.a('string');
+          bru.setEnvVar("username", jsonData.username);
+          console.log("username is now: " + bru.getEnvVar("username"));
+          expect(jsonData.id).to.be.a('string');
+          bru.setEnvVar("userID", jsonData.id);
+          console.log("userID is now: " + bru.getEnvVar("userID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create SCIM User](https://developer.pingidentity.com/pingone-api/platform/scim/scim-users/create-scim-user.html).

@@ -1,0 +1,54 @@
+info:
+  name: Create Rule (Writeback)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/plans/{{planID}}/rules"
+  body:
+    type: json
+    data: |-
+      {
+          "plan": {
+              "id": "{{planID}}"
+          },
+          "environment": {
+              "id": "{{envID}}"
+          },
+          "sourceStore": {
+              "id": "{{writebackStoreID}}"
+          },
+          "targetStore": {
+              "id": "{{sourceStoreID}}"
+          },
+          "name": "Workday Writeback Rule",
+          "description": "Workday writeback rule description",
+          "parentRule": {
+              "id": "{{parentRuleID}}"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("wdWritebackRuleID", jsonData.id);
+            console.log("wdWritebackRuleID is now: " + bru.getEnvVar("wdWritebackRuleID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Rule (Writeback)](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-rules/create-rule-writeback.html).

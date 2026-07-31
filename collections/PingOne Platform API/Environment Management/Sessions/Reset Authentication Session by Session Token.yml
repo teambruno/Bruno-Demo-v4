@@ -1,0 +1,22 @@
+info:
+  name: Reset Authentication Session by Session Token
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/sessions/me"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.sso.session.logout
+    - name: Cookie
+      value: ST={{token}}
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Reset Authentication Session by Session Token](https://developer.pingidentity.com/pingone-api/platform/sessions/create-session-me.html).

@@ -1,0 +1,23 @@
+info:
+  name: Add User to Group
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/memberOfGroups"
+  body:
+    type: json
+    data: |-
+      {
+          "id": "{{groupID}}"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Add User to Group](https://developer.pingidentity.com/pingone-api/platform/users/group-membership/add-user-to-group.html).

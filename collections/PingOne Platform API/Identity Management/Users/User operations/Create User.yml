@@ -1,0 +1,48 @@
+info:
+  name: Create User
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/users"
+  body:
+    type: json
+    data: |-
+      {
+          "email": "marysample@example.com",
+          "name": {
+              "given": "Mary",
+              "family": "Sample"
+          },
+          "population": {
+              "id": "{{popID}}"
+          },
+          "username": "marysample",
+          "department": "engineering",
+          "locales": ["Sydney", "London"]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("userID", jsonData.id);
+            console.log("userID is now: " + bru.getEnvVar("userID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create User](https://developer.pingidentity.com/pingone-api/platform/users/users-1/create-user.html).

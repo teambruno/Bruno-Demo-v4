@@ -1,0 +1,39 @@
+info:
+  name: Create Domain
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/customDomains"
+  body:
+    type: json
+    data: |-
+      {
+          "domainName": "custom-domain.example.eu",
+          "mtlsEnabled": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("customDomainID", jsonData.id);
+            console.log("customDomainID is now: " + bru.getEnvVar("customDomainID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Domain](https://developer.pingidentity.com/pingone-api/platform/custom-domains/create-domain.html).

@@ -1,0 +1,64 @@
+info:
+  name: Create Identity Provider (SAML)
+  type: http
+  seq: 13
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/identityProviders"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "SAMLIdP",
+          "description": "this is SAML IdP test",
+          "type": "SAML",
+          "enabled": false,
+          "spEntityId": "sp-{$timestamp}",
+          "idpEntityId": "idp-{$timestamp}",
+          "sloWindow": 23,
+          "sloResponseEndpoint": "https://slo.response.endpoint",
+          "sloBinding": "HTTP_POST",
+          "sloEndpoint": "https://slo.endpoint",
+          "ssoBinding": "HTTP_POST",
+          "ssoEndpoint": "https://idp.com/sso",
+          "authnRequestSigned": "false",
+          "idpVerification": {
+              "certificates": [
+                  {
+                      "id": "{{certID}}"
+                  }
+              ]
+          },
+          "spSigning": {
+              "key": {
+                  "id": "{{spSigningID}}"
+              }
+              "algorithm": "SHA256withECDSA"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 201", function() {
+            expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains createdAt and id strings", function() {
+            const jsonData = res.getBody();
+            expect(jsonData.createdAt).to.be.a('string');
+            expect(jsonData.id).to.be.a('string');
+            bru.setEnvVar("providerID", jsonData.id);
+            console.log("providerID is now: " + bru.getEnvVar("providerID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Identity Provider (SAML)](https://developer.pingidentity.com/pingone-api/platform/identity-provider-management/identity-providers/create-identity-provider-saml.html).

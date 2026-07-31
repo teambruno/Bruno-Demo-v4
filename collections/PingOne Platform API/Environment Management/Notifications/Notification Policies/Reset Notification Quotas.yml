@@ -1,0 +1,23 @@
+info:
+  name: Reset Notification Quotas
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/notifications/quota"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.quota.reset+json
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Reset Notification Quotas](https://developer.pingidentity.com/pingone-api/platform/notifications/notification-policies/reset_notification_quotas.html).

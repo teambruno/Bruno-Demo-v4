@@ -1,0 +1,79 @@
+info:
+  name: Create Attribute
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/schemas/{{schemaID}}/attributes"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "officeStuff{{$timestamp}}",
+          "displayName": "An optional property that specifies the display name of the attribute.",
+          "description": "An optional property that specifies the description of the new attribute.",
+          "schemaType": "CUSTOM",
+          "type": "STRING",
+          "unique": false,
+          "enabled": false,
+          "multiValued": false,
+          "regexValidation": {
+              "pattern": "xs|XS|s|S|m|M|l|L|xl|XL|xxl|XXL",
+              "requirements": "Must be a T-shirt size from XS to XXL",
+              "valuesPatternShouldMatch": [
+                  "xs",
+                  "XXL"
+              ],
+              "valuesPatternShouldNotMatch": [
+                  "xL",
+                  "x"
+              ]
+          },
+          "#enumeratedValues": [
+              {
+                  "value": "CUPS",
+                  "archived": true,
+                  "description": "Cups, Class: Clergy, Faculty: Emotions and love"
+              },
+              {
+                  "value": "PENTACLES",
+                  "archived": true,
+                  "description": "Pentacles, Class: Merchants, Faculty: Material body or possessions"
+              },
+              {
+                  "value": "SWORDS",
+                  "archived": true,
+                  "description": "Swords, Class: Nobility and military, Faculty: Reason"
+              },
+              {
+                  "value": "WANDS",
+                  "archived": true,
+                  "description": "Wands, Class: Artisans, Faculty: Creativity and will"
+              }
+          ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("schemaAttrID", jsonData.id);
+            console.log("schemaAttrID is now: " + bru.getEnvVar("schemaAttrID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Attribute](https://developer.pingidentity.com/pingone-api/platform/schemas/create-attribute.html).

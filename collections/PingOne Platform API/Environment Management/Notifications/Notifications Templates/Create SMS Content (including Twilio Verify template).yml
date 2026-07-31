@@ -1,0 +1,45 @@
+info:
+  name: Create SMS Content (including Twilio Verify template)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/templates/{{templateName}}/contents/"
+  body:
+    type: json
+    data: |
+      {
+          "locale": "en",
+          "variant": "variant_C",
+          "content": "${user.username} your one time password is ${otp}.",
+          "deliveryMethod": "SMS",
+          "twilioVerifyTemplate": {
+              "id": "HJd2847507a6104c1622eaccf1f949af7d",
+              "locale": "en"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("contentID", jsonData.id);
+            console.log("contentID is now: " + bru.getEnvVar("contentID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create SMS Content (including Twilio Verify template)](https://developer.pingidentity.com/pingone-api/platform/notifications/notifications-templates/create_sms_content_twilio_verify.html).

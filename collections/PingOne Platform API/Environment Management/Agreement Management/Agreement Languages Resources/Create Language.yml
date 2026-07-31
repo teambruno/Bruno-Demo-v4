@@ -1,0 +1,41 @@
+info:
+  name: Create Language
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/agreements/{{agreementID}}/languages"
+  body:
+    type: json
+    data: |-
+      {
+        "locale": "en-US",
+        "displayName": "Language_1",
+        "enabled": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains displayName and id strings", function () {
+          const jsonData = res.getBody();
+          expect(jsonData.displayName).to.be.a('string');
+          expect(jsonData.id).to.be.a('string');
+          bru.setEnvVar("languageID", jsonData.id);
+          console.log("languageID is now: " + bru.getEnvVar("languageID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Language](https://developer.pingidentity.com/pingone-api/platform/agreement-management/agreement-languages-resources/create-language.html).

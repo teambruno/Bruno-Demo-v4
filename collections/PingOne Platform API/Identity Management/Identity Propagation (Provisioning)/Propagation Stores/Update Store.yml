@@ -1,0 +1,37 @@
+info:
+  name: Update Store
+  type: http
+  seq: 20
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/propagation/stores/{{storeID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "type": "scim",
+          "name": "scim",
+          "description": "Update a scim connection",
+          "configuration": {
+              "AUTHENTICATION_METHOD": "Basic Authentication",
+              "SCIM_URL": "https://scim.url",
+              "USERS_RESOURCE": "/users",
+              "SCIM_VERSION": "1.1",
+              "AUTHORIZATION_TYPE": "Basic",
+              "BASIC_AUTH_USER": "{{basicAuthUsername}}",
+              "BASIC_AUTH_PASSWORD": "{{basicAuthPassword}}"
+          },
+          "image": {
+              "href": "https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Store](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-stores/update-store.html).

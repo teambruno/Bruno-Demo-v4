@@ -1,0 +1,45 @@
+info:
+  name: Create Grant
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/applications/{{appID}}/grants"
+  body:
+    type: json
+    data: |-
+      {
+          "resource": {
+              "id": "{{resourceID}}"
+          },
+          "scopes": [
+              {
+                  "id": "{{scopeID}}"
+              }
+          ]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("grantID", jsonData.id);
+            console.log("grantID is now: " + bru.getEnvVar("grantID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Grant](https://developer.pingidentity.com/pingone-api/platform/applications/application-resource-grants/create-grant.html).

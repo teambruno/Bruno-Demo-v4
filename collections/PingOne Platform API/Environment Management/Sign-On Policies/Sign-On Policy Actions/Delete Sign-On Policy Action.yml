@@ -1,0 +1,17 @@
+info:
+  name: Delete Sign-On Policy Action
+  type: http
+  seq: 10
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/signOnPolicies/{{policyID}}/actions/{{actionID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Sign-On Policy Action](https://developer.pingidentity.com/pingone-api/platform/sign-on-policies/sign-on-policy-actions/delete-sign-on-policy-action.html).

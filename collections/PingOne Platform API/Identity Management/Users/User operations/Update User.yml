@@ -1,0 +1,51 @@
+info:
+  name: Update User
+  type: http
+  seq: 9
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "username": "joe@example.com",
+          "name": {
+              "formatted": "Joe Smith",
+              "given": "Joe",
+              "middle": "H.",
+              "family": "Smith",
+              "honorificPrefix": "Dr.",
+              "honorificSuffix": "IV"
+          },
+          "nickname": "Putty",
+          "title": "Senior Director",
+          "preferredLanguage": "en-gb;q=0.8, en;q=0.7",
+          "locale": "en-gb",
+          "email": "joe@example.com",
+          "primaryPhone": "+1.2225554444",
+          "mobilePhone": "+1.4445552222",
+          "photo": {
+              "href": "{{imageUrl}}>"
+          },
+          "address": {
+              "streetAddress": "123 Main Street",
+              "locality": "Springfield",
+              "region": "WA",
+              "postalCode": "98701",
+              "countryCode": "US"
+          },
+          "accountId": "5",
+          "type": "tele",
+          "timezone": "America/Los_Angeles"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update User](https://developer.pingidentity.com/pingone-api/platform/users/users-1/update-user-put.html).

@@ -1,0 +1,20 @@
+info:
+  name: Resend Verification Code To Email
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/emailDomains/{{emailDomainID}}/trustedEmails/{{trustedEmailID}}"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.trustedEmail.sendVerificationCode+json
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Resend Verification Code To Email](https://developer.pingidentity.com/pingone-api/platform/notifications/trusted-email-addresses/resend-verification-code-to-email.html).

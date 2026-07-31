@@ -1,0 +1,45 @@
+info:
+  name: Test Connection Configuration
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/stores/connection/status"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.connection.check+json
+  body:
+    type: json
+    data: |-
+      {
+          "type": "scim",
+          "name": "scim",
+          "configuration": {
+              "AUTHENTICATION_METHOD": "None",
+              "USER_FILTER": "username Eq \"%s\"",
+              "UNIQUE_USER_IDENTIFIER": "userName",
+              "REMOVE_ACTION": "Disable",
+              "CREATE_USERS": true,
+              "UPDATE_USERS": true,
+              "DISABLE_USERS": true,
+              "USERS_RESOURCE": "/Users",
+              "SCIM_VERSION": "2.0",
+              "SCIM_URL": "https://example.com",
+              "AUTHORIZATION_TYPE": "Basic",
+              "BASIC_AUTH_USER": "{{basicAuthUsername}}",
+              "BASIC_AUTH_PASSWORD": "{{basicAuthPassword}}"
+          },
+          "image": {
+              "href": "https://d1oekt4jpdthse.cloudfront.net/branding/market/cb933bfe-8282-405a-a780-0a19b97edc02.png"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Test Connection Configuration](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-stores/test-connection-configuration.html).

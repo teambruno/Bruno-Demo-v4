@@ -1,0 +1,56 @@
+info:
+  name: Create Inbound Traffic Policy
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/inboundTrafficPolicies"
+  body:
+    type: json
+    data: |
+      {
+        "name":"Shared Secret",
+        "trafficRule":{
+          "type":"ALLOW"
+        },
+        "verifyRules":[
+          {
+            "type":"SECRET",
+            "sha256Secrets":[
+              "9e33f87fbe1a805f2e1f1d85b208bed4aa6b0de23117377310162ffa686573cf"
+              ]
+          }
+        ],
+        "clientIpRule":{
+          "type":"HEADER",
+          "name":"secret"
+        },
+        "headerRules":[],
+        "priority":3,
+        "enabled":true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("trafficPolicyID", jsonData.id);
+            console.log("trafficPolicyID is now: " + bru.getEnvVar("trafficPolicyID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Inbound Traffic Policy](https://developer.pingidentity.com/pingone-api/platform/inbound-traffic/create-inbound-traffic-policy.html).

@@ -1,0 +1,11 @@
+info:
+  name: Application Secret
+  type: folder
+  seq: 8
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Application Secret](https://developer.pingidentity.com/pingone-api/platform/applications/application-secret.html).
+  type: text/markdown
