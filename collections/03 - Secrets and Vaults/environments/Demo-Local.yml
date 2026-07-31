@@ -3,8 +3,10 @@ color: "#2E8A54"
 variables:
   - name: httpfakerUrl
     value: https://www.httpfaker.org
+    description: ""
   - name: echoUrl
     value: https://echo.usebruno.com
+    description: ""
   - name: providerLabel
     value: Local - .env and Bruno secrets
     description: shown in test output so the demo makes the source obvious
@@ -16,3 +18,4 @@ variables:
     description: from .env - never committed, only .env.example is
   - secret: true
     name: appOnlySecret
+    description: ""
