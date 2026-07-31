@@ -1,0 +1,65 @@
+info:
+  name: Update Form
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/forms/{{formID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "Custom-Form_Updated_{{$timestamp}}",
+          "description": "Test Description - updated via UPDATE Custom Form request",
+          "category": "CUSTOM",
+          "components": {
+              "fields": [
+                  {
+                      "type": "TEXT",
+                      "position": {
+                          "row": 0,
+                          "col": 0
+                      },
+                      "key": "field",
+                      "label": "[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"},{\"type\":\"i18n\",\"key\":\"fields.user.email.label\",\"defaultTranslation\":\"Email Address\",\"inline\":true,\"children\":[{\"text\":\"\"}]},{\"text\":\"\"}]}]",
+                      "required": true,
+                      "validation": {
+                          "type": "NONE",
+                          "regex": "",
+                          "errorMessage": ""
+                      },
+                      "attributeDisabled": false
+                  },
+                  {
+                      "type": "SUBMIT_BUTTON",
+                      "position": {
+                          "row": 1,
+                          "col": 0
+                      },
+                      "label": "[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"},{\"type\":\"i18n\",\"key\":\"button.text\",\"defaultTranslation\":\"Submit\",\"inline\":true,\"children\":[{\"text\":\"\"}]},{\"text\":\"\"}]}]"
+                  }
+              ]
+          },
+          "cols": 4,
+          "markOptional": true,
+          "markRequired": false,
+          "translationMethod": "TRANSLATE",
+          "fieldTypes": [
+              "SUBMIT_BUTTON",
+              "TEXT"
+          ],
+          "languageBundle": {
+              "fields.user.email.label": "Email Address",
+              "button.text": "Submit"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Form](https://developer.pingidentity.com/pingone-api/platform/forms/update-form.html).

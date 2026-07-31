@@ -1,0 +1,26 @@
+info:
+  name: Verify Email (Code)
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/emailVerification"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.user.emailVerification.verify+json
+  body:
+    type: json
+    data: |-
+      {
+          "verificationCode": "{{verificationCode}}"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Verify Email (Code)](https://developer.pingidentity.com/pingone-api/platform/users/user-email-verification/verify-email-code.html).

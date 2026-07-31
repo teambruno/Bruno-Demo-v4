@@ -1,0 +1,40 @@
+info:
+  name: Create MAIL FROM Domain
+  type: http
+  seq: 8
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/emailDomains/{{emailDomainID}}/mailFromDomain"
+  body:
+    type: json
+    data: |-
+      {  
+         "mailFrom": {
+            "domain": "{{mailFromSubdomain}}"
+         }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("emailDomainID", jsonData.id);
+            console.log("emailDomainID is now: " + bru.getEnvVar("emailDomainID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create MAIL FROM Domain](https://developer.pingidentity.com/pingone-api/platform/notifications/trusted-email-domains/create-mail-from-domain.html).

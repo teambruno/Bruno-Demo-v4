@@ -1,0 +1,26 @@
+info:
+  name: Update Voice Content
+  type: http
+  seq: 14
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/templates/{{templateName}}/contents/{{contentID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "locale": "en",
+          "content": "${user.username}, your one time password is ${otp}.",
+          "deliveryMethod": "Voice",
+          "voice": "Male"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Voice Content](https://developer.pingidentity.com/pingone-api/platform/notifications/notifications-templates/update-voice-content.html).

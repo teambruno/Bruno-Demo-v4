@@ -1,0 +1,43 @@
+info:
+  name: Create Certificate with PKCS7 or PEM File
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/certificates"
+  body:
+    type: multipart-form
+    data:
+      - name: file
+        type: file
+        value:
+          - /Users/kbentley/Downloads/cert.crt
+        contentType: application/x-pkcs7-certificates
+      - name: usageType
+        type: text
+        value: SIGNING
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 202) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("certID", jsonData.id);
+            console.log("certID is now: " + bru.getEnvVar("certID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Certificate with PKCS7 or PEM File](https://developer.pingidentity.com/pingone-api/platform/certificate-management/create-certificate-with-pkcs7-or-pem-file.html).

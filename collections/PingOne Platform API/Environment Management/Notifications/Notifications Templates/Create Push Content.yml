@@ -1,0 +1,43 @@
+info:
+  name: Create Push Content
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/templates/{{templateName}}/contents"
+  body:
+    type: json
+    data: |-
+      {
+          "locale": "en",
+          "title": "Test",
+          "variant": "variant_C",
+          "body": " Your OTP is ${otp}",
+          "deliveryMethod": "Push",
+          "pushCategory": "APPROVE_AND_OPEN_APP"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("contentID", jsonData.id);
+            console.log("contentID is now: " + bru.getEnvVar("contentID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Push Content](https://developer.pingidentity.com/pingone-api/platform/notifications/notifications-templates/create-push-content.html).

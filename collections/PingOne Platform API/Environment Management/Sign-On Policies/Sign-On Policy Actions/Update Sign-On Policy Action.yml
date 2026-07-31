@@ -1,0 +1,65 @@
+info:
+  name: Update Sign-On Policy Action
+  type: http
+  seq: 9
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/signOnPolicies/{{policyID}}/actions/{{actionID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "priority": 2,
+          "type": "PROGRESSIVE_PROFILING",
+          "condition": {
+              "or": [
+                  {
+                      "not": {
+                          "ipRange": [
+                              "10.5.3.72/24"
+                          ],
+                          "contains": "${flow.request.http.remoteIp}"
+                      }
+                  },
+                  {
+                      "secondsSince": "${session.lastSignOn.withAuthenticator.pwd.at}",
+                      "greater": 50400
+                  },
+                  {
+                      "value": "${user.population.id}",
+                      "equals": "{{popID}}"
+                  },
+                  {
+                      "value": "${user.email}",
+                      "equals": "joe@pingidentity.com"
+                  },
+                  {
+                      "ipRisk": {
+                          "minScore": 80,
+                          "maxScore": 100
+                      },
+                      "valid": "${flow.request.http.remoteIp}"
+                  },
+                  {
+                      "geoVelocity": "${flow.request.http.remoteIp}",
+                      "valid": {
+                          "previousSuccessfulAuthenticationTime": "${user.lastSignOn.at}",
+                          "previousSuccessfulAuthenticationIp": "${user.lastSignOn.remoteIp}"
+                      }
+                  }
+              ]
+          },
+          "promptText": "For the best experience, we need a couple things from you.",
+          "promptIntervalSeconds": 3600,
+          "preventMultiplePromptsPerFlow": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Sign-On Policy Action](https://developer.pingidentity.com/pingone-api/platform/sign-on-policies/sign-on-policy-actions/update-sign-on-policy-action.html).

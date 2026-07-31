@@ -1,0 +1,20 @@
+info:
+  name: Read One Rule
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/propagation/rules/{{ruleID}}"
+  headers:
+    - name: Accept
+      value: application/json
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read One Rule](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-rules/read-one-rule.html).

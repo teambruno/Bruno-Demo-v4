@@ -1,0 +1,37 @@
+info:
+  name: Create Image
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/images"
+  headers:
+    - name: Content-Type
+      value: image/jpg
+    - name: Content-Disposition
+      value: attachment; filename=200.jpg
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("imageID", jsonData.id);
+            console.log("imageID is now: " + bru.getEnvVar("imageID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Image](https://developer.pingidentity.com/pingone-api/platform/images/create-image.html).

@@ -1,0 +1,25 @@
+info:
+  name: Update Application Attribute Mapping
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/applications/{{appID}}/attributes/{{samlAttrID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "email",
+          "value": "${user.email}",
+          "required": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Application Attribute Mapping](https://developer.pingidentity.com/pingone-api/platform/applications/application-attribute-mapping/update-application-attribute-mapping.html).

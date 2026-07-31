@@ -1,0 +1,110 @@
+info:
+  name: Update Application (PingID App)
+  type: http
+  seq: 17
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{EnvIDConverged}}/applications/{{pingAppID}}"
+  body:
+    type: json
+    data: |
+      {
+          "name": "PingID Mobile",
+          "description":"The PingID mobile application can be used for multi-factor authentication and user verification use cases.",
+          "protocol": "OPENID_CONNECT",
+          "type": "NATIVE_APP",
+          "enabled": true,
+          "refreshTokenDuration": 2592000,
+          "refreshTokenRollingDuration": 15552000,
+          "mobile": {
+              "pingIDSettings": true,
+              "bundleId": "com.pingidentity.pingid.prod",
+              "packageName": "prod.com.pingidentity.pingid",
+              "otpPushNotificationEnabled": {
+                  "enabled": true
+              },
+              "allowUnPairAndChangeDeviceFromApp": {
+                  "enabled": true
+              },
+              "mobileAppSecurityPinRequire": {
+                  "requireForAllDevices": true,
+                  "securityPinDigit": "FOUR_DIGIT",
+                  "enabled": true
+              },
+              "allowAuthenticationDeviceLocked": {
+                  "enabled": true
+              },
+              "restrictDevicesByBrand":{
+                  "enabled":true,
+                  "deviceBrandsDisAllowed":[
+                      "Apple"
+                  ],
+                  "deviceModelsDisAllowed":[
+                      "iPad Mini 3 (WiFi)"]
+              },
+              "deviceLockEnableRequire": {
+                  "enabled": true
+              },
+              "deviceRequireBiometricsCapabilities": {
+                  "enabled": true
+              },
+              "deviceNotAllowedRootedOrJailBroken": {
+                  "enabled": true
+              },
+              "mobileDeviceManagementRequire": {
+                  "enabled": true,
+                  "effectiveDate": "2025-01-13T11:29:11.943Z",
+                  "tokens": [
+                      {
+                          "token": "89b2fa74-b6c8-4bd0-9096-611b65917bd0",
+                          "creationTime": "2025-01-13T11:29:18.447Z"
+                      }
+                  ]
+              },
+              "minimumOSVersionRequire": {
+                  "enabled": true,
+                  "android": "8.1",
+                  "ios": "16.6.1"
+              },
+              "showAuthenticationInformation": {
+                  "enabled": true
+              },
+              "push":{
+                  "numberMatching":{
+                      "type":"SELECT_NUMBER"
+                  }
+              },
+              "mobileDeviceBiometricsSetting": {
+                  "enabled": false,
+                  "required": true,
+                  "faceIdConsentEnabled": true,
+                  "notificationActionsEnabled": true,
+                  "devicePasscodeFallbackEnabled":true
+              },
+              "minimumPingIDAppVersionRequire": {
+                  "enabled": true,
+                  "android": "1.32.0",
+                  "ios": "1.33.0"
+              },
+              "notifyRequireMobileVersionUpdates": {
+                  "enabled": true,
+                  "android": "1.36.0",
+                  "ios": "1.35.0"
+              },
+              "notifyOptionalMobileVersionUpdates": {
+                  "enabled": true,
+                  "android": "1.38.0",
+                  "ios": "latest"
+              }
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Application (PingID App)](https://developer.pingidentity.com/pingone-api/platform/applications/applications-1/update_pingid_app.html).

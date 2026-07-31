@@ -1,0 +1,35 @@
+info:
+  name: Create Propagation Revision
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/revisions"
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("propagationRevisionID", jsonData.id);
+            console.log("propagationRevisionID is now: " + bru.getEnvVar("propagationRevisionID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Propagation Revision](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-revisions/create-revision-1.html).

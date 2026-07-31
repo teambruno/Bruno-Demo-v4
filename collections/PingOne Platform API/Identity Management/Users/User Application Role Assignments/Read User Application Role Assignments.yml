@@ -1,0 +1,17 @@
+info:
+  name: Read User Application Role Assignments
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/applicationRoles"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read User Application Role Assignments](https://developer.pingidentity.com/pingone-api/platform/users/user-application-role-assignments/read-user-application-role-assignments.html).

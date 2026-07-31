@@ -1,0 +1,38 @@
+info:
+  name: Send Admin Invite
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/users"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.user.invite+json
+  body:
+    type: json
+    data: |
+      {
+          "email": "someone@example.com",
+          "name": {
+              "given": "Mary",
+              "family": "Sample"
+          },
+          "population": {
+              "id": "{{popID}}"
+          },
+          "invite": {
+              "isAdmin": true,
+              "expirationMinutes": 120,
+              "acceptUrl": "https://example.com/accept-invite"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Send Admin Invite](https://developer.pingidentity.com/pingone-api/platform/users/user-admin-invitations/send-admin-invite.html).

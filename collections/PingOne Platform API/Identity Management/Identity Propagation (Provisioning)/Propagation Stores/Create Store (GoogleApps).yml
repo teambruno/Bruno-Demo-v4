@@ -1,0 +1,57 @@
+info:
+  name: Create Store (GoogleApps)
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/propagation/stores"
+  body:
+    type: json
+    data: |-
+      {
+          "type": "GoogleApps",
+          "status": "INACTIVE",
+          "configuration": {
+              "APPLICATION_NAME": "Provisioning",
+              "CREATE_USERS": true,
+              "DEPROVISION_USERS": true,
+              "DISABLE_USERS": true,
+              "DOMAIN": "domain",
+              "OAUTH_ACCESS_TOKEN": "amlYM1UwRmpscEljTjlKMGExdWdVMTc3dzVtb1hJYU9jR2hhamg3cHREdENPSUNiZUZsTzF2cGlsS0JW",
+              "OAUTH_CLIENT_ID": "oauth_client_id",
+              "OAUTH_CLIENT_SECRET": "oauth_client_secret",
+              "OAUTH_REFRESH_TOKEN": "SFZNcjUxbmVGZXRSWHhoUUJLN2RnMmxqTFhtTTJSTHdkcUM2Rmo0bU9pVWwxZnRjdnN3RHE1dW9KSDVS",
+              "PROVISION_DISABLED_USERS_PROV_OPT": true,
+              "REMOVE_ACTION": "Disable",
+              "UPDATE_USERS": true
+          },
+          "name": "google connection",
+          "managed": true
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("storeID", jsonData.id);
+            console.log("storeID is now: " + bru.getEnvVar("storeID"));
+            bru.setEnvVar("targetStoreID", jsonData.id);
+            console.log("targetStoreID is now: " + bru.getEnvVar("targetStoreID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Store (GoogleApps)](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-stores/create-store-googleapps.html).

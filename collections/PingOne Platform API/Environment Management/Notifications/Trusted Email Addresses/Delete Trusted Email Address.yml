@@ -1,0 +1,17 @@
+info:
+  name: Delete Trusted Email Address
+  type: http
+  seq: 6
+
+http:
+  method: DELETE
+  url: "{{apiPath}}/environments/{{envID}}/emailDomains/{{emailDomainID}}/trustedEmails/{{trustedEmailID}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Delete Trusted Email Address](https://developer.pingidentity.com/pingone-api/platform/notifications/trusted-email-addresses/delete-trusted-email-address.html).

@@ -1,0 +1,27 @@
+info:
+  name: Update Resource
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/resources/{{resourceID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "CustomResource1709685712",
+          "audience": "https://api.custom.eu",
+          "applicationPermissionsSettings": {
+              "claimEnabled": true
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Resource](https://developer.pingidentity.com/pingone-api/platform/resources/resources-1/update-resource.html).

@@ -1,0 +1,25 @@
+info:
+  name: Update PingOne access control scope
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/resources/{{resourceID}}/scopes/{{scopeID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "p1:update:user",
+          "description": "An UPDATED access control scope that includes only the user schema attributes listed in the schemaAttributes property",
+          "schemaAttributes": ["name.family", "name.given", "email", "address.streetAddress", "address.locality", "address.region", "address.postalCode", "address.countryCode", "primaryPhone", "mobilePhone"] 
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update PingOne access control scope](https://developer.pingidentity.com/pingone-api/platform/resources/resource-scopes/update-pingone-access-control-scope.html).

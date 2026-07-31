@@ -1,0 +1,61 @@
+info:
+  name: Create Custom Email Provider
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/notificationsSettings/emailDeliverySettings"
+  body:
+    type: json
+    data: |
+      {
+          "name": "CustomEmailProvider",
+          "provider":"CUSTOM_PROVIDER",
+          "authentication":{
+            "method":"BEARER",
+            "authToken":"{{accessTokenForEmailProvider}}"
+          },
+          "from":{
+              "name":"Example Corporation",
+              "address":"notifications@example.com"
+          },
+          "replyTo":{
+              "name":"Example Corporation Replies",
+              "address":"replies@example.com"
+          },
+          "protocol":"HTTP",
+          "requests":[{
+              "body":"{\"From\": \"${from}\",\"To\": \"${to}\",\"message2\": \"${message}\"}",
+              "deliveryMethod":"EMAIL",
+              "url":"{{urlForEmailProvider}}",
+              "method":"POST",
+              "headers":{
+                  "content-type":"application/json"
+              }
+          }]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("phoneDeliverySettingsId", jsonData.id);
+            console.log("phoneDeliverySettingsId is now: " + bru.getEnvVar("phoneDeliverySettingsId"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Custom Email Provider](https://developer.pingidentity.com/pingone-api/platform/notifications/email-delivery-settings/create_custom_email_provider.html).

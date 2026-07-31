@@ -1,0 +1,34 @@
+info:
+  name: Read One Schema
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/schemas/{{schemaID}}"
+  params:
+    - name: filter
+      value: ""
+      type: query
+      disabled: true
+    - name: limit
+      value: ""
+      type: query
+      disabled: true
+    - name: expand
+      value: ""
+      type: query
+      disabled: true
+    - name: order
+      value: ""
+      type: query
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read One Schema](https://developer.pingidentity.com/pingone-api/platform/schemas/read-one-schema.html).

@@ -1,0 +1,34 @@
+info:
+  name: Read Linked Accounts
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/linkedAccounts"
+  params:
+    - name: filter
+      value: ""
+      type: query
+      disabled: true
+    - name: limit
+      value: ""
+      type: query
+      disabled: true
+    - name: expand
+      value: ""
+      type: query
+      disabled: true
+    - name: order
+      value: ""
+      type: query
+      disabled: true
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read Linked Accounts](https://developer.pingidentity.com/pingone-api/platform/users/linked-accounts/read-linked-accounts.html).

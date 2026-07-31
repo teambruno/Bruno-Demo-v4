@@ -1,0 +1,46 @@
+info:
+  name: Create Key with PKCS12 File
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/keys"
+  body:
+    type: multipart-form
+    data:
+      - name: file
+        type: file
+        value:
+          - /Users/kbentley/Downloads/keyStore.p12
+        contentType: application/x-pkcs12-certificates
+      - name: usageType
+        type: text
+        value: ENCRYPTION
+      - name: password
+        type: text
+        value: Optional for encrypted files
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("keyID", jsonData.id);
+            console.log("keyID is now: " + bru.getEnvVar("keyID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Key with PKCS12 File](https://developer.pingidentity.com/pingone-api/platform/certificate-management/create-key-with-pkcs12-file.html).

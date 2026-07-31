@@ -1,0 +1,26 @@
+info:
+  name: Revoke User OAuth Scope Consent
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{apiPath}}/environments/{{envID}}/users/{{userID}}/oauthConsents/{{oauthConsentID}}"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.consent.revoke+json
+  body:
+    type: json
+    data: |
+      {
+        "status" : "REVOKED"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Revoke User OAuth Scope Consent](https://developer.pingidentity.com/pingone-api/platform/users/user-oauth-scope-consents/revoke-user-oauth-scope-consent.html).

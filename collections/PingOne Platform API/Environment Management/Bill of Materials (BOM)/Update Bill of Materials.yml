@@ -1,0 +1,70 @@
+info:
+  name: Update Bill of Materials
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/billOfMaterials"
+  body:
+    type: json
+    data: |-
+      {
+        "products": [
+          {
+            "type": "PING_DIRECTORY",
+            "description": "PingOne Directory",
+            "bookmarks": [
+                {
+                  "name": "PingDirectory admin documentation",
+                  "href": "https://docs.pingidentity.com/bundle/pingdirectory-83/page/tyt1564011416169.html"
+                },
+                {
+                  "name": "PingDirectory API reference",
+                  "href": "https://apidocs.pingidentity.com/pingdirectory/directory/v1/api/guide/"
+                }
+            ]
+          },
+          {
+            "type": "PING_ONE_MFA",
+            "description": "PingOne MFA",
+            "bookmarks": [
+                {
+                  "name": "PingOne MFA admin documentation",
+                  "href": "https://docs.pingidentity.com/bundle/pingoneMFA/page/sur1595922082774.html"
+                },
+                {
+                  "name": "PingOne API reference",
+                  "href": "https://apidocs.pingidentity.com/pingone/platform/v1/api/"
+                }
+            ]
+          },
+          {
+            "type": "PING_ONE_PROVISIONING",
+            "description": "PingOne Provisioning"
+          },
+          {
+            "type": "PING_ONE_RISK",
+            "description": "PingOne Risk",
+            "bookmarks": [
+                {
+                  "name": "PingOne Risk admin documentation",
+                  "href": "https://docs.pingidentity.com/bundle/pingoneRisk/page/ytr1603474916048.html"
+                },
+                {
+                  "name": "PingOne API reference",
+                  "href": "https://apidocs.pingidentity.com/pingone/platform/v1/api/"
+                }
+            ]
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Bill of Materials](https://developer.pingidentity.com/pingone-api/platform/bill-of-materials-bom/update-bill-of-materials.html).

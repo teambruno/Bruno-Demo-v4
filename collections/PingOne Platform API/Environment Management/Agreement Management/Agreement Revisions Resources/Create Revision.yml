@@ -1,0 +1,47 @@
+info:
+  name: Create Revision
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/agreements/{{agreementID}}/languages/{{languageID}}/revisions"
+  body:
+    type: json
+    data: |-
+      {
+        "effectiveAt": "2098-08-01T22:45:44.497Z",
+        "requireReconsent": false,
+        "text": "Test, test, test",
+        "contentType": "text/plain"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        /*
+        var dateISO = new Date().toISOString();
+        pm.environment.set ('now', dateISO);
+    - type: after-response
+      code: |-
+        test("Status code is 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains effectiveAt and id strings", function () {
+          const jsonData = res.getBody();
+          expect(jsonData.effectiveAt).to.be.a('string');
+          expect(jsonData.id).to.be.a('string');
+          bru.setEnvVar("revisionID", jsonData.id);
+          console.log("revisionID is now: " + bru.getEnvVar("revisionID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Revision](https://developer.pingidentity.com/pingone-api/platform/agreement-management/agreement-revisions-resources/create-revision.html).

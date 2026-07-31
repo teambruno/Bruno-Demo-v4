@@ -1,0 +1,26 @@
+info:
+  name: Discover OpenID Provider Metadata
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/identityProviders"
+  headers:
+    - name: Content-Type
+      value: application/vnd.pingidentity.openid-configuration.discover+json
+  body:
+    type: json
+    data: |-
+      {
+        "url": "https://Identity_Provider_oidc_well_known_endpoint"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Discover OpenID Provider Metadata](https://developer.pingidentity.com/pingone-api/platform/identity-provider-management/identity-providers/discover-openid-provider-metadata.html).

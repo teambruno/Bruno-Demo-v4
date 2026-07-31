@@ -1,0 +1,47 @@
+info:
+  name: Update Subscription
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/subscriptions/{{subscriptionID}}"
+  body:
+    type: json
+    data: |-
+      {
+        "name":"UpdatedSubscription",
+        "filterOptions":{
+          "includedActionTypes":[
+            "USER.CREATED",
+            "USER.MODIFIED"
+          ],
+          "includedPopulations":[
+            {"id": "{popID}"}
+          ],
+          "includedApplications":[
+            {"id": "{appID}"}
+          ]
+        },
+         "httpEndpoint":{
+          "url":"https://subscriptionendpoint.com",
+          "headers":{
+            "some-header":"some-value"
+          }
+        },
+        "format":"ACTIVITY",
+        "enabled": true,
+        "verifyTlsCertificates":true,
+        "tlsClientAuthKeyPair":{
+            "id": "{{keyID}}"
+        }  
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Subscription](https://developer.pingidentity.com/pingone-api/platform/subscriptions-webhooks/update-subscription.html).

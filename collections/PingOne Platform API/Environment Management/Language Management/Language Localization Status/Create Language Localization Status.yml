@@ -1,0 +1,40 @@
+info:
+  name: Create Language Localization Status
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/languages/{{languageID}}/status"
+  body:
+    type: json
+    data: |-
+      {
+        "service": "Service_Name2",
+        "localizationComplete": true,
+        "statusDetails": "Status details here"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 201) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("l10nStatusID", jsonData.id);
+            console.log("l10nStatusID is now: " + bru.getEnvVar("l10nStatusID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Language Localization Status](https://developer.pingidentity.com/pingone-api/platform/language-management/language-localization-status/create-language-localization-status.html).

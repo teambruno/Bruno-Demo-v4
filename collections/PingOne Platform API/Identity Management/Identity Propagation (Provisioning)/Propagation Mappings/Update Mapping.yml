@@ -1,0 +1,27 @@
+info:
+  name: Update Mapping
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/propagation/mappings/{{mappingID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "rule": {
+              "id": "{{ruleID}}"
+          },
+          "sourceAttribute": "username",
+          "targetAttribute": "accountId"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Mapping](https://developer.pingidentity.com/pingone-api/platform/identity-propagation-provisioning/propagation-mappings/update-mapping.html).

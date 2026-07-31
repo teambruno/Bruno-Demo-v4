@@ -1,0 +1,17 @@
+info:
+  name: Clone Branding Theme
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/themes/{{themeID}}/clone"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Clone Branding Theme](https://developer.pingidentity.com/pingone-api/platform/branding/branding-themes/clone-branding-theme.html).

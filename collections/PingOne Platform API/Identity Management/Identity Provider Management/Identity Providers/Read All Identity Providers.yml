@@ -1,0 +1,17 @@
+info:
+  name: Read All Identity Providers
+  type: http
+  seq: 15
+
+http:
+  method: GET
+  url: "{{apiPath}}/environments/{{envID}}/identityProviders"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Read All Identity Providers](https://developer.pingidentity.com/pingone-api/platform/identity-provider-management/identity-providers/read-all-identity-providers.html).

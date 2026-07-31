@@ -1,0 +1,68 @@
+name: PingOne Demo Environment
+variables:
+  - name: tld
+    value: com
+  - name: apiPath
+    value: https://api.pingone.{{tld}}/v1
+  - name: authPath
+    value: https://auth.pingone.{{tld}}
+  - name: scimPath
+    value: https://scim-api.pingone.{{tld}}
+  - secret: true
+    name: accessToken
+  - name: envID
+    value: 0a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d
+  - name: orgID
+    value: 1b2c3d4e-5f6a-4b7c-8d9e-1f2a3b4c5d6e
+  - name: userID
+    value: 2c3d4e5f-6a7b-4c8d-89ef-2a3b4c5d6e7f
+  - name: appID
+    value: 3d4e5f6a-7b8c-4d9e-8fa0-3b4c5d6e7f80
+  - name: popID
+    value: 4e5f6a7b-8c9d-4e0f-8a1b-4c5d6e7f8091
+  - name: krpID
+    value: 2a3b4c5d-6e7f-4081-8293-c4d5e6f70819
+  - name: iconID
+    value: 3b4c5d6e-7f80-4192-83a4-d5e6f708192a
+  - name: templateName
+    value: transaction
+  - name: locale
+    value: en
+  - secret: true
+    name: password
+  - name: groupID
+    value: 5f6a7b8c-9d0e-4f1a-8b2c-5d6e7f8091a2
+  - name: resourceID
+    value: 6a7b8c9d-0e1f-4a2b-8c3d-6e7f8091a2b3
+  - name: providerID
+    value: 7b8c9d0e-1f2a-4b3c-8d4e-7f8091a2b3c4
+  - name: gatewayID
+    value: 8c9d0e1f-2a3b-4c4d-8e5f-8091a2b3c4d5
+  - name: policyID
+    value: 9d0e1f2a-3b4c-4d5e-8f60-91a2b3c4d5e6
+  - name: passwordPolicyID
+    value: 0e1f2a3b-4c5d-4e6f-8071-a2b3c4d5e6f7
+  - name: keyID
+    value: 1f2a3b4c-5d6e-4f70-8182-b3c4d5e6f708
+  - name: imageID
+    value: 4c5d6e7f-8091-42a3-84b5-e6f708192a3b
+  - name: themeID
+    value: 5d6e7f80-91a2-43b4-85c6-f708192a3b4c
+  - name: schemaID
+    value: 6e7f8091-a2b3-44c5-86d7-08192a3b4c5d
+  - name: agreementID
+    value: 7f8091a2-b3c4-45d6-87e8-192a3b4c5d6e
+  - name: languageID
+    value: 8091a2b3-c4d5-46e7-88f9-2a3b4c5d6e7f
+  - name: emailDomainID
+    value: 91a2b3c4-d5e6-47f8-8901-3b4c5d6e7f80
+  - name: contentID
+    value: a2b3c4d5-e6f7-4809-8a12-4c5d6e7f8091
+  - name: ruleID
+    value: b3c4d5e6-f708-491a-8b23-5d6e7f8091a2
+  - name: planID
+    value: c4d5e6f7-0819-4a2b-8c34-6e7f8091a2b3
+  - name: username
+    value: demo.user@example.com
+  - name: email
+    value: demo.user@example.com

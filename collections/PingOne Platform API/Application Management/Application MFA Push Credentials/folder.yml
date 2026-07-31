@@ -1,0 +1,11 @@
+info:
+  name: Application MFA Push Credentials
+  type: folder
+  seq: 5
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Application MFA Push Credentials](https://developer.pingidentity.com/pingone-api/platform/applications/application-mfa-push-credentials.html).
+  type: text/markdown

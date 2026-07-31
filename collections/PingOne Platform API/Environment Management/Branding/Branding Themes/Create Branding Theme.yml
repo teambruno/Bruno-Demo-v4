@@ -1,0 +1,109 @@
+info:
+  name: Create Branding Theme
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/themes"
+  body:
+    type: json
+    data: |-
+      {
+          "template": "slate",
+          "default": false,
+          "configuration": {
+              "logoType": "IMAGE",
+              "logo": {
+                  "href": "https://d3uinntk0mqu3p.cloudfront.net/branding/market/a3d073bc-3108-49ad-b96c-404bea59a1d0.png",
+                  "id": "00000000-0000-0000-0000-000000000000"
+              },
+              "applicationBackgroundColor": "#f8f8f8",
+              "backgroundType": "DEFAULT",
+              "bodyTextColor": "#4C4C4C",
+              "cardColor": "#FFFFFF",
+              "headingTextColor": "#4A4A4A",
+              "linkTextColor": "#5F5F5F",
+              "buttonColor": "#4A4A4A",
+              "buttonTextColor": "#FFFFFF",
+              "name": "Custom Slate v2",
+              "footer": "<p>Copyright © 2025 My Company</p>",
+              "backgroundOutlineColor": "#4A4A4A",
+              "foregroundMainColor": "#4A4A4A",
+              "foregroundHighlightColor": "#4A4A4A",
+              "schemaVersion": 2,
+              "buttonBorderColor": "#4A4A4A",
+              "focusRectangleColor": "#D033FF",
+              "buttonHoverStateFillColor": "#4A4A4A",
+              "buttonHoverStateBorderColor": "#4A4A4A",
+              "buttonHoverStateTextColor": "#FFFFFF",
+              "subTitleTextColor": "#4A4A4A",
+              "titleTextColor": "#4A4A4A",
+              "linkTextHoverColor": "#007CBA",
+              "inputLabelTextColor": "#798087",
+              "inputBoxBorderColor": "#4A4A4A",
+              "cardBorderColor": "#CACED3",
+              "globalFont": "\"Helvetica Neue\", Helvetica, sans-serif",
+              "logoHeight": "56px",
+              "buttonBorderWidth": "1px",
+              "buttonCornerRadius": "2px",
+              "buttonTextSize": "18px",
+              "buttonTextWeight": "400",
+              "titleTextSize": "20px",
+              "titleTextWeight": "600",
+              "subTitleTextSize": "15px",
+              "subTitleTextWeight": "400",
+              "bodyTextSize": "15px",
+              "bodyTextWeight": "400",
+              "linkTextSize": "15px",
+              "linkTextWeight": "400",
+              "inputLabelTextSize": "15px",
+              "inputLabelTextWeight": "600",
+              "inputValueTextSize": "15px",
+              "inputValueTextWeight": "600",
+              "inputValueTextColor": "#798087",
+              "inputBorderWidth": "1px",
+              "inputCornerRadius": "0px",
+              "inputLabelPosition": "float",
+              "cardBorderWidth": "0px",
+              "cardCornerRadius": "0px",
+              "cardShadow": "0px",
+              "cardHorizontalAlignment": "left",
+              "cardVerticalAlignment": "center",
+              "footerLocalized": {
+                  "enabled": true,
+                  "defaultLanguage": "en",
+                  "contentType": "HTML",
+                  "content": {
+                      "en": {
+                          "inputText": "<p>Copyright © 2025 My Company</p>"
+                      }
+                  }
+              },
+              "cardLogoAlignment": "left"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() == 200) {
+            try {
+                var jsonData = res.getBody();
+            }
+            catch (e) {
+                console.log("There was an error parsing JSON ", e);
+            }
+            bru.setEnvVar("themeID", jsonData.id);
+            console.log("themeID is now: " + bru.getEnvVar("themeID"));
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Branding Theme](https://developer.pingidentity.com/pingone-api/platform/branding/branding-themes/create-branding-theme.html).

@@ -1,0 +1,25 @@
+info:
+  name: Update Language Localization Status
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/languages/{{languageID}}/status/{{l10nStatusID}}"
+  body:
+    type: json
+    data: |-
+      {
+        "service": "Service_Name1",
+        "localizationComplete": true,
+        "statusDetails": "Status Details - add updated status details here"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Language Localization Status](https://developer.pingidentity.com/pingone-api/platform/language-management/language-localization-status/create-language-localization-status-1.html).

@@ -1,0 +1,26 @@
+info:
+  name: Update SOP Assignment
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/applications/{{appID}}/signOnPolicyAssignments/{{SOPAssignmentID}}"
+  body:
+    type: json
+    data: |-
+      {
+          "priority": 2,
+          "signOnPolicy": {
+              "id": "{{policyID}}"
+          }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update SOP Assignment](https://developer.pingidentity.com/pingone-api/platform/applications/application-sign-on-policy-assignments/update-sop-assignment.html).

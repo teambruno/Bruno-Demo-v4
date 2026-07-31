@@ -1,0 +1,23 @@
+info:
+  name: Update Environment Type
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{apiPath}}/environments/{{envID}}/type"
+  body:
+    type: json
+    data: |-
+      {
+          "type": "PRODUCTION"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Update Environment Type](https://developer.pingidentity.com/pingone-api/platform/environments/update-environment-type.html).

@@ -1,0 +1,103 @@
+info:
+  name: Create Custom Form
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{apiPath}}/environments/{{envID}}/forms"
+  body:
+    type: json
+    data: |-
+      {
+          "name": "Custom-Form_{{$timestamp}}",
+          "#description": "Test Description - created via CREATE Custom Form request",
+          "category": "CUSTOM",
+          "components": {
+              "fields": [
+                  {
+                      "type": "TEXT",
+                      "position": {
+                          "row": 0,
+                          "col": 0
+                      },
+                      "key": "field",
+                      "label": "[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"},{\"type\":\"i18n\",\"key\":\"fields.user.email.label\",\"defaultTranslation\":\"Email Address\",\"inline\":true,\"children\":[{\"text\":\"\"}]},{\"text\":\"\"}]}]",
+                      "required": true,
+                      "validation": {
+                          "type": "NONE",
+                          "regex": "",
+                          "errorMessage": ""
+                      },
+                      "attributeDisabled": false,
+                      "visibility": {
+                          "type": "SHOW_BY_DEFAULT",
+                          "key": "some-key"
+                      }
+                  },
+                  {
+                      "type" : "SOCIAL_LOGIN_BUTTON",
+                      "position" : {
+                      "row" : 1,
+                      "col" : 0
+                  },
+                     "key" : "social-login-button-field",
+                     "label" : "Sign in with Google",
+                     "styles" : {
+                        "width" : 100,
+                        "alignment" : "CENTER",
+                        "enabled" : false
+                     },
+                     "idpType" : "GOOGLE",
+                     "idpName" : "Google",
+                     "idpId" : "{{providerID}}",
+                     "idpEnabled" : true
+                  },
+                  {
+                      "type": "SUBMIT_BUTTON",
+                      "position": {
+                          "row": 2,
+                          "col": 0
+                      },
+                      "label": "[{\"type\":\"paragraph\",\"children\":[{\"text\":\"\"},{\"type\":\"i18n\",\"key\":\"button.text\",\"defaultTranslation\":\"Submit\",\"inline\":true,\"children\":[{\"text\":\"\"}]},{\"text\":\"\"}]}]"
+                  }
+              ]
+          },
+          "cols": 4,
+          "markOptional": true,
+          "markRequired": false,
+          "translationMethod": "TRANSLATE",
+          "fieldTypes": [
+              "SUBMIT_BUTTON",
+              "TEXT"
+          ],
+          "languageBundle": {
+              "fields.user.email.label": "Email Address",
+              "button.text": "Submit"
+          }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        test("Status code is 201", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("Response body JSON contains name and id strings", function () {
+          const jsonData = res.getBody();
+          expect(jsonData.name).to.be.a('string');
+          expect(jsonData.id).to.be.a('string');
+          bru.setEnvVar("formID", jsonData.id);
+          console.log("formID is now: " + bru.getEnvVar("formID"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Create Custom Form](https://developer.pingidentity.com/pingone-api/platform/forms/create-custom-form.html).
