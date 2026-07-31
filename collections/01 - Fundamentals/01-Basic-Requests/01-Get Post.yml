@@ -17,6 +17,8 @@ runtime:
       code: |-
         const globalVar = bru.getGlobalEnvVar('apiVersion');
         console.log('apiV: ' + globalVar);
+
+        console.log('date-time');
     - type: tests
       code: |-
         test("status code is 200", function() {
@@ -58,10 +60,8 @@ runtime:
     - expression: res.status
       operator: eq
       value: "200"
-      disabled: true
     - expression: res.body
       operator: isJson
-      disabled: true
     - expression: res.body.id
       operator: isNumber
       disabled: true
