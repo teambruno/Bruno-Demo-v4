@@ -1,13 +1,5 @@
 # Bruno CLI x GitHub Actions - Bruno V4 Demo Kit
 #
-# The GitHub twin of bruno-cli.gitlab-ci.yml. Same three stages, same three
-# reporters, same collections - so a prospect on either platform sees their own
-# CI. ("03 - Secrets and Vaults" is app-only - see the note on the matrix.)
-#
-# Unlike GitLab, the workflow path is fixed: GitHub only reads
-# .github/workflows/, so there is no custom-CI-path setting to point at a
-# bruno-cli.github.yml at the repo root.
-#
 #   Overview  https://docs.usebruno.com/bru-cli/overview
 #   Docker    https://docs.usebruno.com/bru-cli/docker
 #   Options   https://docs.usebruno.com/bru-cli/commandOptions
