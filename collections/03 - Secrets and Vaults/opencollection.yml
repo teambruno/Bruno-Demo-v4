@@ -1,0 +1,156 @@
+opencollection: 1.0.0
+
+info:
+  name: 03 - Secrets and Vaults
+  version: v1.0.0
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+docs:
+  content: |-
+    # 03 - Secrets and Vaults
+
+    Where a credential can live, and how Bruno reaches it. Nothing sensitive
+    is committed in any of these options.
+
+    | Folder | Source | Environments |
+    |--------|--------|--------------|
+    | `01-External-Secrets` | external secret managers | Demo-Azure, Demo-AWS, Demo-HashiCorp |
+    | `02-Local-Secrets` | `.env` file and Bruno secret vars | Demo-Local |
+
+    Most calls only need folder 02 - a `.env` file is where the prospect
+    already is. Folder 01 is the answer to "and when we outgrow that?".
+
+    ## Which source works where
+
+    | Source | Reference | Works in CI |
+    |--------|-----------|-------------|
+    | Bruno secret var | `{{name}}` | no - OS keychain, local only |
+    | `.env` | `{{process.env.NAME}}` | yes - and masked in reports |
+    | Secret manager | `{{secretStore.keyname}}` | yes - with runner credentials |
+
+    The two folders are separate because the reference syntax is not
+    interchangeable: `{{secretStore.keyname}}` is `externalSecrets` binding syntax
+    and only resolves when the environment declares a provider.
+
+    ## The point of folder 01
+
+    All three environments bind their provider to the **same alias**, `secretStore`.
+    So the requests never name a provider:
+
+    ```
+    {{secretStore.oauth-client-secret}}
+    ```
+
+    Switch the environment dropdown - `Demo-Azure` -> `Demo-AWS` ->
+    `Demo-HashiCorp` - and the exact same request resolves against a
+    different secret manager. No request edits, no re-tokenising.
+
+    ## Binding model
+
+    One binding = one container. The `.keyname` half of `{{alias.keyname}}`
+    selects a key inside it.
+
+    | Provider     | `type`                 | Field        | Container                     |
+    |--------------|------------------------|--------------|-------------------------------|
+    | Azure        | `azure-key-vault`      | `vaultName`  | the vault; keys = secret names |
+    | AWS          | `aws-secrets-manager`  | `secretName` | ONE secret holding JSON        |
+    | HashiCorp    | `hashicorp-vault`      | `path`       | one KV v2 path                 |
+
+    Connection credentials (tenant/client ID, AWS access keys, Vault token)
+    are NOT in these files - they are configured per provider in the
+    Environment UI and stored outside the repo.
+
+    ## Keys stored in every provider
+
+    Four keys, and every provider holds the same four.
+
+    | Key                      | Used by                                    |
+    |--------------------------|--------------------------------------------|
+    | `basic-auth-password`    | 01-Resolve Secret Value, 03-Basic Auth |
+    | `oauth-client-secret`    | 02-OAuth2 Client Secret                |
+    | `dummyjson-password`     | 04-Login Password                      |
+    | `webhook-signing-secret` | 05-Sign Webhook Payload - HMAC             |
+
+    Key names are lowercase alphanumerics + hyphens only. That is Azure Key
+    Vault's limit (no underscores, dots or slashes) and it is the strictest
+    of the three, so naming to it keeps one set of keys portable everywhere.
+
+    ## Seeding a provider
+
+    The Azure vault is already populated. If you ever rebuild it, or stand up
+    the other two:
+
+    ```bash
+    # Azure - one secret per key
+    az keyvault secret set --vault-name bruno-demo-kv \
+      --name oauth-client-secret --value 'demo-client-secret'
+
+    # AWS - ONE secret holding all four keys as JSON, because an
+    # aws-secrets-manager binding maps to a single secret
+    aws secretsmanager create-secret --name james_ha/bruno-demo-sm \
+      --secret-string '{"oauth-client-secret":"demo-client-secret",
+        "basic-auth-password":"passwd","dummyjson-password":"jamesdpass",
+        "webhook-signing-secret":"whsec_9c2f7ab3e14d5680bf3a1e2c4d8b60f7"}'
+
+    # HashiCorp - KV v2. Write to secret/bruno-demo; the read path in
+    # Demo-HashiCorp.yml is secret/data/bruno-demo (the /data/ segment is a
+    # KV v2 API requirement, not a typo)
+    vault kv put secret/bruno-demo \
+      oauth-client-secret=demo-client-secret basic-auth-password=passwd \
+      dummyjson-password=jamesdpass \
+      webhook-signing-secret=whsec_9c2f7ab3e14d5680bf3a1e2c4d8b60f7
+    ```
+
+    On Azure, creating a vault does **not** grant permission to read secrets
+    out of it - that is a separate data-plane role and the most common way
+    this demo dies:
+
+    ```bash
+    az role assignment create --role "Key Vault Secrets Officer" \
+      --assignee "$(az ad signed-in-user show --query id -o tsv)" \
+      --scope "$(az keyvault show --name bruno-demo-kv --query id -o tsv)"
+    ```
+
+    ## One-time setup for `02-Local-Secrets` under the CLI
+
+    The app reads `.env` from the workspace root, but `bru run` reads it from
+    the collection root. Symlink once so both work:
+
+    ```bash
+    ln -s ../../.env "collections/03 - Secrets and Vaults/.env"
+    ```
+
+    Covered by the `.env` rule in `.gitignore`, so it stays local. Without
+    it, `{{process.env.*}}` stays an unresolved template under the CLI and
+    request 01 fails - which is exactly what its assertions are there to
+    catch. Verified on bru 3.3.0.
+
+    ## Not wired into CI
+
+    Folder 01 needs live vault credentials, so this collection is
+    deliberately absent from `bruno-cli.gitlab-ci.yml`. Run it from the app,
+    or locally once `az login` has happened:
+
+    ```bash
+    bru run "01-External-Secrets" --env Demo-Azure
+
+    # Folder 02 needs no cloud credentials at all
+    bru run "02-Local-Secrets" --env Demo-Local
+    ```
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    scripts:
+      additionalContextRoots:
+        - ../../shared-scripts

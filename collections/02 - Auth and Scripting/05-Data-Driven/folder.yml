@@ -1,32 +1,50 @@
 info:
-  name: 04-Data-Driven
+  name: 05-Data-Driven
   type: folder
-  seq: 4
+  seq: 5
 
 docs:
   content: |-
-    ## 05 – Data-Driven Testing
+    ## 05 - Data-Driven Testing
 
-    Bruno CLI can iterate a request over every row in a CSV file using `--csv-file-path`.
-    Each row injects its columns as Bruno variables for that iteration.
+    Bruno CLI iterates a request over every row of a data file, injecting each
+    row's columns as variables for that iteration. One request file, N runs.
 
-    ### CSV file: `users.csv`
-    | userId | expectedName         | expectedEmail              |
-    |--------|----------------------|----------------------------|
-    | 1      | Leanne Graham        | Sincere@april.biz          |
-    | 2      | Ervin Howell         | Shanna@melissa.tv          |
-    | 3      | Clementine Bauch     | Nathan@yesenia.net         |
-    | 4      | Patricia Lebsack     | Julianne.OConner@kory.org  |
-    | 5      | Chelsey Dietrich     | Lucio_Hettinger@annie.ca   |
+    ### Data files
+
+    Both files hold the same three rows, so the two flags below are
+    interchangeable - useful for showing the feature is not CSV-only.
+
+    | name       | job                |
+    |------------|--------------------|
+    | John Doe   | Software Engineer  |
+    | Jane Smith | Product Manager    |
+    | Mark Lee   | Data Scientist     |
 
     ```bash
-    # Run the data-driven folder — iterates once per CSV row
-    bru run "05-Data-Driven" --env Production \
-      --csv-file-path "05-Data-Driven/users.csv"
+    # CSV
+    bru run "05-Data-Driven" --env Demo-Env \
+      --csv-file-path "05-Data-Driven/req-users.csv"
 
-    # Combine with reporters
-    bru run "05-Data-Driven" --env Production \
-      --csv-file-path "05-Data-Driven/users.csv" \
+    # JSON - same three rows, same result
+    bru run "05-Data-Driven" --env Demo-Env \
+      --json-file-path "05-Data-Driven/req-users.json"
+
+    # With reporters
+    bru run "05-Data-Driven" --env Demo-Env \
+      --csv-file-path "05-Data-Driven/req-users.csv" \
       --reporter-html reports/data-driven.html
     ```
+
+    Run these from the collection root
+    (`collections/02 - Auth and Scripting`), not the workspace root - the
+    data-file path resolves relative to the working directory.
+
+    ### Note on reading row values
+
+    The request asserts against the echoed response rather than calling
+    `bru.getVar("name")`. Row values interpolate into a request body
+    reliably; reading them back with `getVar()` is not dependable across CLI
+    versions. This folder previously used `getVar()` and had to run with
+    `allow_failure: true` in CI as a result.
   type: text/markdown

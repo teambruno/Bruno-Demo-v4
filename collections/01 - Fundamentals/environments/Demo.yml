@@ -1,5 +1,4 @@
 name: Demo
-color: "#2196F3"
 variables:
   - name: baseUrl
     value: https://jsonplaceholder.typicode.com
@@ -45,8 +44,14 @@ variables:
   - secret: true
     name: password
     description: ""
+  - secret: true
+    name: username
+    description: ""
+  - name: tokenVar
+    value: environmentToken
+    description: ""
 externalSecrets:
   type: azure-key-vault
   variables:
-    - name: azure-secrets
-      vaultName: Demo-James
+    - name: secretStore
+      vaultName: bruno-demo-kv

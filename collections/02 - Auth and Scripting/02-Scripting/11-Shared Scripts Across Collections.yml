@@ -89,7 +89,7 @@ docs: |-
   `shared-scripts/testData.js` `buildUser()` and validated by
   `shared-scripts/httpAsserts.js` - the exact same modules
   `01 - Fundamentals/05-Shared-Scripts` and
-  `03 - CLI CI and V4 Features/03-v4 Updates` call.
+  `04 - CLI CI and V4 Features/03-v4 Updates` call.
 
   Config (in `opencollection.yml`):
 

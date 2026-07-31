@@ -1,0 +1,34 @@
+info:
+  name: 02-Local-Secrets
+  type: folder
+  seq: 2
+
+docs:
+  content: |-
+    # Secrets without a secret manager
+
+    Folder 01 answers "our secrets live in Azure/AWS/Vault". This folder
+    answers the two questions that come before that one: "we just use a
+    .env file" and "can Bruno hold the secret itself?".
+
+    Run these on the **Demo-Local** environment. They do not use
+    `externalSecrets` at all - there is no vault in the loop.
+
+    | Source | Referenced as | Lives in |
+    |--------|---------------|----------|
+    | `.env` file | `{{process.env.NAME}}` | gitignored file at the workspace root |
+    | Bruno secret var | `{{appOnlySecret}}` | the OS keychain, never on disk |
+
+    ## Why these requests are separate from folder 01
+
+    Folder 01's requests reference `{{secretStore.oauth-client-secret}}`. That
+    dotted form is `externalSecrets` binding syntax - it only resolves when
+    the environment declares a provider. A plain environment cannot satisfy
+    it (object-typed variables do not interpolate with dot access either), so
+    Demo-Local gets its own requests rather than pretending to drive folder
+    01's.
+
+    That is worth saying out loud if someone asks why there are two folders:
+    the choice of secret *source* is an environment-level decision, and the
+    reference syntax changes with it.
+  type: text/markdown

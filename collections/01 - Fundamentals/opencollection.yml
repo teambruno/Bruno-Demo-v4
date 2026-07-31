@@ -19,7 +19,7 @@ docs:
   content: |-
     # 🎓 01 - Fundamentals
 
-    > **Start here.** Basic CRUD requests, variable precedence, chained requests, and a data-driven run — all against free public test APIs (JSONPlaceholder, DummyJSON, NewsAPI, Bruno's echo service).
+    > **Start here.** Basic CRUD requests, variable precedence, and chained requests — all against free public test APIs (JSONPlaceholder, DummyJSON, NewsAPI, Bruno's echo service). Data-driven runs moved to `02 - Auth and Scripting/05-Data-Driven`.
 
     ---
 
@@ -30,7 +30,6 @@ docs:
     | 01 | 🌐 **Basic-Requests** | 8 | Core CRUD operations & HTTP verbs |
     | 02 | 🔧 **Variables-and-Environments** | 2 | Variable precedence & scoping |
     | 03 | 🔗 **Chained-Requests** | 2 | Passing data between requests |
-    | 04 | 📊 **Data-Driven** | 1 | CSV-driven iterations |
     | 05 | 🧩 **Shared-Scripts** | 1 | Reusable workspace scripts |
 
     ---
@@ -53,12 +52,6 @@ docs:
       --reporter-json reports/results.json \
       --reporter-html reports/results.html \
       --reporter-junit reports/results.xml
-    ```
-
-    ### 🔄 Data-driven run from CSV
-    ```bash
-    bru run "04-Data-Driven" --env Production \
-      --csv-file-path "04-Data-Driven/users.csv"
     ```
 
     ### 🛠️ Shared scripts (requires developer sandbox)

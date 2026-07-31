@@ -1,7 +1,7 @@
 info:
   name: Get Random Dog Fact
   type: http
-  seq: 1
+  seq: 2
   tags:
     - demo
 

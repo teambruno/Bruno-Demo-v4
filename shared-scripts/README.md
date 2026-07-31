@@ -70,7 +70,7 @@ test('status is 200', () => {
 
 - `01 - Fundamentals/05-Shared-Scripts/01-Shared Asserts.yml`
 - `02 - Auth and Scripting/02-Scripting/11-Shared Scripts Across Collections.yml`
-- `03 - CLI CI and V4 Features/03-v4 Updates/05-Shared Scripts via additionalContextRoots.yml`
+- `04 - CLI CI and V4 Features/03-v4 Updates/05-Shared Scripts via additionalContextRoots.yml`
 
 Contrast with `02 - Auth and Scripting/02-Scripting/contractTests.js`, which
 is a **collection-local** JS file — no config needed, but only reachable from

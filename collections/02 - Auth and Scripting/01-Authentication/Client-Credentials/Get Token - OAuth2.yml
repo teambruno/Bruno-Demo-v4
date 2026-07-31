@@ -16,7 +16,10 @@ http:
     accessTokenUrl: https://www.httpfaker.org/api/auth/oauth2/client-credentials/token
     credentials:
       clientId: demo-client-id
-      clientSecret: demo-client-secret
+      # Pulled from Azure Key Vault via the `vault` binding in Demo-Env.yml.
+      # Only Demo-Env has that binding - Prod-Env/Staging-Env do not, so run
+      # this one on Demo-Env. See "03 - Secrets and Vaults" for the full story.
+      clientSecret: "{{secretStore.oauth-client-secret}}"
       placement: body
     scope: user:read
     tokenConfig:

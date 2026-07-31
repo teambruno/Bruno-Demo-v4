@@ -1,7 +1,7 @@
 info:
   name: Get News Articles
   type: http
-  seq: 2
+  seq: 4
   tags:
     - demo
 
@@ -25,7 +25,7 @@ http:
   auth:
     type: apikey
     key: apiKey
-    value: "{{azure-keys.news-api-key}}"
+    value: "{{secretStore.news-api-key}}"
     placement: query
 
 runtime:

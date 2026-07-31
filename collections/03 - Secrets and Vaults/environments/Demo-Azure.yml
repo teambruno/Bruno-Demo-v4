@@ -1,0 +1,17 @@
+name: Demo-Azure
+color: "#346AB2"
+variables:
+  - name: httpfakerUrl
+    value: https://www.httpfaker.org
+  - name: dummyUrl
+    value: https://dummyjson.com
+  - name: oauthUrl
+    value: https://www.httpfaker.org/api/auth/oauth2/client-credentials
+  - name: providerLabel
+    value: Azure Key Vault
+    description: shown in test output so the demo makes the provider obvious
+externalSecrets:
+  type: azure-key-vault
+  variables:
+    - name: secretStore
+      vaultName: bruno-demo-kv

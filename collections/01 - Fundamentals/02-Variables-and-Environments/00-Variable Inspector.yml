@@ -1,7 +1,7 @@
 info:
   name: Variable Inspector
   type: http
-  seq: 0
+  seq: 3
   tags:
     - smoke
     - regression

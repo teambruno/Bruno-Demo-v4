@@ -19,6 +19,7 @@ runtime:
   variables:
     - name: tokenVar
       value: tokenRequest
+      disabled: true
   scripts:
     - type: before-request
       code: |-

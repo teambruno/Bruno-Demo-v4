@@ -7,7 +7,7 @@ request:
   auth:
     type: apikey
     key: x-api-key
-    value: "{{azure-keys.reqres-api-key}}"
+    value: "{{secretStore.reqres-api-key}}"
     placement: header
 
 docs:

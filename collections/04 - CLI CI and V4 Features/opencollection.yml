@@ -1,7 +1,7 @@
 opencollection: 1.0.0
 
 info:
-  name: 03 - CLI CI and V4 Features
+  name: 04 - CLI CI and V4 Features
   version: v1.0.0
 config:
   proxy:
@@ -17,7 +17,7 @@ config:
 
 docs:
   content: |-
-    # 03 - CLI CI and V4 Features
+    # 04 - CLI CI and V4 Features
 
     CLI runner + reporter demos (tags, data-driven, multi-format reports),
     protocol coverage beyond REST (SOAP, SSE, gRPC, GraphQL, WebSocket),

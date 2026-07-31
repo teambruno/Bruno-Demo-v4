@@ -4,14 +4,14 @@ info:
   seq: 1
 
 http:
-  method: GET
-  url: https://httpbin.org/basic-auth/user/passwd
+  method: POST
+  url: https://www.httpfaker.org/api/echo
   headers:
     - name: content-type
       value: application/json
   body:
     type: json
-    data: ""
+    data: "{}"
   auth:
     type: basic
     username: user
@@ -21,20 +21,40 @@ runtime:
   scripts:
     - type: after-response
       code: |-
-        const body = res.getBody();
-        if (body && body.accessToken) {
-          bru.setVar("token", body.accessToken);
-        }
-
         bru.setNextRequest("Get all products");
     - type: tests
       code: |-
-        const body = res.getBody();
+        const echo = res.getBody();
 
-        test("login ok", () => {
+        // httpfaker echoes the request back, so we can verify the exact
+        // Authorization header Bruno built from the basic-auth config above.
+        const expected =
+          "Basic " + Buffer.from("user:passwd").toString("base64");
+
+        test("Bruno sent a well-formed Basic auth header", () => {
           expect(res.getStatus()).to.equal(200);
-          expect(body).to.have.property("accessToken");
+          expect(echo.headers.authorization).to.equal(expected);
         });
+
+docs: |-
+  ## Basic authentication
+
+  Bruno builds the `Authorization: Basic <base64(user:password)>` header from
+  the username/password fields - you never assemble it by hand.
+
+  This posts to `httpfaker.org/api/echo`, which hands the request back, so the
+  test can assert on the exact header that went on the wire.
+
+  Previously this hit `httpbin.org/basic-auth/user/passwd` for a 200/401
+  gate. httpbin is Postman-owned and takes our demos down when it has an
+  outage; httpfaker is Bruno's own but has no basic-auth endpoint. Checking
+  the echoed header proves the same thing - that the credentials were encoded
+  and sent correctly. For a live 200-vs-401 credential gate, see
+  `03 - Secrets and Vaults/01-External-Secrets/03-Digest Auth Password`.
+
+  Note the old test asserted `accessToken` on the response, which
+  httpbin's basic-auth endpoint never returned - it could not pass. Replaced
+  with an assertion that actually holds.
 
 settings:
   encodeUrl: true

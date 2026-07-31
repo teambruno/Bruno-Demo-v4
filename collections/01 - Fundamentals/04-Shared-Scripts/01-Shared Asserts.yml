@@ -73,7 +73,7 @@ docs: |-
   ```
 
   Same two lines appear in `02 - Auth and Scripting` and
-  `03 - CLI CI and V4 Features` - one definition, three collections.
+  `04 - CLI CI and V4 Features` - one definition, four collections.
 
   **Gotcha to demo:** runtime globals (`res`, `bru`, `expect`, `test`) are not
   injected into a required module, which is why `res` is passed in as an

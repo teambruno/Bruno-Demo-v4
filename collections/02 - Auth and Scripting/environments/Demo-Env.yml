@@ -36,6 +36,6 @@ variables:
 externalSecrets:
   type: azure-key-vault
   variables:
-    - name: azure-keys
-      vaultName: Demo-James
+    - name: secretStore
+      vaultName: bruno-demo-kv
       enabled: true

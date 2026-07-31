@@ -1,7 +1,8 @@
 # Bruno CLI x GitLab CI - Bruno V4 Demo Kit
 #
-# Runs the three collections in this workspace with the official Bruno CLI
-# Docker image and publishes HTML + JSON + JUnit reports on every pipeline.
+# Runs the three CI-safe collections in this workspace with the official Bruno
+# CLI Docker image and publishes HTML + JSON + JUnit reports on every pipeline.
+# ("03 - Secrets and Vaults" is app-only - see .all-collections below.)
 #
 #   Overview  https://docs.usebruno.com/bru-cli/overview
 #   Docker    https://docs.usebruno.com/bru-cli/docker
@@ -72,9 +73,15 @@ default:
                                  # path, so staging and prod runs of the same
                                  # request no longer show up as duplicates.
 
-# The three collections from workspace.yml.
+# The runnable collections from workspace.yml.
 # "02 - Auth and Scripting"'s Prod-Env.yml is deliberately bare in this demo
 # workspace, so CI injects the endpoints it needs with --env-var (repeatable).
+#
+# "03 - Secrets and Vaults" is deliberately NOT in this matrix. Its three
+# environments bind to live secret managers (Azure Key Vault, AWS Secrets
+# Manager, HashiCorp Vault) and every request needs data-plane credentials
+# the pipeline does not hold. Give the runner a workload identity and add it
+# here if you ever want it gated in CI.
 .all-collections:
   parallel:
     matrix:
@@ -86,7 +93,7 @@ default:
           --env-var weatherUrl=https://api.open-meteo.com/v1
           --env-var breweryUrl=https://api.openbrewerydb.org/v1
           --env-var userId=1
-      - COLLECTION: "03 - CLI CI and V4 Features"
+      - COLLECTION: "04 - CLI CI and V4 Features"
         BRU_ENV: "Production"
 
 # ---------------------------------------------------------------------------
@@ -120,21 +127,26 @@ data-driven:
   stage: test
   extends: .bru
   variables:
-    COLLECTION: "01 - Fundamentals"
-    BRU_ENV: "Production"
-    BRU_TARGET: "04-Data-Driven"
-    BRU_ARGS: "-r --csv-file-path 04-Data-Driven/users.csv"
-  # 5 CSV rows -> 5 iterations, each one a row in the report. The request's
-  # tests read their row with bru.getVar(), which returns undefined on CLI
-  # 4.0.0, so 3 of 4 tests fail per iteration - allowed to fail until the
-  # collection is updated. Drop this line once it's green.
-  allow_failure: true
+    COLLECTION: "02 - Auth and Scripting"
+    BRU_ENV: "Prod-Env"
+    BRU_TARGET: "05-Data-Driven"
+    BRU_ARGS: "-r --csv-file-path 05-Data-Driven/req-users.csv"
+  # 3 CSV rows -> 3 iterations, each one a row in the report. Swap the flag for
+  # --json-file-path 05-Data-Driven/req-users.json to drive the same three
+  # iterations from JSON instead.
+  #
+  # No allow_failure any more. The old version asserted with bru.getVar(),
+  # which returns undefined for CSV row values on CLI 4.0.0 - 3 of its 4 tests
+  # failed every iteration, so the job could never gate. The rewritten request
+  # asserts against the echoed response instead, which does not depend on
+  # getVar. Verified green locally on bru 3.3.0 (3/3 iterations, 6/6 tests)
+  # for both --csv-file-path and --json-file-path.
 
 v4-features:
   stage: test
   extends: .bru
   variables:
-    COLLECTION: "03 - CLI CI and V4 Features"
+    COLLECTION: "04 - CLI CI and V4 Features"
     BRU_ENV: "Production"
     # Scoped to this folder on purpose: 02-Additional-Request-Types holds
     # WebSocket/gRPC/SSE requests, which the CLI can't execute ("Unsupported

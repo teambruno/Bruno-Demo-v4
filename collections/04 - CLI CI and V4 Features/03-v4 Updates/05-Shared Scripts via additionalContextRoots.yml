@@ -7,8 +7,8 @@ info:
     - v4-feature
 
 http:
-  method: GET
-  url: https://httpbin.org/get?correlationId={{correlationId}}&runDate={{runDate}}
+  method: POST
+  url: https://www.httpfaker.org/api/echo?correlationId={{correlationId}}&runDate={{runDate}}
   params:
     - name: correlationId
       value: "{{correlationId}}"
@@ -18,6 +18,12 @@ http:
       value: "{{runDate}}"
       type: query
       description: Built by shared-scripts/testData.js today()
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: "{}"
   auth: inherit
 
 runtime:
@@ -36,16 +42,25 @@ runtime:
           assertRequiredFields
         } = require('../../shared-scripts/httpAsserts.js');
 
-        const body = res.getBody();
+        const echo = res.getBody();
+
+        // httpfaker's /api/echo has no parsed `args` object the way httpbin
+        // did - the query survives only inside the echoed `url` string.
+        const query = Object.fromEntries(
+          (echo.url.split('?')[1] || '')
+            .split('&')
+            .filter(Boolean)
+            .map(pair => pair.split('=').map(decodeURIComponent))
+        );
 
         test('200, JSON, under 5s (shared helper)', () => {
           assertHealthyJsonResponse(res, { status: 200, maxMs: 5000 });
         });
 
-        test('httpbin echoed the query built from shared test data', () => {
-          assertRequiredFields(body.args, ['correlationId', 'runDate']);
-          expect(body.args.correlationId).to.match(/^cli-ci-/);
-          expect(body.args.runDate).to.match(/^\d{4}-\d{2}-\d{2}$/);
+        test('httpfaker echoed the query built from shared test data', () => {
+          assertRequiredFields(query, ['correlationId', 'runDate']);
+          expect(query.correlationId).to.match(/^cli-ci-/);
+          expect(query.runDate).to.match(/^\d{4}-\d{2}-\d{2}$/);
         });
   assertions:
     - expression: res.status
@@ -75,9 +90,10 @@ docs:
             - "../../shared-scripts"
     ```
 
-    All three collections in this workspace point at `/shared-scripts/`, so
+    All four collections in this workspace point at `/shared-scripts/`, so
     `httpAsserts.js` and `testData.js` are written once and required from
-    `01 - Fundamentals`, `02 - Auth and Scripting`, and here.
+    `01 - Fundamentals`, `02 - Auth and Scripting`,
+    `03 - Secrets and Vaults`, and here.
 
     **CLI gate to demo:** the feature only works in the developer sandbox.
 

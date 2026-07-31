@@ -6,8 +6,14 @@ info:
     - v4-feature
 
 http:
-  method: GET
-  url: https://httpbin.org/get
+  method: POST
+  url: https://www.httpfaker.org/api/echo
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: "{}"
   auth: inherit
 
 runtime:

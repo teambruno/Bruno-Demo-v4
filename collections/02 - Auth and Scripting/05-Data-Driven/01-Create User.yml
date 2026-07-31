@@ -1,0 +1,103 @@
+info:
+  name: 01-Create User
+  type: http
+  seq: 1
+  tags:
+    # Deliberately NOT tagged `regression`. The regression CI job runs
+    # --tags regression with no data file attached, and this request fails by
+    # design in that situation (see the not.include("{{") test). It is driven
+    # by the dedicated data-driven job instead.
+    - data-driven
+
+http:
+  method: POST
+  url: https://echo.usebruno.com
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "{{name}}",
+        "job": "{{job}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        // echo.usebruno.com returns the request body verbatim, so the response
+        // IS the proof that this iteration's row was interpolated correctly.
+        //
+        // Deliberately no bru.getVar("name") here. Row values interpolate into
+        // the body reliably, but reading them back with getVar() is not
+        // dependable across CLI versions - that is exactly what made the old
+        // data-driven job allow_failure. Asserting on the echo sidesteps it.
+
+        test("row was injected - no unresolved template", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(body.name, "name").to.be.a("string").and.not.include("{{");
+          expect(body.job, "job").to.be.a("string").and.not.include("{{");
+        });
+
+        test("row is one of the seeded users", () => {
+          const users = {
+            "John Doe": "Software Engineer",
+            "Jane Smith": "Product Manager",
+            "Mark Lee": "Data Scientist"
+          };
+          expect(Object.keys(users), "unexpected name").to.include(body.name);
+          expect(body.job, `wrong job for ${body.name}`).to.equal(users[body.name]);
+        });
+
+        console.log(`row -> ${body.name} | ${body.job}`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.name
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Data-driven - Create User
+
+  One request file, three runs. Each row of `req-users.csv` (or
+  `req-users.json`) injects its columns as variables for that iteration, so
+  `{{name}}` and `{{job}}` in the body below resolve to a different user each
+  time.
+
+  ```bash
+  # CSV
+  bru run "05-Data-Driven" --env Demo-Env \
+    --csv-file-path "05-Data-Driven/req-users.csv"
+
+  # JSON - same three rows, same result
+  bru run "05-Data-Driven" --env Demo-Env \
+    --json-file-path "05-Data-Driven/req-users.json"
+  ```
+
+  ### Why the tests read the response, not the row
+
+  `echo.usebruno.com` returns the request body verbatim, so the response is
+  direct evidence of what actually went on the wire for this iteration.
+
+  That matters because reading row values back with `bru.getVar("name")` is
+  not dependable across CLI versions, while interpolation into the body is.
+  The previous version of this folder asserted with `getVar()` and had to be
+  marked `allow_failure` in CI because 3 of its 4 tests failed every
+  iteration. Asserting on the echo avoids the problem entirely and the job
+  can gate for real.
+
+  The `not.include("{{")` check is the important one - an unresolved Bruno
+  template is sent literally rather than erroring, so without it a run with
+  no data file attached would still pass.
