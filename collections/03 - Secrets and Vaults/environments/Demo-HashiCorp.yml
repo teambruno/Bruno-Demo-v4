@@ -1,5 +1,5 @@
 name: Demo-HashiCorp
-color: "#d18bdf"
+color: "#8D44B2"
 variables:
   - name: httpfakerUrl
     value: https://www.httpfaker.org
@@ -10,3 +10,8 @@ variables:
   - name: providerLabel
     value: HashiCorp Vault
     description: shown in test output so the demo makes the provider obvious
+externalSecrets:
+  type: hashicorp-vault-server
+  variables:
+    - name: secretStore
+      path: secret/data/bruno-demo-vault
