@@ -7,7 +7,7 @@ info:
 
 http:
   method: GET
-  url: https://newsapi.org/v2/everything?q=tesla&sortBy=publishedAt&from={{validDate}}
+  url: "{{newsUrl}}/everything?q=tesla&sortBy=publishedAt&from={{validDate}}"
   params:
     - name: q
       value: tesla

@@ -13,6 +13,9 @@ variables:
   - name: weatherUrl
     value: https://api.open-meteo.com/v1
     description: ""
+  - name: newsUrl
+    value: https://newsapi.org/v2
+    description: ""
   - name: postId
     value: "1"
     description: ""

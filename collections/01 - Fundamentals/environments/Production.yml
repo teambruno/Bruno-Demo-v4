@@ -9,6 +9,8 @@ variables:
     value: https://dummyjson.com
   - name: weatherUrl
     value: https://api.open-meteo.com/v1
+  - name: newsUrl
+    value: https://newsapi.org/v2
   - name: postId
     value: "1"
   - name: userId
