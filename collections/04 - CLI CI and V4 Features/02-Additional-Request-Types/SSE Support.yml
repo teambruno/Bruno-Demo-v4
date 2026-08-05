@@ -2,10 +2,15 @@ info:
   name: SSE Support
   type: http
   seq: 4
+  tags:
+    - v4-feature
 
 http:
   method: GET
-  url: sse.dev/test
+  url: https://stream.wikimedia.org/v2/stream/page-create
+  headers:
+    - name: Accept
+      value: text/event-stream
   auth: inherit
 
 settings:
@@ -13,3 +18,20 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  ## V4 feature: Server-Sent Events
+
+  Bruno detects the `text/event-stream` response and renders each event as it
+  arrives, instead of waiting for a response that never completes.
+
+  This points at Wikimedia EventStreams — a free, public, no-auth SSE feed of
+  every page created across all Wikimedia wikis in real time. Roughly one event
+  per second, so the pane fills at a readable pace on a call.
+
+  Other streams on the same host work too — swap `page-create` for
+  `recentchange` to get the full firehose (~40 events/sec: impressive, but too
+  fast to read).
+
+  Note: the previous endpoint (`sse.dev/test`) went offline — the domain no
+  longer resolves. Worth a sanity check before a customer demo.
