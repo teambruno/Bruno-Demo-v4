@@ -14,6 +14,7 @@
 #                          {{process.env.BRUNO_GLOBAL_API_KEY}}
 
 stages:
+  - basics
   - smoke
   - test
   - report
@@ -97,7 +98,30 @@ default:
         BRU_ENV: "Production"
 
 # ---------------------------------------------------------------------------
-# Stage 1 - fast gate: only requests tagged `smoke`, stop at the first failure
+# Stage 1 - `bru run` on its own, no templates, no matrix, no reporters
+#
+# Four commands, each its own line in the job log. This is the whole CLI: point
+# it at a request or a folder, pick an environment, and it runs your tests.
+# Everything after this stage is the same command with more flags on it.
+# ---------------------------------------------------------------------------
+bru-basics:
+  stage: basics
+  before_script:
+    - cd "$CI_PROJECT_DIR/collections/01 - Fundamentals"
+  script:
+    - bru --version
+
+    # One request, one environment -> 8 tests
+    - bru run "01-Basic-Requests/01-Get Post.yml" --env Production
+
+    # Same request, one variable overridden at run time (repeat --env-var to stack)
+    - bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
+
+    # A whole folder, in sequence: request 2 uses a variable request 1 set
+    - bru run "03-Chained-Requests" --env Production
+
+# ---------------------------------------------------------------------------
+# Stage 2 - fast gate: only requests tagged `smoke`, stop at the first failure
 # ---------------------------------------------------------------------------
 smoke:
   stage: smoke
@@ -106,7 +130,7 @@ smoke:
     BRU_ARGS: "-r --tags smoke --bail"
 
 # ---------------------------------------------------------------------------
-# Stage 2 - the suite, one job per collection, all running in parallel
+# Stage 3 - the suite, one job per collection, all running in parallel
 # ---------------------------------------------------------------------------
 regression:
   stage: test
@@ -155,7 +179,7 @@ v4-features:
     BRU_ARGS: "-r --sandbox developer"
 
 # ---------------------------------------------------------------------------
-# Stage 3 - publish the HTML reports to GitLab Pages with a small index
+# Stage 4 - publish the HTML reports to GitLab Pages with a small index
 # ---------------------------------------------------------------------------
 pages:
   stage: report

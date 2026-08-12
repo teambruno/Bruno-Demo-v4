@@ -39,10 +39,41 @@ env:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Stage 1 - fast gate: only requests tagged `smoke`, stop at the first failure
+  # Stage 1 - `bru run` on its own, no matrix, no arg building, no reporters
+  #
+  # Four commands, each its own line in the log. This is the whole CLI: point it
+  # at a request or a folder, pick an environment, and it runs your tests.
+  # Everything after this job is the same command with more flags on it.
+  # ---------------------------------------------------------------------------
+  basics:
+    name: bru basics
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: bru run
+        working-directory: collections/01 - Fundamentals
+        run: |
+          # `bru` below is the pinned CLI image with this folder mounted at /c
+          bru() { docker run --rm -v "$PWD:/c" -w /c "$BRUNO_CLI_IMAGE" "$@"; }
+
+          bru --version
+
+          # One request, one environment -> 8 tests
+          bru run "01-Basic-Requests/01-Get Post.yml" --env Production
+
+          # Same request, one variable overridden at run time (repeat --env-var to stack)
+          bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
+
+          # A whole folder, in sequence: request 2 uses a variable request 1 set
+          bru run "03-Chained-Requests" --env Production
+
+  # ---------------------------------------------------------------------------
+  # Stage 2 - fast gate: only requests tagged `smoke`, stop at the first failure
   # ---------------------------------------------------------------------------
   smoke:
     name: smoke (${{ matrix.slug }})
+    needs: basics
     runs-on: ubuntu-latest
     strategy:
       # false so one red collection still shows you the other two, which reads
@@ -121,7 +152,7 @@ jobs:
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Stage 2 - the suite, one job per collection, all running in parallel
+  # Stage 3 - the suite, one job per collection, all running in parallel
   #
   # GitLab expresses this as four jobs that each `extends: .all-collections`.
   # Actions has no `extends:`, so the same fan-out is one matrix whose entries
@@ -245,7 +276,7 @@ jobs:
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Stage 3 - collect every report into one artifact and a run summary
+  # Stage 4 - collect every report into one artifact and a run summary
   #
   # GitHub has no native JUnit viewer, so where GitLab feeds the MR "Tests" tab
   # with `reports: junit:`, this builds the same numbers into the run summary
