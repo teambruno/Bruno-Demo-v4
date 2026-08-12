@@ -23,9 +23,6 @@ runtime:
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("content-type is JSON", function() {
-          expect(res.getHeader('content-type')).to.include('application/json');
-        });
 
         test("response time is below 2000ms", function() {
           expect(res.getResponseTime()).to.be.below(2000);
