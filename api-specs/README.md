@@ -12,6 +12,8 @@ api-specs/
 ├── petstore/            Swagger Petstore - the canonical teaching spec
 │   ├── openapi.yaml         OpenAPI 3.0.4, 19 operations, 3 tags, live server
 │   └── swagger-2.0.json     Swagger 2.0 in JSON, same API
+├── adyen/               Enterprise spec - the one with examples everywhere
+│   └── checkout-v71.json    OpenAPI 3.1.0, 28 operations, 283 named examples
 ├── open-meteo/          Real published specs for an API this kit already calls
 │   ├── forecast.yml         OpenAPI 3.1.0, ~80 params on one operation
 │   ├── elevation.yml        OpenAPI 3.1.0, the smallest useful spec
@@ -22,6 +24,15 @@ api-specs/
 
 Between them these cover every import combination Bruno supports - **2.0 and
 3.x, YAML and JSON** - which is the point of having more than one.
+
+### Which one to open
+
+| If you want to show... | Use |
+|---|---|
+| Requests that actually **send** on a call | `petstore/openapi.yaml` |
+| **Examples and pre-filled bodies** arriving with the import | `adyen/checkout-v71.json` |
+| Legacy **Swagger 2.0** still importing | `petstore/swagger-2.0.json` |
+| **3.1**, and the no-`servers` snag customers hit | `open-meteo/forecast.yml` |
 
 There is deliberately **no checked-in collection** built from these. Importing
 live is the demo - the audience should watch the requests appear, not be shown
@@ -60,7 +71,38 @@ blank auth tab.
 Then import `swagger-2.0.json` to make the "and your old Swagger 2 files too"
 point without leaving the room.
 
-### 2. Import from URL, then Sync (Beta)
+### 2. Examples come across too
+
+Import `api-specs/adyen/checkout-v71.json` when someone asks what else survives
+the trip. **All 28 requests arrive with examples - 283 of them, about ten
+each** - and they keep the names Adyen wrote:
+
+```
+Payment session data for Apple Pay
+Response code 401. Unauthorized. (Get origin keys)
+```
+
+Open one and it holds a real response body, not a schema-shaped placeholder.
+24 of the 28 requests also land with their **request body pre-filled** from the
+spec's examples - real payment payloads with amounts and currencies.
+
+How Bruno builds these is worth knowing, because it decides what a customer's
+own spec will produce:
+
+- a response with a named `examples:` map keeps those names (`Apple Pay`)
+- a response with a single `example:` or just a schema becomes `200 Response`,
+  `400 Response`, and so on
+
+So a spec with named examples imports better than one without - a concrete,
+non-obvious reason for a team to invest in their OpenAPI document. Petstore
+still gets 75 examples across 19 requests with no named examples at all,
+because Bruno falls back to the response schemas.
+
+> Adyen's `servers` block points at their test environment, which needs a real
+> merchant account - every request 401s without credentials. Import it for the
+> examples, run Petstore.
+
+### 3. Import from URL, then Sync (Beta)
 
 Right-click → **OpenAPI Sync (Beta)** → **Add URL**:
 
@@ -83,7 +125,7 @@ demonstrated than asserted.
 > Sync overwrites the collection from the spec and cannot be undone. Demo it on
 > a throwaway import, not on a collection you spent the morning building.
 
-### 3. Show drift without waiting for upstream to change
+### 4. Show drift without waiting for upstream to change
 
 Sync polls a URL, so serve the specs locally and edit the copy:
 
@@ -98,14 +140,14 @@ The same idea works as a test rather than a UI gesture: a request that GETs
 here will fail a pipeline the day upstream changes the contract. No Node, no
 extra tooling - one request and a `test()` block.
 
-### 4. Export, the other direction
+### 5. Export, the other direction
 
 Collection → **Share** → **OpenAPI Specification** → **Create**. A collection
 someone built request-by-request comes back out as an OAS 3 document with
 endpoints, methods, parameters, headers and responses. Pairs well with a
 customer who has no spec at all and wants one.
 
-### 5. Generate collections in CI
+### 6. Generate collections in CI
 
 [`tools/oas-to-bruno.mjs`](tools/) does the import headlessly with
 `@usebruno/converters`, so the collection can be a build artifact of the spec
