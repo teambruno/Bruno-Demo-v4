@@ -1,5 +1,4 @@
 name: Local
-color: "#2196F3"
 variables:
   - name: baseUrl
     value: https://jsonplaceholder.typicode.com
@@ -35,3 +34,5 @@ variables:
           "outputDir": "reports"
         }
     description: object - reporter switches grouped into one typed variable
+  - name: lastRunAt
+    value: 2026-08-13T13:40:48.242Z

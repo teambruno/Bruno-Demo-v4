@@ -1,0 +1,16 @@
+{
+  "name": "bruno-demo-api-spec-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Generate Bruno V4 collections from the OpenAPI specs in ../",
+  "scripts": {
+    "generate:petstore": "node oas-to-bruno.mjs ../petstore/openapi.yaml ../../generated/petstore --name \"Petstore (generated)\"",
+    "generate:petstore-v2": "node oas-to-bruno.mjs ../petstore/swagger-2.0.json ../../generated/petstore-v2 --name \"Petstore Swagger 2.0 (generated)\"",
+    "generate:forecast": "node oas-to-bruno.mjs ../open-meteo/forecast.yml ../../generated/open-meteo --name \"Open-Meteo Forecast (generated)\""
+  },
+  "dependencies": {
+    "@usebruno/converters": "^0.22.0",
+    "js-yaml": "^4.1.0"
+  }
+}

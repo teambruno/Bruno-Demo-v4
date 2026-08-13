@@ -24,6 +24,32 @@ Each collection folder has its own docs (visible in the Bruno app, or in
 each `opencollection.yml` / `folder.yml`) with the relevant `bru run`
 commands.
 
+## OpenAPI
+
+[`api-specs/`](api-specs/) holds OpenAPI contracts to demo Bruno's OAS support
+against - import, OpenAPI Sync, view/design, export. Every spec is **vendored
+from upstream, unmodified** - nothing is hand-written for the demo, so "is that
+a real spec?" has a one-word answer.
+
+| Directory | Spec | Covers |
+|---|---|---|
+| [`api-specs/petstore/`](api-specs/petstore/) | Swagger Petstore, **OAS 3.0.4 YAML** + **Swagger 2.0 JSON** | 19 operations, 3 tags, live server, OAuth2 + API-key security schemes |
+| [`api-specs/open-meteo/`](api-specs/open-meteo/) | Open-Meteo, three **OAS 3.1.0** documents | Real published specs, tags with spaces, no `servers` block |
+| [`api-specs/tools/`](api-specs/tools/) | `oas-to-bruno.mjs` | Generate a collection from a spec in CI via `@usebruno/converters` |
+
+Between them that's every import combination Bruno supports - **2.0 and 3.x,
+YAML and JSON** - which is why there's more than one.
+
+Demo recipes - import into a collection, connect OpenAPI Sync to a live spec
+URL, force a drift, export back out as OAS, generate a collection in CI - are
+in [`api-specs/README.md`](api-specs/README.md), along with a reliability table
+for `petstore3.swagger.io` (a shared public sandbox where `/store/*` and a few
+other endpoints intermittently 500 - worth reading before demoing live).
+
+Import on a call rather than shipping a checked-in collection, so the audience
+sees the requests appear. Everything in `api-specs/` was verified against its
+live server on 2026-08-12.
+
 ## Shared scripts
 
 `/shared-scripts/` holds JS modules (`httpAsserts.js`, `testData.js`) used by
@@ -50,7 +76,8 @@ Docs: https://docs.usebruno.com/testing/script/js-file
 ## What changed from the old workspace
 
 - `workspace.yml` used to reference four collections that didn't exist on
-  disk (New Collection, Swagger Petstore, Zscaler OneAPI x2) - dropped.
+  disk (New Collection, Swagger Petstore, Zscaler OneAPI x2) - dropped. The
+  Petstore spec itself now lives in `api-specs/`, to import from on a call.
 - Committed `secrets.json`, `.env`, and `node_modules/` have been removed
   and gitignored. Secrets now use Bruno V4's `externalSecrets` /
   `{{name.keyname}}` pattern instead of a root-level `secrets.json`.

@@ -6,3 +6,7 @@ secrets.json
 reports/*.html
 reports/*.json
 reports/*.xml
+
+# Collections generated from api-specs/ by api-specs/tools/oas-to-bruno.mjs.
+# Build artifacts of the specs - regenerate with `npm run generate:petstore`.
+generated/

@@ -1,0 +1,249 @@
+version: 1
+mockServers:
+  B0KBTlLgN9JYMPDc6y5wy:
+    name: Fundamentals
+    port: 4000
+    sourceType: collection
+    collectionUid: liyfv0000000000000000
+    globalDelay: 0
+    responses:
+      - name: example - post (mock)
+        description: ''
+        copiedFrom:
+          exampleName: example - post
+          requestPathname: /Users/james/Bruno/Bruno-Demo/Workspaces/Bruno-v4-demo/collections/01 - Fundamentals/01-Basic-Requests/01-Get Post.yml
+        request:
+          url: /posts/:postId
+          method: GET
+          headers: []
+          params: []
+          body:
+            mode: none
+            json: null
+            text: null
+            xml: null
+            sparql: null
+            formUrlEncoded: []
+            multipartForm: []
+            graphql: null
+            file: []
+        response:
+          status: 200
+          statusText: OK
+          headers:
+            - uid: 40326e8683016b6d0e62e
+              name: date
+              value: Thu, 13 Aug 2026 13:34:11 GMT
+              enabled: true
+            - uid: 5dbeb5e155faed0a8d88f
+              name: content-type
+              value: application/json; charset=utf-8
+              enabled: true
+            - uid: 1790882041666f64f8021
+              name: transfer-encoding
+              value: chunked
+              enabled: true
+            - uid: 46fa389c4b80639dc9d7e
+              name: connection
+              value: keep-alive
+              enabled: true
+            - uid: 3fe34f46f82fa8a23111a
+              name: access-control-allow-credentials
+              value: 'true'
+              enabled: true
+            - uid: ce1661362345e717762f3
+              name: cache-control
+              value: max-age=43200
+              enabled: true
+            - uid: b654b554a01384a5b52cc
+              name: etag
+              value: W/"124-yiKdLzqO5gfBrJFrcdJ8Yq0LGnU"
+              enabled: true
+            - uid: 17145dd0ee06eef970d5d
+              name: expires
+              value: '-1'
+              enabled: true
+            - uid: 241ef1c4e27324a5cd64f
+              name: nel
+              value: '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
+              enabled: true
+            - uid: 123e2ed86a08ee0b58f8e
+              name: pragma
+              value: no-cache
+              enabled: true
+            - uid: 509c54445e6f9ff47d93e
+              name: report-to
+              value: '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=JRLSIl8tBt%2BKopkqJRorj73N%2B5rDONCX5VdSSUqKGF0%3D\u0026sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d\u0026ts=1785057943"}],"max_age":3600}'
+              enabled: true
+            - uid: fe006376c7b3b73985907
+              name: reporting-endpoints
+              value: heroku-nel="https://nel.heroku.com/reports?s=JRLSIl8tBt%2BKopkqJRorj73N%2B5rDONCX5VdSSUqKGF0%3D&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&ts=1785057943"
+              enabled: true
+            - uid: ca784b51a72349e2a8b4b
+              name: server
+              value: cloudflare
+              enabled: true
+            - uid: 6ad744c13c18989bb7c88
+              name: vary
+              value: Origin, Accept-Encoding
+              enabled: true
+            - uid: 553846c9b266219662e43
+              name: via
+              value: 2.0 heroku-router
+              enabled: true
+            - uid: 7e136576cb7b50bec8ab7
+              name: x-content-type-options
+              value: nosniff
+              enabled: true
+            - uid: bd4e655bbfbff07009ef5
+              name: x-powered-by
+              value: Express
+              enabled: true
+            - uid: 7ec62b383437349e2df64
+              name: x-ratelimit-limit
+              value: '1000'
+              enabled: true
+            - uid: 36edf49f007cf2879cb1a
+              name: x-ratelimit-remaining
+              value: '999'
+              enabled: true
+            - uid: c3771bcee2dede2189a52
+              name: x-ratelimit-reset
+              value: '1785057959'
+              enabled: true
+            - uid: 602f373fb4b58389a9d5a
+              name: age
+              value: '21708'
+              enabled: true
+            - uid: 001eb3406dd60735edc86
+              name: cf-cache-status
+              value: HIT
+              enabled: true
+            - uid: 5b73194f7cf1094e53682
+              name: cf-ray
+              value: a2a818890db523dd-EWR
+              enabled: true
+            - uid: ee2cbc482bd78a8ea140c
+              name: alt-svc
+              value: h3=":443"; ma=86400
+              enabled: true
+          body:
+            type: json
+            content: |-
+              {
+                "userId": 1,
+                "id": 1,
+                "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+                "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+              }
+        rules:
+          operator: AND
+          conditions: []
+        uid: bUT2L8YnBfP6Lqs2feOL1
+      - name: example - random (mock)
+        description: ''
+        copiedFrom:
+          exampleName: example - random
+          requestPathname: /Users/james/Bruno/Bruno-Demo/Workspaces/Bruno-v4-demo/collections/01 - Fundamentals/01-Basic-Requests/Get Random Dog Fact NEW.yml
+        request:
+          url: /api/v2/facts
+          method: GET
+          headers:
+            - uid: klhCdDEZ02DA1Cz1LI25a
+              name: Content-Type
+              value: application/json
+              enabled: false
+          params:
+            - uid: RVv8X7TjZHJlAJdtZE2fC
+              name: max_length
+              value: ''
+              type: query
+              enabled: false
+          body:
+            mode: none
+            json: null
+            text: null
+            xml: null
+            sparql: null
+            formUrlEncoded: []
+            multipartForm: []
+            graphql: null
+            file: []
+        response:
+          status: 200
+          statusText: OK
+          headers:
+            - uid: dbTKxSkYzZYuRgfooDJaO
+              name: cache-control
+              value: no-store
+              enabled: true
+            - uid: n8MetcorIZOEkPjANL5S9
+              name: content-length
+              value: '425'
+              enabled: true
+            - uid: YSRiuauLKqGZ64rm0hqmp
+              name: content-security-policy
+              value: 'default-src ''self''; base-uri ''self''; object-src ''none''; frame-ancestors ''none''; font-src ''self'' data:; img-src ''self'' data: https: blob:; script-src ''self'' https://good.lasagna.pizza ''nonce-NNPe2tJQhhZKlhZkdInYhQ==''; style-src ''self'' ''unsafe-inline''; connect-src ''self'' https://good.lasagna.pizza'
+              enabled: true
+            - uid: eLpNm3JrltaSn4h4p3naT
+              name: content-type
+              value: application/vnd.api+json; charset=utf-8
+              enabled: true
+            - uid: r2c8xjnHZ2pPKT8JHyT9k
+              name: etag
+              value: W/"9437bbdc3f5008ddea983889f91fe057"
+              enabled: true
+            - uid: 7hRk8qD4TW1zw5Xwm2NDf
+              name: referrer-policy
+              value: strict-origin-when-cross-origin
+              enabled: true
+            - uid: et9w1VhU5TN27rXv1ebkD
+              name: strict-transport-security
+              value: max-age=63072000; includeSubDomains
+              enabled: true
+            - uid: SI1LcFRJWLImlETyVvKY4
+              name: vary
+              value: Origin
+              enabled: true
+            - uid: F3F0iUMgXVC2lFSTDQqFl
+              name: x-content-type-options
+              value: nosniff
+              enabled: true
+            - uid: fhrtyRkFsLqsYDLLvmDDC
+              name: x-frame-options
+              value: SAMEORIGIN
+              enabled: true
+            - uid: oxYWiHuUU2jdDlvJnkNjN
+              name: x-permitted-cross-domain-policies
+              value: none
+              enabled: true
+            - uid: nCqUFfBX2SbHJLJy4oViV
+              name: x-request-id
+              value: f2d8be31-8465-446c-9484-1c361294f156
+              enabled: true
+            - uid: QvySmeEPyPNVlshIArIlv
+              name: x-runtime
+              value: '0.014369'
+              enabled: true
+            - uid: n7IlknQhuAkGc08qLGEq4
+              name: x-xss-protection
+              value: '0'
+              enabled: true
+            - uid: skRiFmDiqXDZMIwd9vLPP
+              name: date
+              value: Thu, 13 Aug 2026 13:34:21 GMT
+              enabled: true
+          body:
+            type: text
+            content: '{"data":[{"id":"17417cc4-a274-49f5-bf48-428ac83f1c44","type":"fact","attributes":{"body":"SAP poodles did not originate in France but in Germany (\"poodle\" comes from the German pudel or pudelhund, meaning \"splashing dog\"). Some scholars speculate the poodle’s puffs of hair evolved when hunters shaved the poodle for more efficient swimming, while leaving the pom-poms around the major joints to keep them warm."}}]}'
+        rules:
+          operator: AND
+          conditions: []
+        uid: PQW08H5NkGND7fuq5VZh1
+  ZfgK2hpDTg2JCShjxi8ab:
+    name: New Mock Server
+    port: 4001
+    sourceType: collection
+    collectionUid: 19z4ecz00000000000000
+    globalDelay: 0
+    responses: []
