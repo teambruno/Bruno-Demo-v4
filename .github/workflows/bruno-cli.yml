@@ -4,14 +4,23 @@
 #   Docker    https://docs.usebruno.com/bru-cli/docker
 #   Options   https://docs.usebruno.com/bru-cli/commandOptions
 #   Reporters https://docs.usebruno.com/bru-cli/builtInReporters
+#   Secrets   https://docs.usebruno.com/bru-cli/secret-managers
 #
-# Optional repository secret (Settings > Secrets and variables > Actions):
-#   BRUNO_GLOBAL_API_KEY - read by environments/Globals-CI.yml as
-#                          {{process.env.BRUNO_GLOBAL_API_KEY}}
+# Optional repository secrets (Settings > Secrets and variables > Actions):
+#   BRUNO_GLOBAL_API_KEY  - read by environments/Globals-CI.yml as
+#                           {{process.env.BRUNO_GLOBAL_API_KEY}}
 #
-# Optional repository variable, same screen:
-#   PUBLISH_PAGES = true - also publish the HTML reports to GitHub Pages
-#                          (the equivalent of GitLab's `pages:` job)
+#   AZURE_CLIENT_ID       - the `vault` job at the bottom. App registration with
+#   AZURE_TENANT_ID         Key Vault "Secrets User" on bruno-demo-kv.
+#   AZURE_SUBSCRIPTION_ID
+#   AZURE_CLIENT_SECRET   - service-principal leg only. The azure/login leg is
+#                           federated (OIDC) and needs no secret at all.
+#
+# Optional repository variables, same screen:
+#   PUBLISH_PAGES = true        - also publish the HTML reports to GitHub Pages
+#                                 (the equivalent of GitLab's `pages:` job)
+#   RUN_AZURE_VAULT_DEMO = true - enable the `vault` job. Off by default so a
+#                                 fork without an Azure tenant stays green.
 
 name: Bruno CLI
 
@@ -161,8 +170,8 @@ jobs:
   # "03 - Secrets and Vaults" is deliberately NOT in this matrix. Its three
   # environments bind to live secret managers (Azure Key Vault, AWS Secrets
   # Manager, HashiCorp Vault) and every request needs data-plane credentials
-  # the pipeline does not hold. Give the runner an OIDC identity and add it
-  # here if you ever want it gated in CI.
+  # the pipeline does not hold. The `vault` job at the bottom of this file runs
+  # it against Azure Key Vault once the runner has an identity.
   # ---------------------------------------------------------------------------
   test:
     name: ${{ matrix.slug }}
@@ -361,3 +370,146 @@ jobs:
           path: public/
       - uses: actions/deploy-pages@v5
         if: vars.PUBLISH_PAGES == 'true' && github.ref == 'refs/heads/main'
+
+  # ---------------------------------------------------------------------------
+  # Stage 5 - Azure Key Vault, two ways to authenticate
+  #
+  #   https://docs.usebruno.com/bru-cli/secret-managers
+  #
+  # "03 - Secrets and Vaults" reads its credentials out of a real vault instead
+  # of out of the repo. Its Demo-Azure.yml environment binds the alias
+  # `secretStore` to the Key Vault, and nothing else:
+  #
+  #   externalSecrets:
+  #     type: azure-key-vault
+  #     variables:
+  #       - name: secretStore
+  #         vaultName: bruno-demo-kv
+  #
+  # Requests then use {{secretStore.basic-auth-password}} the same way they use
+  # any other variable. Note what is NOT in the collection: how to log in. That
+  # lives in the file behind --secrets-env-file, which is why the identical
+  # collection runs on a laptop and on a runner with no edits - only the file
+  # changes. Values are resolved at run time and never written to disk.
+  #
+  # The matrix is the demo: same requests, same vault, two ways in.
+  #
+  #   azure-cli        `az login` via OIDC, then a one-line env file that just
+  #                    says "use that session". No Azure secret in the repo.
+  #   secrets-env-file service principal credentials rendered from Actions
+  #                    secrets at run time. Needs no az binary and no session,
+  #                    so this is the path for runners or containers that have
+  #                    no Azure CLI on them.
+  #
+  # Reports upload as their own artifact rather than joining the `report` job's
+  # aggregate, so this stays independent of the rest of the pipeline.
+  # ---------------------------------------------------------------------------
+  vault:
+    name: azure key vault (${{ matrix.auth }})
+    needs: test
+    # Off unless you set the RUN_AZURE_VAULT_DEMO repository variable to "true",
+    # so a checkout without an Azure tenant behind it never goes red here.
+    if: always() && vars.RUN_AZURE_VAULT_DEMO == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # federated login below mints an OIDC token for Entra ID
+    strategy:
+      fail-fast: false
+      matrix:
+        auth: [azure-cli, secrets-env-file]
+    steps:
+      - uses: actions/checkout@v7
+
+      # Leg 1 only. Federated credentials, so the repo holds no Azure password -
+      # the runner trades its OIDC token for a short-lived Entra ID one. Needs a
+      # federated credential on the app registration; if you have not set that
+      # up, swap the three inputs for `creds: ${{ secrets.AZURE_CREDENTIALS }}`.
+      - name: az login
+        if: matrix.auth == 'azure-cli'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Leg 2 only. ci/azure-keyvault-service-principal.env.tpl is committed with
+      # placeholders; the real values arrive as Actions secrets and are
+      # substituted in here. The rendered file is written to RUNNER_TEMP - it
+      # never exists inside the checkout, so it cannot be committed by accident
+      # or swept into an artifact by the upload step below.
+      - name: Render secrets env file from repository secrets
+        if: matrix.auth == 'secrets-env-file'
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+
+          # envsubst turns an unset secret into an empty value, and the CLI
+          # would then fail somewhere less obvious. Say it here instead.
+          for v in AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET; do
+            [[ -n "${!v}" ]] || { echo "::error::repository secret $v is unset"; exit 1; }
+          done
+
+          # 600 before anything is written, and the explicit variable list keeps
+          # envsubst from expanding anything else that happens to be in scope.
+          install -m 600 /dev/null "$RUNNER_TEMP/azure-keyvault-service-principal.env"
+          envsubst '${AZURE_TENANT_ID} ${AZURE_CLIENT_ID} ${AZURE_CLIENT_SECRET}' \
+            < ci/azure-keyvault-service-principal.env.tpl \
+            > "$RUNNER_TEMP/azure-keyvault-service-principal.env"
+
+      # Native install rather than the container the other jobs use: Azure CLI
+      # auth needs the `az` binary and its login session, both of which are on
+      # the runner and neither of which is in usebruno/cli. The service-principal
+      # leg has no such constraint and would run fine in the image - mount the
+      # rendered file in with -v and pass the container path.
+      - name: Install Bruno CLI
+        run: |
+          # Version tracks BRUNO_CLI_IMAGE above so the two cannot drift apart.
+          npm install -g "@usebruno/cli@${BRUNO_CLI_IMAGE##*:}"
+          bru --version
+
+      - name: bru run
+        env:
+          BRU_AUTH: ${{ matrix.auth }}
+          BRU_NAME: vault-${{ matrix.auth }}
+        run: |
+          set -uo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/$REPORT_DIR"
+
+          # The only difference between the two legs: which file this points at.
+          # Same flag, same command, same collection.
+          if [[ "$BRU_AUTH" == "azure-cli" ]]; then
+            secrets_env_file="$GITHUB_WORKSPACE/ci/azure-keyvault-cli-auth.env"
+          else
+            secrets_env_file="$RUNNER_TEMP/azure-keyvault-service-principal.env"
+          fi
+
+          cd "$GITHUB_WORKSPACE/collections/03 - Secrets and Vaults"
+
+          bru run "02-External-Secrets" -r \
+            --env Demo-Azure \
+            --secrets-env-file "$secrets_env_file" \
+            --global-env "$BRU_GLOBAL_ENV" \
+            --workspace-path "$BRU_WORKSPACE_PATH" \
+            --reporter-html  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.html" \
+            --reporter-json  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.json" \
+            --reporter-junit "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.xml" \
+            --reporter-skip-headers authorization \
+            --reporter-skip-headers x-api-key \
+            --reporter-skip-headers x-secret-probe
+
+      # RUNNER_TEMP is wiped with the runner anyway, but on a self-hosted runner
+      # it may not be. Drop the file the moment it stops being needed.
+      - name: Remove rendered credentials
+        if: always() && matrix.auth == 'secrets-env-file'
+        run: rm -f "$RUNNER_TEMP/azure-keyvault-service-principal.env"
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bruno-reports-vault-${{ matrix.auth }}
+          path: ${{ env.REPORT_DIR }}/
+          retention-days: 30

@@ -3,6 +3,11 @@ node_modules/
 secrets.json
 .env
 *.log
+
+# Rendered from ci/azure-keyvault-service-principal.env.tpl - CI writes it to
+# RUNNER_TEMP, but a local `cp` of the template lands here. Only the .tpl and
+# the (credential-free) ci/azure-keyvault-cli-auth.env belong in git.
+ci/azure-keyvault-service-principal.env
 reports/*.html
 reports/*.json
 reports/*.xml

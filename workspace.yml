@@ -16,5 +16,7 @@ collections:
     path: "collections/01 - Fundamentals - 1"
 
 specs:
+  - name: "checkout-v71"
+    path: "api-specs/adyen/checkout-v71.json"
 
 docs: ''
