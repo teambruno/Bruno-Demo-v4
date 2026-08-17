@@ -50,11 +50,27 @@ runtime:
         console.log('Date 28 days ago:', formatted);
     - type: after-response
       code: |-
-        // A test() works in a post-response script too, but the tests block
-        // below is its proper home - same result, easier to find.
-        test("returns 200 OK", () => {
-          expect(res.status).to.equal(200);
-        });
+        // Extract articles from the news API response and store metadata
+        const articles = res.body.articles;
+        const totalResults = res.body.totalResults;
+
+        console.log(`=== News API Response ===`);
+        console.log(`Total articles available: ${totalResults}`);
+        console.log(`Articles in this response: ${articles?.length || 0}`);
+
+        // Store the article count and first article title for use in subsequent requests
+        if (articles && articles.length > 0) {
+          bru.setVar('articleCount', articles.length);
+          bru.setVar('firstArticleTitle', articles[0].title);
+          bru.setVar('firstArticleUrl', articles[0].url);
+          console.log(`First article: "${articles[0].title}"`);
+        }
+
+        // Demonstrate storing vars at different scope levels
+        bru.setVar('newsApiLastFetch', new Date().toISOString());  // request-level
+        bru.setEnvVar('latestArticleCount', articles.length);      // environment-level
+        bru.setCollectionVar('lastNewsApiCall', req.url);          // collection-level
+        bru.setGlobalEnvVar('newsApiTimestamp', new Date().toISOString()); // global-level
     - type: tests
       code: |-
         const body = res.getBody();
