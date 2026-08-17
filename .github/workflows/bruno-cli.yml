@@ -500,7 +500,14 @@ jobs:
 
           cd "$GITHUB_WORKSPACE/collections/03 - Secrets and Vaults"
 
-          cmd=(bru run "02-External-Secrets" -r --env Demo-Azure)
+          # --exclude-tags drops 03-Digest Auth Password, which is tagged
+          # app-only. The CLI does not interpolate digest auth credentials -
+          # it puts the literal "{{secretStore.basic-auth-password}}" on the
+          # wire - so that request 401s here whatever the vault holds. Bug
+          # filed; see the request's docs. The other four all resolve real
+          # vault values, so this stays an honest test of the store.
+          cmd=(bru run "02-External-Secrets" -r --env Demo-Azure
+               --exclude-tags app-only)
 
           # The only difference between the two legs. Leg 1 adds nothing and
           # rides the az login session; leg 2 points at the rendered file.
@@ -509,7 +516,15 @@ jobs:
             cmd+=(--secrets-env-file "$RUNNER_TEMP/azure-keyvault-service-principal.env")
           fi
 
-          cmd+=(--global-env "$BRU_GLOBAL_ENV"
+          # --verbose is not optional here. A vault fetch that fails - bad
+          # credentials, no data-plane role, wrong vault name - is caught and
+          # swallowed, so without this the run just reports ordinary 401s from
+          # the API under test and never says the vault was the problem. It
+          # logs the vault name and whether each fetch succeeded, never a
+          # secret value, and "1. Fetched secret for: bruno-demo-kv" is worth
+          # pointing at on a call anyway.
+          cmd+=(--verbose
+                --global-env "$BRU_GLOBAL_ENV"
                 --workspace-path "$BRU_WORKSPACE_PATH"
                 --reporter-html  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.html"
                 --reporter-json  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.json"
