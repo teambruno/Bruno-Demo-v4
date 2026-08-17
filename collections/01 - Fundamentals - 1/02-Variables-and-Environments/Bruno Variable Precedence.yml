@@ -19,8 +19,8 @@ runtime:
   variables:
     - name: tokenVar
       value: tokenRequest
-      disabled: true
       description: Request-scoped var - beats the environment, loses to setVar. Enable it to watch it take over.
+      disabled: true
   scripts:
     - type: before-request
       code: |-

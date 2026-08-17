@@ -15,3 +15,10 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  ## Reusing a captured token
+
+  No script here - the Bearer token is `{{dummyJsonToken}}`, set by the
+  `Login` request's `after-response` script. Run `Login` first (or run the
+  folder) and this request authenticates with no copy/paste.

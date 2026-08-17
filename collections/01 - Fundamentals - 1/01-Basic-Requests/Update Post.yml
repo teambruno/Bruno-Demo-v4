@@ -1,0 +1,49 @@
+info:
+  name: Update Post
+  type: http
+  seq: 5
+  tags:
+    - regression
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/posts/{{postId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "id": 1,
+        "title": "Bruno CLI – Updated Title",
+        "body": "Updated via a Bruno CLI collection run.",
+        "userId": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("title was updated", () => {
+          expect(body.title).to.equal("Bruno CLI – Updated Title");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.title
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5

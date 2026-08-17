@@ -33,7 +33,9 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // Dynamically compute a 7-day forecast window
+        // before-request runs before the URL is assembled, so anything set
+        // here is available to {{start_date}} / {{end_date}} in the query
+        // above. The date range is always current - nothing to hand-edit.
         const today = new Date();
         const fmt = (d) => d.toISOString().split('T')[0];
 

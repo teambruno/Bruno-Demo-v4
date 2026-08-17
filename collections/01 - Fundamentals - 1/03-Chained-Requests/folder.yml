@@ -1,0 +1,19 @@
+info:
+  name: 03-Chained-Requests
+  type: folder
+  seq: 3
+
+request: {}
+
+docs:
+  content: |-
+    ## 02 – Chained Requests
+
+    Shows how Bruno passes data between requests using `bru.setVar()`.
+    Step 1 fetches a list of products and stores the top-rated product's ID.
+    Step 2 uses that stored ID to fetch the full product detail.
+
+    ```bash
+    bru run "02-Chained-Requests" --env Production
+    ```
+  type: text/markdown

@@ -33,10 +33,13 @@ runtime:
   scripts:
     - type: tests
       code: |-
+        // zod ships inside Bruno - no npm install, no node_modules in the repo.
         const { z } = require("zod");
 
         const response = res.getBody();
 
+        // Describe the contract once; parse() throws on any drift, and the
+        // surrounding test() turns that throw into a named failing test.
         const PetSchema = z.object({
           id: z.string().startsWith("pet_"),
           name: z.string(),

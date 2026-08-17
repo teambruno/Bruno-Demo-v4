@@ -22,10 +22,12 @@ runtime:
 
         console.log(`User: ${user.name} | City: ${user?.address?.city}`);
 
-        // Conditional flow: skip next if user not found
+        // Conditional flow: stop the run if the prerequisite failed, rather
+        // than letting every downstream request fail for the same reason.
+        // Runner-only - has no effect on a single Send.
         if (res.status !== 200) {
           console.warn("User not found – skipping downstream request");
-          bru.setNextRequest(null); // stop the run
+          bru.setNextRequest(null); // null = end the run here
         }
     - type: tests
       code: |-

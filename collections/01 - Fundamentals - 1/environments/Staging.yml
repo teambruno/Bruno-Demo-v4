@@ -1,0 +1,36 @@
+name: Staging
+color: "#e5be7a"
+variables:
+  - name: baseUrl
+    value: https://jsonplaceholder.typicode.com
+  - name: breweryUrl
+    value: https://api.openbrewerydb.org/v1
+  - name: dummyUrl
+    value: https://dummyjson.com
+  - name: weatherUrl
+    value: https://api.open-meteo.com/v1
+  - name: newsUrl
+    value: https://newsapi.org/v2
+  - name: postId
+    value: "1"
+  - name: userId
+    value: "1"
+  - name: releaseStage
+    value: staging
+  - name: retryLimit
+    value:
+      type: number
+      data: "1"
+  - name: verboseLogging
+    value:
+      type: boolean
+      data: "true"
+  - name: featureFlags
+    value:
+      type: object
+      data: |-
+        {
+          "betaSearch": true,
+          "newAuthFlow": true,
+          "maxBatchSize": 50
+        }

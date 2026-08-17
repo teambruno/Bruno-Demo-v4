@@ -12,6 +12,8 @@ collections:
     path: "collections/03 - Secrets and Vaults"
   - name: "04 - CLI CI and V4 Features"
     path: "collections/04 - CLI CI and V4 Features"
+  - name: "01 - Fundamentals"
+    path: "collections/01 - Fundamentals - 1"
 
 specs:
 

@@ -1,0 +1,15 @@
+info:
+  name: 02-Variables-and-Environments
+  type: folder
+  seq: 2
+
+request: {}
+
+docs:
+  content: |-
+    ## 02 - Variables and Environments
+
+    Variable precedence (runtime > folder > environment > collection > global)
+    and prompt-for-input variables. Points at Bruno's own echo.usebruno.com
+    test endpoint.
+  type: text/markdown

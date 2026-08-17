@@ -22,6 +22,10 @@ runtime:
           expect(res.status).to.equal(200);
         });
 
+        // Same latency budget expressed twice - here as a test, and in the
+        // assertions block below as res.responseTime lte 3000. Pick whichever
+        // your team reads more easily; both fail the run and both land in the
+        // JUnit/HTML report.
         test("response time is under 3 seconds", () => {
           expect(res.responseTime).to.be.below(3000);
         });

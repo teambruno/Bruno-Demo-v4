@@ -14,6 +14,9 @@ runtime:
   scripts:
     - type: tests
       code: |-
+        // Two ways to check the same response, both reported side by side:
+        // these scripted Chai tests, and the declarative `assertions:` block
+        // at the bottom of this file (no code, set from the Assert tab).
         const users = res.getBody();
 
         test("status is 200", () => {

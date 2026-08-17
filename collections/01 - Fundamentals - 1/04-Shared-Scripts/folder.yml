@@ -1,0 +1,35 @@
+info:
+  name: 04-Shared-Scripts
+  type: folder
+  seq: 4
+
+request: {}
+
+docs:
+  content: |-
+    ## 05 - Shared Scripts
+
+    The same JS modules, reused by all three collections in this workspace.
+    Modules live in `/shared-scripts/` at the workspace root and are exposed
+    to this collection by `additionalContextRoots` in `opencollection.yml`:
+
+    ```yml
+    extensions:
+      bruno:
+        scripts:
+          additionalContextRoots:
+            - "../../shared-scripts"
+    ```
+
+    Requires **Developer Mode** in the app, and `--sandbox=developer` on the
+    CLI (v3.0.0+):
+
+    ```bash
+    bru run "05-Shared-Scripts" --env Production --sandbox=developer
+
+    # Same run without the flag - fails on the require(), on purpose.
+    bru run "05-Shared-Scripts" --env Production
+    ```
+
+    Docs: https://docs.usebruno.com/testing/script/js-file
+  type: text/markdown

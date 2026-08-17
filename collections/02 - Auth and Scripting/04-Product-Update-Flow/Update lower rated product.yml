@@ -18,6 +18,9 @@ runtime:
   scripts:
     - type: before-request
       code: |-
+        // The low-rating branch. Reads the discount captured two requests ago,
+        // doubles it, and feeds it back into the body as
+        // {{updatedDiscountPercent}} - the body is built from live data.
         var currentDiscount = bru.getVar('discountPercent')
         bru.setVar('updatedDiscountPercent', currentDiscount * 2)
 

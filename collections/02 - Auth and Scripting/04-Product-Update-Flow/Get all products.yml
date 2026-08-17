@@ -12,8 +12,10 @@ runtime:
   scripts:
     - type: after-response
       code: |-
+        // Step 1 of the branching flow. Grab the catalogue size so the next
+        // request can pick a random product id that actually exists.
         let productTotal = res.body.total
-         
+
         // Accessing response properties
         console.log("Total Products Returned :" + productTotal);
         bru.setVar('productMaxTotal',productTotal)
@@ -69,12 +71,11 @@ runtime:
           avgRating = Number((sum / count).toFixed(2));
         }
 
-        // keep the rest of your script the same
-        bru.setVar("avgRatingPage", avgRating);
-
         const lowRatedIds = products.filter(p => (Number(p.rating) || 0) < 3.0).map(p => p.id);
         const lowStockIds = products.filter(p => p.stock <= 5).map(p => p.id);
 
+        // Anything worth reusing downstream goes into a runtime var. Arrays
+        // are stringified so they survive {{...}} interpolation.
         bru.setVar("avgRatingPage", avgRating);
         bru.setVar("lowRatedIds", JSON.stringify(lowRatedIds)); // e.g. "[1,10,23]"
         bru.setVar("lowStockIds", JSON.stringify(lowStockIds));

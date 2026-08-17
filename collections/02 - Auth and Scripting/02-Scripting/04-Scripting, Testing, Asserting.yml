@@ -30,6 +30,9 @@ runtime:
   scripts:
     - type: before-request
       code: |-
+        // All three of Bruno's checks in one request: this script, the tests
+        // block, and the declarative assertions at the bottom.
+
         // Get today's date
         const today = new Date();
 
@@ -47,6 +50,8 @@ runtime:
         console.log('Date 28 days ago:', formatted);
     - type: after-response
       code: |-
+        // A test() works in a post-response script too, but the tests block
+        // below is its proper home - same result, easier to find.
         test("returns 200 OK", () => {
           expect(res.status).to.equal(200);
         });

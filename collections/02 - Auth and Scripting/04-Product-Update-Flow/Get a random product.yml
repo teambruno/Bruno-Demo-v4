@@ -15,7 +15,8 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // Get the upper bound from an environment or runtime variable
+        // Step 2. Upper bound comes from the previous request's runtime var,
+        // with a fallback so this still works on its own.
         const max = parseInt(bru.getVar("productMaxTotal") || "100", 10);
 
         // Generate a random integer between 1 and max (inclusive)
@@ -28,7 +29,9 @@ runtime:
         console.log(`Generated randomInt = ${randomInt} (1..${max})`);
     - type: after-response
       code: |-
-        // Post-response script in Bruno
+        // Step 3 - the fork in the road. The response data decides which
+        // request the runner goes to next, so the same collection covers two
+        // paths without duplicating requests.
 
         const body = res.getBody();
         const rating = Number.parseFloat(body?.rating);
@@ -51,7 +54,8 @@ runtime:
           console.log(`--- Stored runtime var lastRating = ${rating} ---`);
 
           if (rating < 3.0) {
-            const next = "Update lowered rated product"; // 🔁 adjust path
+            // The string must match the request's name exactly
+            const next = "Update lower rated product";
             console.log(`🚨 Rating (${rating}) is below 3.0 → setting next request to: ${next}`);
             bru.setNextRequest(next);
 
@@ -59,7 +63,7 @@ runtime:
               expect(rating).to.be.below(3.0);
             });
           } else {
-            const next = "Update high rated product"; // 🔁 adjust path
+            const next = "Update high rated product";
             console.log(`✅ Rating (${rating}) is acceptable (>= 3.0) → setting next request to: ${next}`);
             bru.setNextRequest(next);
           }

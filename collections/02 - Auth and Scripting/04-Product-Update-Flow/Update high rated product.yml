@@ -12,7 +12,9 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // Skipping request in collection runner flow
+        // Belt and braces: setNextRequest already routes around this one, but
+        // a guard here means the request self-skips on a straight top-to-bottom
+        // run too. skipRequest() drops it from the run - it is not a failure.
         if (bru.getVar('lastRating') <= 3)
         {
           bru.runner.skipRequest();

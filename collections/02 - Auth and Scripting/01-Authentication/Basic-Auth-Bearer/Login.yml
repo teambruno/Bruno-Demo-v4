@@ -21,8 +21,13 @@ runtime:
   scripts:
     - type: after-response
       code: |-
+        // Log in once, reuse the token everywhere. The next request just
+        // reads {{dummyJsonToken}} in its Bearer field.
         const body = res.getBody();
         if (body && body.accessToken) {
+          // setVar keeps the token in memory for this run only. setEnvVar
+          // would write it into the environment file on disk (V4 behaviour) -
+          // never do that with a credential.
           bru.setVar("dummyJsonToken", body.accessToken);
         }
     - type: tests

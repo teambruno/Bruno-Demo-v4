@@ -24,6 +24,8 @@ runtime:
     - type: before-request
       code: |-
         console.log('before-request');
+        // req.* mutates the outgoing request - headers, body, URL, timeout.
+        // Handy for timestamps, signatures, or a per-run trace id.
         req.setHeader("X-Timestamp", Date.now());
     - type: after-response
       code: |-

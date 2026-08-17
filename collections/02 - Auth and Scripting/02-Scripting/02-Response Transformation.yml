@@ -20,6 +20,8 @@ runtime:
   scripts:
     - type: after-response
       code: |-
+        // after-response gets the parsed body, so plain JS is enough to
+        // reshape a payload before anything downstream sees it.
         const breweries = res.getBody();
 
         // Transform: group by brewery type
@@ -30,6 +32,8 @@ runtime:
           return acc;
         }, {});
 
+        // Stringify so the summary can be interpolated as {{brewerySummary}}
+        // in a later request body
         bru.setVar("brewerySummary", JSON.stringify(grouped));
 
         console.log("=== CA Breweries by Type ===");

@@ -21,6 +21,9 @@ runtime:
   scripts:
     - type: after-response
       code: |-
+        // Runner-only: hand control to the request with this exact name
+        // instead of carrying on in file order. The string has to match the
+        // request name character for character. No effect on a single Send.
         bru.setNextRequest("Get all products");
     - type: tests
       code: |-
