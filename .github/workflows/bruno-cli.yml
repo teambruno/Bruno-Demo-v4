@@ -10,11 +10,11 @@
 #   BRUNO_GLOBAL_API_KEY  - read by environments/Globals-CI.yml as
 #                           {{process.env.BRUNO_GLOBAL_API_KEY}}
 #
-#   AZURE_CLIENT_ID       - the `vault` job at the bottom. App registration with
-#   AZURE_TENANT_ID         Key Vault "Secrets User" on bruno-demo-kv.
-#   AZURE_SUBSCRIPTION_ID
-#   AZURE_CLIENT_SECRET   - service-principal leg only. The azure/login leg is
-#                           federated (OIDC) and needs no secret at all.
+#   AZURE_CLIENT_ID       - the `vault` job at the bottom. An app registration
+#   AZURE_TENANT_ID         holding the "Key Vault Secrets User" role on
+#   AZURE_SUBSCRIPTION_ID   bruno-demo-kv. Both legs of that job use all four;
+#   AZURE_CLIENT_SECRET     see the az login step for the OIDC alternative,
+#                           which drops the need for AZURE_CLIENT_SECRET.
 #
 # Optional repository variables, same screen:
 #   PUBLISH_PAGES = true        - also publish the HTML reports to GitHub Pages
@@ -394,8 +394,11 @@ jobs:
   #
   # The matrix is the demo: same requests, same vault, two ways in.
   #
-  #   azure-cli        `az login` via OIDC, then a one-line env file that just
-  #                    says "use that session". No Azure secret in the repo.
+  #   azure-cli        `az login`, then no --secrets-env-file at all. For an
+  #                    azure-key-vault environment with no provider config the
+  #                    CLI falls back to the Azure CLI credential, so the
+  #                    login session IS the configuration. Nothing to render,
+  #                    nothing to clean up.
   #   secrets-env-file service principal credentials rendered from Actions
   #                    secrets at run time. Needs no az binary and no session,
   #                    so this is the path for runners or containers that have
@@ -421,17 +424,33 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Leg 1 only. Federated credentials, so the repo holds no Azure password -
-      # the runner trades its OIDC token for a short-lived Entra ID one. Needs a
-      # federated credential on the app registration; if you have not set that
-      # up, swap the three inputs for `creds: ${{ secrets.AZURE_CREDENTIALS }}`.
+      # Leg 1 only. Signs in with the app registration's client secret, which is
+      # what the four AZURE_* repository secrets already describe.
+      #
+      # Prefer federated credentials (OIDC) if you can: the runner then trades
+      # its own token for a short-lived Entra ID one and the repo holds no Azure
+      # password at all. Register the subject once -
+      #
+      #   az ad app federated-credential create --id <AZURE_CLIENT_ID> --parameters '{
+      #     "name": "github-bruno-demo-main",
+      #     "issuer": "https://token.actions.githubusercontent.com",
+      #     "subject": "repo:teambruno/Bruno-Demo-v4:ref:refs/heads/main",
+      #     "audiences": ["api://AzureADTokenExchange"]
+      #   }'
+      #
+      # - then replace the `creds:` line below with these three:
+      #
+      #   client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      #   tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      #   subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #
+      # Without that registration azure/login fails with AADSTS70025 ("has no
+      # configured federated identity credentials").
       - name: az login
         if: matrix.auth == 'azure-cli'
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
       # Leg 2 only. ci/azure-keyvault-service-principal.env.tpl is committed with
       # placeholders; the real values arrive as Actions secrets and are
@@ -479,27 +498,27 @@ jobs:
           set -uo pipefail
           mkdir -p "$GITHUB_WORKSPACE/$REPORT_DIR"
 
-          # The only difference between the two legs: which file this points at.
-          # Same flag, same command, same collection.
-          if [[ "$BRU_AUTH" == "azure-cli" ]]; then
-            secrets_env_file="$GITHUB_WORKSPACE/ci/azure-keyvault-cli-auth.env"
-          else
-            secrets_env_file="$RUNNER_TEMP/azure-keyvault-service-principal.env"
-          fi
-
           cd "$GITHUB_WORKSPACE/collections/03 - Secrets and Vaults"
 
-          bru run "02-External-Secrets" -r \
-            --env Demo-Azure \
-            --secrets-env-file "$secrets_env_file" \
-            --global-env "$BRU_GLOBAL_ENV" \
-            --workspace-path "$BRU_WORKSPACE_PATH" \
-            --reporter-html  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.html" \
-            --reporter-json  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.json" \
-            --reporter-junit "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.xml" \
-            --reporter-skip-headers authorization \
-            --reporter-skip-headers x-api-key \
-            --reporter-skip-headers x-secret-probe
+          cmd=(bru run "02-External-Secrets" -r --env Demo-Azure)
+
+          # The only difference between the two legs. Leg 1 adds nothing and
+          # rides the az login session; leg 2 points at the rendered file.
+          # Same command, same environment, same collection.
+          if [[ "$BRU_AUTH" != "azure-cli" ]]; then
+            cmd+=(--secrets-env-file "$RUNNER_TEMP/azure-keyvault-service-principal.env")
+          fi
+
+          cmd+=(--global-env "$BRU_GLOBAL_ENV"
+                --workspace-path "$BRU_WORKSPACE_PATH"
+                --reporter-html  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.html"
+                --reporter-json  "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.json"
+                --reporter-junit "$GITHUB_WORKSPACE/$REPORT_DIR/$BRU_NAME.xml"
+                --reporter-skip-headers authorization
+                --reporter-skip-headers x-api-key
+                --reporter-skip-headers x-secret-probe)
+
+          "${cmd[@]}"
 
       # RUNNER_TEMP is wiped with the runner anyway, but on a self-hosted runner
       # it may not be. Drop the file the moment it stops being needed.

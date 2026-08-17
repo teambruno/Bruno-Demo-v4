@@ -12,8 +12,16 @@
 #   cp ci/azure-keyvault-service-principal.env.tpl \
 #      ci/azure-keyvault-service-principal.env
 #
-# Unlike the CLI-auth file, this path needs no `az` binary and no login
-# session, so it also works inside the usebruno/cli container.
-BRUNO_AZURE_TENANT_ID=${AZURE_TENANT_ID}
-BRUNO_AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
-BRUNO_AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+# This path needs no `az` binary and no login session, so unlike the Azure CLI
+# credential it also works inside the usebruno/cli container.
+#
+# The key names are not free-form. The CLI matches on the BRUNO_AZURE_KEY_VAULT_
+# prefix and ignores anything else, so a near-miss like BRUNO_AZURE_TENANT_ID
+# yields "No recognised BRUNO_* secrets provider keys found in: <file>" and the
+# run then silently falls back to the Azure CLI credential. These three names
+# come from SECRET_PROVIDER_ENV_KEYS['azure-key-vault'] in @usebruno/common -
+# they are exactly what the app writes out under
+# Preferences > Secret Manager > Export as .env.
+BRUNO_AZURE_KEY_VAULT_TENANT_ID=${AZURE_TENANT_ID}
+BRUNO_AZURE_KEY_VAULT_CLIENT_ID=${AZURE_CLIENT_ID}
+BRUNO_AZURE_KEY_VAULT_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
