@@ -1,0 +1,46 @@
+info:
+  name: 01-Health Check
+  type: http
+  seq: 1
+  tags:
+    - smoke
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/1"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("API is reachable", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("under the 2s health budget", () => {
+          expect(res.getResponseTime()).to.be.below(2000);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.responseTime
+      operator: lt
+      value: "2000"
+
+settings:
+  encodeUrl: true
+  timeout: 5000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Tag: `smoke`
+
+  The cheapest useful check - one GET, two assertions, a hard 5s timeout.
+  This is what belongs in front of every merge.
+
+  ```bash
+  bru run "03-Runner-and-Tags" --env Demo --tags smoke --bail
+  ```

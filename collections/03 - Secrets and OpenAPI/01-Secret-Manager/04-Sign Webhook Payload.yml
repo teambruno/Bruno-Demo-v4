@@ -1,0 +1,86 @@
+info:
+  name: 04-Sign Webhook Payload
+  type: http
+  seq: 4
+  tags:
+    - secret-store
+
+http:
+  method: POST
+  url: "{{httpfakerUrl}}/api/echo"
+  headers:
+    - name: content-type
+      value: application/json
+    - name: x-webhook-signature
+      value: "{{webhookSignature}}"
+      description: HMAC-SHA256 of the body, computed in the pre-request script
+  body:
+    type: json
+    data: |-
+      {
+        "event": "invoice.paid",
+        "id": "evt_apiworld_0194",
+        "amount": 4200
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const CryptoJS = require("crypto-js");
+
+        // The signing key comes from the vault and is used only here. It is
+        // never sent - only the digest derived from it goes on the wire.
+        const signingKey = bru.interpolate("{{secretStore.webhook-signing-secret}}");
+        const payload = req.getBody();
+        const canonical =
+          typeof payload === "string" ? payload : JSON.stringify(payload);
+
+        const signature = CryptoJS.HmacSHA256(canonical, signingKey).toString(
+          CryptoJS.enc.Hex
+        );
+
+        bru.setVar("webhookSignature", signature);
+    - type: tests
+      code: |-
+        // httpfaker lowercases header keys in its echo payload.
+        const sent = res.getBody().headers["x-webhook-signature"];
+
+        test("the payload was signed with the vault key", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(sent).to.match(/^[a-f0-9]{64}$/, "not a SHA256 hex digest");
+        });
+
+        test("the signing key itself never left the client", () => {
+          // Greps the whole echoed request for the key's prefix. If the secret
+          // appeared anywhere - header, body, query - this fails.
+          const raw = JSON.stringify(res.getBody());
+          expect(raw).to.not.include("whsec_");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 15000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## The secret that never goes on the wire
+
+  Every other request in this folder sends its vault value to a server. This
+  one does not. The signing key is pulled from the vault inside the
+  pre-request script, used to compute an HMAC-SHA256 of the body, and
+  discarded. Only the 64-character hex digest travels.
+
+  ### The assertion to read out loud
+
+  `the signing key itself never left the client` greps the entire echoed
+  request for `whsec_` and fails if the key appears anywhere in it.
+
+  That is the difference between "the secret is *stored* safely" and "the
+  secret is *used* safely" - which is usually the question a security team is
+  actually asking.
+
+  `crypto-js` is one of Bruno's inbuilt libraries, so this runs under the
+  default `safe` sandbox. No `--sandbox=developer` needed.

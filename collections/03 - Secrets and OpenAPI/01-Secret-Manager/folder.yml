@@ -1,0 +1,124 @@
+info:
+  name: 01-Secret-Manager
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    # One request, three vaults
+
+    Run these top to bottom on **Demo-Azure**, then switch the environment
+    dropdown to **Demo-AWS** or **Demo-HashiCorp** and run them again.
+    Nothing in these four files changes between providers.
+
+    | # | Request | What it proves |
+    |---|---------|----------------|
+    | 01 | Resolve Secret Value | the binding works at all - start here |
+    | 02 | OAuth2 Client Secret | a real token exchange, secret from the vault |
+    | 03 | Login Password | a real login returning a real JWT |
+    | 04 | Sign Webhook Payload | the secret is *used* without ever being sent |
+
+    ## Why the requests never name a provider
+
+    All three environments bind their provider to the **same alias**,
+    `secretStore`:
+
+    ```yml
+    # Demo-Azure.yml
+    externalSecrets:
+      type: azure-key-vault
+      variables:
+        - name: secretStore
+          vaultName: bruno-demo-kv
+    ```
+
+    So every request says `{{secretStore.oauth-client-secret}}` and none of
+    them care which product is behind it. That is the demo: switch the
+    dropdown, same request, different secret manager.
+
+    ## Binding model
+
+    One binding = one container. The `.keyname` half of `{{alias.keyname}}`
+    selects a key inside it.
+
+    | Provider | `type` | Field | Container |
+    |----------|--------|-------|-----------|
+    | Azure | `azure-key-vault` | `vaultName` | the vault; keys are secret names |
+    | AWS | `aws-secrets-manager` | `secretName` | ONE secret holding JSON |
+    | HashiCorp | `hashicorp-vault-server` | `path` | one KV v2 path |
+
+    Connection credentials (tenant/client id, AWS access keys, Vault token)
+    are **not** in these files. They are configured per provider in the
+    Environment UI, or supplied to the CLI with `--secrets-env-file`, and
+    stored outside the repo. That is why the identical collection runs on a
+    laptop and on a CI runner with no edits.
+
+    ## Keys stored in every provider
+
+    Three keys, and every provider holds the same three.
+
+    | Key | Used by |
+    |-----|---------|
+    | `oauth-client-secret` | 02-OAuth2 Client Secret |
+    | `dummyjson-password` | 03-Login Password (user `jamesd`) |
+    | `webhook-signing-secret` | 04-Sign Webhook Payload |
+
+    Key names are lowercase alphanumerics and hyphens only. That is Azure Key
+    Vault's limit - no underscores, dots or slashes - and it is the strictest
+    of the three, so naming to it keeps one set of keys portable everywhere.
+
+    ## Seeding a provider
+
+    The Azure vault is already populated. To rebuild it, or to stand up the
+    other two:
+
+    ```bash
+    # Azure - one secret per key
+    az keyvault secret set --vault-name bruno-demo-kv \
+      --name oauth-client-secret --value 'demo-client-secret'
+
+    # AWS - ONE secret holding all three keys as JSON, because an
+    # aws-secrets-manager binding maps to a single secret
+    aws secretsmanager create-secret --name james_ha/bruno-demo-sm \
+      --secret-string '{"oauth-client-secret":"demo-client-secret",
+        "dummyjson-password":"jamesdpass",
+        "webhook-signing-secret":"whsec_9c2f7ab3e14d5680bf3a1e2c4d8b60f7"}'
+
+    # HashiCorp - KV v2. Write to secret/bruno-demo-vault; the read path in
+    # Demo-HashiCorp.yml is secret/data/bruno-demo-vault (the /data/ segment
+    # is a KV v2 API requirement, not a typo)
+    vault kv put secret/bruno-demo-vault \
+      oauth-client-secret=demo-client-secret \
+      dummyjson-password=jamesdpass \
+      webhook-signing-secret=whsec_9c2f7ab3e14d5680bf3a1e2c4d8b60f7
+    ```
+
+    On Azure, creating a vault does **not** grant permission to read secrets
+    out of it. That is a separate data-plane role and the most common way this
+    demo dies:
+
+    ```bash
+    az role assignment create --role "Key Vault Secrets Officer" \
+      --assignee "$(az ad signed-in-user show --query id -o tsv)" \
+      --scope "$(az keyvault show --name bruno-demo-kv --query id -o tsv)"
+    ```
+
+    ## If request 01 fails
+
+    - **403 / Forbidden** - creating the vault does not grant read access. On
+      Azure you need **Key Vault Secrets User** on your own identity; the AWS
+      equivalent is `secretsmanager:GetSecretValue`.
+    - **An unresolved `{{secretStore.…}}` on the wire** - the environment has
+      no `externalSecrets` block, or you are on an environment from a
+      different collection.
+    - **Silence about the vault entirely** - you forgot `--verbose`. The CLI
+      swallows vault fetch errors, so a failed fetch looks like an ordinary
+      401 from the API under test.
+
+    ```bash
+    bru run "01-Secret-Manager" --env Demo-Azure --verbose
+    ```
+  type: text/markdown

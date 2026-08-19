@@ -1,0 +1,79 @@
+info:
+  name: 01-Login
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+    - auth
+
+http:
+  method: POST
+  url: "{{dummyUrl}}/auth/login"
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "username": "{{username}}",
+        "password": "{{password}}"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+
+        if (body && body.accessToken) {
+          // setVar, not setEnvVar. setEnvVar writes to the environment file on
+          // disk in V4 - a token stored that way lands in a file you might
+          // commit. setVar keeps it in memory for this run only.
+          bru.setVar("authToken", body.accessToken);
+          console.log(`token captured for ${body.username} (${body.accessToken.length} chars)`);
+        }
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("login succeeded", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("a real JWT came back", () => {
+          expect(body.accessToken).to.be.a("string");
+          // Three dot-separated base64url segments
+          expect(body.accessToken.split(".")).to.have.lengthOf(3);
+        });
+
+        test("the token is for the user we logged in as", () => {
+          expect(body.username).to.equal(bru.getEnvVar("username"));
+        });
+
+        test("the token was stashed for the next request", () => {
+          expect(bru.getVar("authToken")).to.equal(body.accessToken);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Log in once
+
+  A real login against `dummyjson.com/auth/login`, returning a real signed
+  JWT. The post-response script stashes it as `authToken`.
+
+  The line worth saying out loud is the comment in the script: this uses
+  `bru.setVar()`, **not** `bru.setEnvVar()`. In V4 `setEnvVar` writes straight
+  to the environment file on disk, so a script that stores a token that way
+  puts a live credential into a file that may well be committed. `setVar` is
+  memory-only and gone when the run ends.

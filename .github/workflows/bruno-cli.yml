@@ -1,4 +1,4 @@
-# Bruno CLI x GitHub Actions - Bruno V4 Demo Kit
+# Bruno CLI x GitHub Actions - Conference 2026 kit
 #
 #   Overview  https://docs.usebruno.com/bru-cli/overview
 #   Docker    https://docs.usebruno.com/bru-cli/docker
@@ -18,7 +18,6 @@
 #
 # Optional repository variables, same screen:
 #   PUBLISH_PAGES = true        - also publish the HTML reports to GitHub Pages
-#                                 (the equivalent of GitLab's `pages:` job)
 #   RUN_AZURE_VAULT_DEMO = true - enable the `vault` job. Off by default so a
 #                                 fork without an Azure tenant stays green.
 
@@ -26,12 +25,11 @@ name: Bruno CLI
 
 on:
   push:
-    branches: [main]
+    branches: [main, conference-2026]
   pull_request:
     branches: [main]
   workflow_dispatch:
 
-# GitLab's `interruptible: true`
 concurrency:
   group: bruno-cli-${{ github.ref }}
   cancel-in-progress: true
@@ -50,9 +48,9 @@ jobs:
   # ---------------------------------------------------------------------------
   # Stage 1 - `bru run` on its own, no matrix, no arg building, no reporters
   #
-  # Four commands, each its own line in the log. This is the whole CLI: point it
-  # at a request or a folder, pick an environment, and it runs your tests.
-  # Everything after this job is the same command with more flags on it.
+  # This is the whole CLI: point it at a request or a folder, pick an
+  # environment, and it runs your tests. Everything after this job is the same
+  # command with more flags on it.
   # ---------------------------------------------------------------------------
   basics:
     name: bru basics
@@ -61,21 +59,25 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: bru run
-        working-directory: collections/01 - Fundamentals
         run: |
-          # `bru` below is the pinned CLI image with this folder mounted at /c
-          bru() { docker run --rm -v "$PWD:/c" -w /c "$BRUNO_CLI_IMAGE" "$@"; }
+          # `bru` below is the pinned CLI image with a given folder mounted at /c
+          bru() { docker run --rm -v "$1:/c" -w /c "$BRUNO_CLI_IMAGE" "${@:2}"; }
+          core="$GITHUB_WORKSPACE/collections/01 - Core"
+          adv="$GITHUB_WORKSPACE/collections/02 - Advanced"
 
-          bru --version
+          bru "$core" --version
 
-          # One request, one environment -> 8 tests
-          bru run "01-Basic-Requests/01-Get Post.yml" --env Production
+          # One request, one environment
+          bru "$core" run "01-Requests/01-Get Pokemon.yml" --env Demo
 
-          # Same request, one variable overridden at run time (repeat --env-var to stack)
-          bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
+          # Same request, one variable overridden at run time
+          bru "$core" run "01-Requests/01-Get Pokemon.yml" --env Demo --env-var pokemonName=snorlax
 
-          # A whole folder, in sequence: request 2 uses a variable request 1 set
-          bru run "03-Chained-Requests" --env Production
+          # A whole folder, in sequence
+          bru "$core" run "01-Requests" --env Demo
+
+          # Four requests where each uses a variable the previous one set
+          bru "$adv" run "01-Chaining" --env CI
 
   # ---------------------------------------------------------------------------
   # Stage 2 - fast gate: only requests tagged `smoke`, stop at the first failure
@@ -85,30 +87,19 @@ jobs:
     needs: basics
     runs-on: ubuntu-latest
     strategy:
-      # false so one red collection still shows you the other two, which reads
-      # better on a call than GitHub cancelling the siblings mid-demo.
+      # false so one red collection still shows you the other, which reads
+      # better on a call than GitHub cancelling the sibling mid-demo.
       fail-fast: false
       matrix:
         include:
-          - slug: fundamentals
-            collection: "01 - Fundamentals"
-            env: Production
-          - slug: auth-scripting
-            collection: "02 - Auth and Scripting"
-            env: Prod-Env
-            # "02 - Auth and Scripting"'s Prod-Env.yml is deliberately bare in
-            # this demo workspace, so CI injects the endpoints it needs with
-            # --env-var (repeatable).
-            env_vars: >-
-              --env-var weatherUrl=https://api.open-meteo.com/v1
-              --env-var breweryUrl=https://api.openbrewerydb.org/v1
-              --env-var userId=1
-          - slug: v4-features
-            collection: "04 - CLI CI and V4 Features"
-            env: Production
+          - slug: core
+            collection: "01 - Core"
+            env: Demo
+          - slug: advanced
+            collection: "02 - Advanced"
+            env: CI
     steps:
       - uses: actions/checkout@v7
-
       - name: bru run
         env:
           BRUNO_GLOBAL_API_KEY: ${{ secrets.BRUNO_GLOBAL_API_KEY }}
@@ -117,7 +108,6 @@ jobs:
           BRU_NAME: smoke-${{ matrix.slug }}
           BRU_TARGET: ""
           BRU_ARGS: "-r --tags smoke --bail"
-          BRU_ENV_VARS: ${{ matrix.env_vars }}
         run: |
           set -uo pipefail
           mkdir -p "$GITHUB_WORKSPACE/$REPORT_DIR"
@@ -133,10 +123,9 @@ jobs:
 
           # Quoted: folder names in this workspace contain spaces.
           if [[ -n "$BRU_TARGET" ]]; then cmd+=("$BRU_TARGET"); fi
-          # Deliberately unquoted - multi-flag strings that must split into
-          # separate argv entries, same as $BRU_ARGS in the GitLab file.
-          if [[ -n "$BRU_ARGS" ]];     then cmd+=($BRU_ARGS);     fi
-          if [[ -n "$BRU_ENV_VARS" ]]; then cmd+=($BRU_ENV_VARS); fi
+          # Deliberately unquoted - a multi-flag string that must split into
+          # separate argv entries.
+          if [[ -n "$BRU_ARGS" ]];   then cmd+=($BRU_ARGS);   fi
 
           cmd+=(--env "$BRU_ENV"
                 --global-env "$BRU_GLOBAL_ENV"
@@ -147,11 +136,11 @@ jobs:
                 --reporter-skip-headers authorization
                 --reporter-skip-headers x-api-key)
 
-          "${cmd[@]}"; status=$?
+          "${cmd[@]}"; rc=$?
           # Reports come back root-owned; hand them to the runner user so
           # upload-artifact can read them.
           sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/$REPORT_DIR" || true
-          exit $status
+          exit $rc
 
       - uses: actions/upload-artifact@v7
         if: always() # keep the reports even when the run goes red
@@ -161,17 +150,15 @@ jobs:
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Stage 3 - the suite, one job per collection, all running in parallel
+  # Stage 3 - the suite, one job per slice, all running in parallel
   #
-  # GitLab expresses this as four jobs that each `extends: .all-collections`.
-  # Actions has no `extends:`, so the same fan-out is one matrix whose entries
-  # carry what the GitLab job-level `variables:` blocks carried.
+  # "03 - Secrets and OpenAPI / 01-Secret-Manager" is deliberately NOT in this
+  # matrix: its environments bind to live secret managers and every request
+  # needs data-plane credentials the pipeline does not hold. The `vault` job at
+  # the bottom runs it against Azure Key Vault once the runner has an identity.
   #
-  # "03 - Secrets and Vaults" is deliberately NOT in this matrix. Its three
-  # environments bind to live secret managers (Azure Key Vault, AWS Secrets
-  # Manager, HashiCorp Vault) and every request needs data-plane credentials
-  # the pipeline does not hold. The `vault` job at the bottom of this file runs
-  # it against Azure Key Vault once the runner has an identity.
+  # "02-Local-Secrets" is also absent - it reads the workspace `.env`, which is
+  # gitignored and never reaches a runner.
   # ---------------------------------------------------------------------------
   test:
     name: ${{ matrix.slug }}
@@ -182,65 +169,46 @@ jobs:
       matrix:
         include:
           # -- regression: --tags matches requests with ALL listed tags,
-          #    --exclude-tags drops ANY
-          - slug: regression-fundamentals
-            collection: "01 - Fundamentals"
-            env: Production
+          #    --exclude-tags drops ANY.
+          #    NOTE: --exclude-tags takes ONE comma-separated value. Repeating
+          #    the flag fails with "excludeTags.split is not a function".
+          - slug: regression-core
+            collection: "01 - Core"
+            env: Demo
             args: "-r --tags regression --exclude-tags slow"
-          - slug: regression-auth-scripting
-            collection: "02 - Auth and Scripting"
-            env: Prod-Env
-            args: "-r --tags regression --exclude-tags slow"
-            env_vars: >-
-              --env-var weatherUrl=https://api.open-meteo.com/v1
-              --env-var breweryUrl=https://api.openbrewerydb.org/v1
-              --env-var userId=1
-          - slug: regression-v4-features
-            collection: "04 - CLI CI and V4 Features"
-            env: Production
+          - slug: regression-advanced
+            collection: "02 - Advanced"
+            env: CI
             args: "-r --tags regression --exclude-tags slow"
 
-          # -- shared-scripts: require()-ing /shared-scripts via
-          #    additionalContextRoots needs the developer sandbox
-          #    (default is `safe` since CLI 3.0.0)
-          - slug: shared-scripts-fundamentals
-            collection: "01 - Fundamentals"
-            env: Production
-            args: "-r --tags shared-scripts --sandbox developer"
-          - slug: shared-scripts-auth-scripting
-            collection: "02 - Auth and Scripting"
-            env: Prod-Env
-            args: "-r --tags shared-scripts --sandbox developer"
-            env_vars: >-
-              --env-var weatherUrl=https://api.open-meteo.com/v1
-              --env-var breweryUrl=https://api.openbrewerydb.org/v1
-              --env-var userId=1
-          - slug: shared-scripts-v4-features
-            collection: "04 - CLI CI and V4 Features"
-            env: Production
+          # -- shared-scripts: require()-ing /shared-scripts through
+          #    additionalContextRoots needs the developer sandbox (the default
+          #    has been `safe` since CLI 3.0.0)
+          - slug: shared-scripts
+            collection: "01 - Core"
+            env: Demo
             args: "-r --tags shared-scripts --sandbox developer"
 
-          # -- data-driven: 3 CSV rows -> 3 iterations, each one a row in the
-          #    report. Swap the flag for --json-file-path 05-Data-Driven/req-users.json
-          #    to drive the same three iterations from JSON instead.
+          # -- data-driven: 4 CSV rows -> 4 iterations, each its own section in
+          #    the report. Swap the flag for
+          #    --json-file-path 02-Data-Driven/pokemon.json to drive the same
+          #    four rows from JSON instead.
           - slug: data-driven
-            collection: "02 - Auth and Scripting"
-            env: Prod-Env
-            target: "05-Data-Driven"
-            args: "-r --csv-file-path 05-Data-Driven/req-users.csv"
+            collection: "02 - Advanced"
+            env: CI
+            target: "02-Data-Driven"
+            args: "-r --csv-file-path 02-Data-Driven/pokemon.csv"
 
-          # -- v4-features: scoped to this folder on purpose.
-          #    02-Additional-Request-Types holds WebSocket/gRPC/SSE requests,
-          #    which the CLI can't execute ("Unsupported protocol wss:") -
-          #    those stay app-only demos.
-          - slug: v4-updates
-            collection: "04 - CLI CI and V4 Features"
-            env: Production
-            target: "03-v4 Updates"
-            args: "-r --sandbox developer"
+          # -- openapi: fetches the live Petstore spec and fails if an operation
+          #    this collection depends on has been removed. Tests a contract
+          #    rather than an implementation, and needs no credentials.
+          - slug: openapi-contract
+            collection: "03 - Secrets and OpenAPI"
+            env: Demo-Local
+            target: "03-OpenAPI"
+            args: "-r"
     steps:
       - uses: actions/checkout@v7
-
       - name: bru run
         env:
           BRUNO_GLOBAL_API_KEY: ${{ secrets.BRUNO_GLOBAL_API_KEY }}
@@ -249,7 +217,6 @@ jobs:
           BRU_NAME: ${{ matrix.slug }}
           BRU_TARGET: ${{ matrix.target }}
           BRU_ARGS: ${{ matrix.args }}
-          BRU_ENV_VARS: ${{ matrix.env_vars }}
         run: |
           set -uo pipefail
           mkdir -p "$GITHUB_WORKSPACE/$REPORT_DIR"
@@ -261,8 +228,7 @@ jobs:
                "$BRUNO_CLI_IMAGE" run)
 
           if [[ -n "$BRU_TARGET" ]]; then cmd+=("$BRU_TARGET"); fi
-          if [[ -n "$BRU_ARGS" ]];     then cmd+=($BRU_ARGS);     fi
-          if [[ -n "$BRU_ENV_VARS" ]]; then cmd+=($BRU_ENV_VARS); fi
+          if [[ -n "$BRU_ARGS" ]];   then cmd+=($BRU_ARGS);   fi
 
           cmd+=(--env "$BRU_ENV"
                 --global-env "$BRU_GLOBAL_ENV"
@@ -273,9 +239,9 @@ jobs:
                 --reporter-skip-headers authorization
                 --reporter-skip-headers x-api-key)
 
-          "${cmd[@]}"; status=$?
+          "${cmd[@]}"; rc=$?
           sudo chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE/$REPORT_DIR" || true
-          exit $status
+          exit $rc
 
       - uses: actions/upload-artifact@v7
         if: always()
@@ -322,7 +288,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
           # The JSON reporter emits an array of iterations, each with its own
-          # .summary - so a data-driven run with 3 CSV rows has 3 entries.
+          # .summary - so a data-driven run with 4 CSV rows has 4 entries.
           # Totals are summed across them.
           for f in reports/*.json; do
             [ -e "$f" ] || continue
@@ -359,9 +325,9 @@ jobs:
           path: public/
           retention-days: 30
 
-      # GitLab's `pages:` job. Off unless you set the PUBLISH_PAGES repository
-      # variable to "true" AND enable Pages (Settings > Pages > Source: Actions)
-      # - so a repo without Pages configured never goes red over it.
+      # Off unless you set the PUBLISH_PAGES repository variable to "true" AND
+      # enable Pages (Settings > Pages > Source: Actions) - so a repo without
+      # Pages configured never goes red over it.
       - uses: actions/configure-pages@v6
         if: vars.PUBLISH_PAGES == 'true' && github.ref == 'refs/heads/main'
       - uses: actions/upload-pages-artifact@v5
@@ -376,8 +342,8 @@ jobs:
   #
   #   https://docs.usebruno.com/bru-cli/secret-managers
   #
-  # "03 - Secrets and Vaults" reads its credentials out of a real vault instead
-  # of out of the repo. Its Demo-Azure.yml environment binds the alias
+  # "03 - Secrets and OpenAPI / 01-Secret-Manager" reads its credentials out of
+  # a real vault instead of out of the repo. Its Demo-Azure.yml binds the alias
   # `secretStore` to the Key Vault, and nothing else:
   #
   #   externalSecrets:
@@ -386,7 +352,7 @@ jobs:
   #       - name: secretStore
   #         vaultName: bruno-demo-kv
   #
-  # Requests then use {{secretStore.basic-auth-password}} the same way they use
+  # Requests then use {{secretStore.oauth-client-secret}} the same way they use
   # any other variable. Note what is NOT in the collection: how to log in. That
   # lives in the file behind --secrets-env-file, which is why the identical
   # collection runs on a laptop and on a runner with no edits - only the file
@@ -396,16 +362,12 @@ jobs:
   #
   #   azure-cli        `az login`, then no --secrets-env-file at all. For an
   #                    azure-key-vault environment with no provider config the
-  #                    CLI falls back to the Azure CLI credential, so the
-  #                    login session IS the configuration. Nothing to render,
-  #                    nothing to clean up.
+  #                    CLI falls back to the Azure CLI credential, so the login
+  #                    session IS the configuration.
   #   secrets-env-file service principal credentials rendered from Actions
   #                    secrets at run time. Needs no az binary and no session,
   #                    so this is the path for runners or containers that have
   #                    no Azure CLI on them.
-  #
-  # Reports upload as their own artifact rather than joining the `report` job's
-  # aggregate, so this stays independent of the rest of the pipeline.
   # ---------------------------------------------------------------------------
   vault:
     name: azure key vault (${{ matrix.auth }})
@@ -498,16 +460,9 @@ jobs:
           set -uo pipefail
           mkdir -p "$GITHUB_WORKSPACE/$REPORT_DIR"
 
-          cd "$GITHUB_WORKSPACE/collections/03 - Secrets and Vaults"
+          cd "$GITHUB_WORKSPACE/collections/03 - Secrets and OpenAPI"
 
-          # --exclude-tags drops 03-Digest Auth Password, which is tagged
-          # app-only. The CLI does not interpolate digest auth credentials -
-          # it puts the literal "{{secretStore.basic-auth-password}}" on the
-          # wire - so that request 401s here whatever the vault holds. Bug
-          # filed; see the request's docs. The other four all resolve real
-          # vault values, so this stays an honest test of the store.
-          cmd=(bru run "02-External-Secrets" -r --env Demo-Azure
-               --exclude-tags app-only)
+          cmd=(bru run "01-Secret-Manager" -r --env Demo-Azure)
 
           # The only difference between the two legs. Leg 1 adds nothing and
           # rides the az login session; leg 2 points at the rendered file.
@@ -519,10 +474,10 @@ jobs:
           # --verbose is not optional here. A vault fetch that fails - bad
           # credentials, no data-plane role, wrong vault name - is caught and
           # swallowed, so without this the run just reports ordinary 401s from
-          # the API under test and never says the vault was the problem. It
-          # logs the vault name and whether each fetch succeeded, never a
-          # secret value, and "1. Fetched secret for: bruno-demo-kv" is worth
-          # pointing at on a call anyway.
+          # the API under test and never says the vault was the problem. It logs
+          # the vault name and whether each fetch succeeded, never a secret
+          # value, and "1. Fetched secret for: bruno-demo-kv" is worth pointing
+          # at on a call anyway.
           cmd+=(--verbose
                 --global-env "$BRU_GLOBAL_ENV"
                 --workspace-path "$BRU_WORKSPACE_PATH"

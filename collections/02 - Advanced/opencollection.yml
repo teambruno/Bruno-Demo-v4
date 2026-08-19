@@ -1,0 +1,91 @@
+opencollection: 1.0.0
+
+info:
+  name: 02 - Advanced
+  version: v1.0.0
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+docs:
+  content: |-
+    # 02 - Advanced
+
+    The things people do not expect an open-source API client to do.
+
+    | # | Folder | The one-line pitch |
+    |---|--------|--------------------|
+    | 01 | **Chaining** | Four requests walk a Pokemon's evolution chain by following links in each response. Nobody pastes an id. |
+    | 02 | **Data-Driven** | One request file, four rows of a CSV, four runs. |
+    | 03 | **Runner-and-Tags** | Tag requests `smoke` / `regression` / `slow` and run any slice of them. |
+    | 04 | **Auth** | Log in once, reuse the token. Bearer and OAuth2 client-credentials. |
+    | 05 | **Beyond-REST** | GraphQL, WebSocket, SSE and gRPC in the same client. |
+
+    Default environment at the table: **Demo**.
+
+    ## The 90-second version
+
+    Open `01-Chaining`, hit **Run** on the folder, and talk while it goes:
+    "It picked a random electric Pokemon, looked it up, followed the species
+    link, then walked the evolution chain - `pichu` to `pikachu` to `raichu`.
+    Four requests, zero hardcoded ids."
+
+    Then `02-Data-Driven` for "and the same request over a spreadsheet of test
+    data", and `05-Beyond-REST` if they ask about protocols.
+
+    ## Run it
+
+    ```bash
+    # The whole collection. The exclusions matter - see the note below.
+    bru run --env Demo --exclude-tags app-only,data-driven
+
+    # The chain
+    bru run "01-Chaining" --env Demo
+
+    # Data-driven: 4 rows -> 4 iterations
+    bru run "02-Data-Driven" --env Demo --csv-file-path "02-Data-Driven/pokemon.csv"
+    bru run "02-Data-Driven" --env Demo --json-file-path "02-Data-Driven/pokemon.json"
+
+    # Tag slices
+    bru run --env Demo --tags smoke
+    bru run --env Demo --tags regression --exclude-tags slow
+
+    # Reports in all three formats
+    bru run "03-Runner-and-Tags" --env Demo \
+      --reporter-html ../../reports/advanced.html \
+      --reporter-json ../../reports/advanced.json \
+      --reporter-junit ../../reports/advanced.xml
+    ```
+
+    ### Two exclusions to know before you run the whole collection
+
+    `--exclude-tags app-only,data-driven` is not decoration:
+
+    - **`app-only`** - the CLI cannot execute WebSocket or gRPC requests, and
+      an SSE stream has no final response to assert against. Those three
+      requests live in `05-Beyond-REST` and are app demos.
+    - **`data-driven`** - `02-Data-Driven` is *designed* to fail when no data
+      file is attached, so that forgetting `--csv-file-path` is loud rather
+      than silent. Run that folder with its own command.
+
+    Without them a whole-collection run reports four failures, all expected -
+    which is a bad look at a table even when you can explain it.
+
+    `--exclude-tags` takes **one comma-separated value**. Repeating the flag
+    (`--exclude-tags a --exclude-tags b`) fails with
+    `excludeTags.split is not a function` on bru 4.0.0.
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    scripts:
+      additionalContextRoots:
+        - ../../shared-scripts

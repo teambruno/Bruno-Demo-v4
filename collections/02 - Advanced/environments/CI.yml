@@ -1,0 +1,24 @@
+name: CI
+color: "#9C27B0"
+variables:
+  - name: pokeUrl
+    value: https://pokeapi.co/api/v2
+  - name: pokeGraphqlUrl
+    value: https://beta.pokeapi.co/graphql/v1beta
+  - name: dummyUrl
+    value: https://dummyjson.com
+  - name: httpfakerUrl
+    value: https://www.httpfaker.org
+  - name: echoUrl
+    value: https://echo.usebruno.com
+  - name: username
+    value: emilys
+  - name: password
+    value: emilyspass
+  - name: releaseStage
+    value: ci
+  - name: tokenTtlSeconds
+    value:
+      type: number
+      data: "3600"
+    description: number - compare against Date.now() without parseInt()

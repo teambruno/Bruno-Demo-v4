@@ -1,0 +1,37 @@
+info:
+  name: 01-Chaining
+  type: folder
+  seq: 1
+
+docs:
+  content: |-
+    ## 01 - Chaining
+
+    Four requests. Each one reads a value the previous one stashed, so the
+    only thing anybody types is **Run**.
+
+    ```
+    01  GET /type/electric          → picks a random electric Pokemon
+    02  GET /pokemon/{{name}}       → follows it, stashes the species link
+    03  GET {{speciesUrl}}          → follows the link, stashes the chain id
+    04  GET /evolution-chain/{{id}} → walks the chain: pichu → pikachu → raichu
+    ```
+
+    Request 03's **entire URL** is a variable. The species URL came out of the
+    previous response body, so Bruno is following the API's own links rather
+    than a path anyone hardcoded.
+
+    **At the table:** run the folder twice. It picks a different Pokemon each
+    time and every test still passes, because the assertions check the
+    *relationships* between the four responses, not fixed values.
+
+    ```bash
+    bru run "01-Chaining" --env Demo
+    ```
+
+    ### How the values travel
+
+    `bru.setVar()` writes a run-scoped variable - in memory, for this run
+    only, never to disk. That is the right tool for chaining: nothing about
+    this folder mutates a file, so running it leaves the repo clean.
+  type: text/markdown

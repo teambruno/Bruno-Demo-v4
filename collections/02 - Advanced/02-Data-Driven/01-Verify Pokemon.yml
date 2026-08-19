@@ -1,0 +1,126 @@
+info:
+  name: 01-Verify Pokemon
+  type: http
+  seq: 1
+  tags:
+    # Deliberately not tagged `regression`. A regression run has no data file
+    # attached, and this request is designed to fail in that situation - the
+    # "no unresolved template" test below is what catches it.
+    - data-driven
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  headers:
+    - name: X-Expected-Type
+      value: "{{expectedType}}"
+      description: this row's expectedType column - read back with req.getHeader()
+    - name: X-Expected-Id
+      value: "{{expectedId}}"
+      description: this row's expectedId column - read back with req.getHeader()
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        // ── How to read a data row back ─────────────────────────────────────
+        // Row values are injected into the REQUEST, not into the script scope:
+        // bru.getVar("expectedType") is undefined here, and so is every other
+        // getter. What does work is reading them off the interpolated request
+        // via req - which is why this request carries its two expected values
+        // as headers. req.getHeader() is case-sensitive.
+        const expectedType = req.getHeader("X-Expected-Type");
+        const expectedId = req.getHeader("X-Expected-Id");
+
+        test("the row was injected - no unresolved template", () => {
+          // An unresolved {{...}} is sent literally rather than erroring, so a
+          // run with no data file attached 404s rather than failing loudly.
+          // This is the check that makes that mistake obvious.
+          expect(res.getStatus(), "did you forget --csv-file-path?").to.equal(200);
+          expect(expectedType, "X-Expected-Type").to.be.a("string").and.not.include("{{");
+          expect(req.getUrl(), "URL").to.not.include("{{");
+        });
+
+        test("this iteration fetched the Pokemon named in the row", () => {
+          expect(req.getUrl()).to.include(`/pokemon/${body.name}`);
+        });
+
+        test("primary type matches the row's expectedType", () => {
+          expect(body.types[0].type.name).to.equal(expectedType);
+        });
+
+        test("national dex number matches the row's expectedId", () => {
+          // CSV columns arrive as strings, JSON keeps real numbers, and header
+          // values are always strings - Number() makes one assertion work for
+          // both data files.
+          expect(body.id).to.equal(Number(expectedId));
+        });
+
+        console.log(`row → ${body.name} | ${body.types[0].type.name} | #${body.id}`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.name
+      operator: isString
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## One request, four iterations
+
+  Each row of `pokemon.csv` (or `pokemon.json`) becomes the variables for one
+  iteration, so `{{pokemonName}}` in the URL resolves to a different Pokemon
+  each time and the tests assert against that row's other two columns.
+
+  ```bash
+  bru run "02-Data-Driven" --env Demo --csv-file-path "02-Data-Driven/pokemon.csv"
+  bru run "02-Data-Driven" --env Demo --json-file-path "02-Data-Driven/pokemon.json"
+  ```
+
+  ## Reading a row inside a test - the part that trips people up
+
+  Row values are injected into the **request**, not into the script scope.
+  Under `bru run`, every getter comes back undefined:
+
+  ```js
+  bru.getVar("expectedType")        // undefined
+  bru.getRequestVar("expectedType") // undefined
+  bru.getEnvVar("expectedType")     // undefined
+  bru.interpolate("{{expectedType}}") // the literal string, unresolved
+  ```
+
+  What works is reading the **interpolated request** back through `req`:
+
+  ```js
+  req.getUrl()                        // ".../pokemon/pikachu"
+  req.getHeader("X-Expected-Type")    // "electric"
+  ```
+
+  That is why this request carries its two expected values as headers -
+  `X-Expected-Type` and `X-Expected-Id` - so the assertions have something
+  per-row to compare against. PokeAPI ignores unknown request headers, so they
+  cost nothing.
+
+  Two gotchas worth knowing: `req.getHeader()` is **case-sensitive**
+  (`"x-expected-type"` returns `null`), and header values are always strings,
+  hence the `Number()` around `expectedId`.
+
+  ### The test that earns its place
+
+  `the row was injected - no unresolved template`. Forgetting
+  `--csv-file-path` sends a request to the literal path
+  `/pokemon/{{pokemonName}}` and produces a confusing 404 rather than a clear
+  error. The named failure message says which mistake you made.
+
+  ### CSV vs JSON
+
+  Both files hold the same four rows, so the two flags are interchangeable.
+  Verified against bru 4.0.0.

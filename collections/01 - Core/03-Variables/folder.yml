@@ -1,0 +1,28 @@
+info:
+  name: 03-Variables
+  type: folder
+  seq: 3
+
+docs:
+  content: |-
+    ## 03 - Variables
+
+    Four scopes, one precedence order, and a request that prints which one
+    won.
+
+    | Scope | Set by | Read with | Beats |
+    |-------|--------|-----------|-------|
+    | Runtime / `--env-var` | CLI flag or `bru.setVar()` | `bru.getVar()` | everything below |
+    | Collection env | `environments/*.yml` via `--env` | `bru.getEnvVar()` | global |
+    | Global env | `../../environments/*.yml` via `--global-env` | `bru.getGlobalEnvVar()` | - |
+
+    **At the table:** run request 01, then run it again with
+    `--env-var releaseStage=staging` and show the console output change while
+    the *file* stays identical.
+
+    ```bash
+    bru run "03-Variables" --env Demo
+    bru run "03-Variables" --env Demo --global-env Globals
+    bru run "03-Variables" --env Demo --global-env Globals --env-var releaseStage=staging
+    ```
+  type: text/markdown

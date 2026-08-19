@@ -1,0 +1,104 @@
+info:
+  name: 01-Variable Precedence
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // ── Which scope won? ───────────────────────────────────────────────
+        // releaseStage is deliberately defined in BOTH the collection env
+        // (Demo.yml) and the workspace global env (../../environments/Globals.yml),
+        // so it shows the whole chain in one variable.
+        const noGlobal = "(no --global-env loaded)";
+        const notSet = "(not set)";
+
+        const globalStage = bru.getGlobalEnvVar("releaseStage") ?? noGlobal;
+        const envStage = bru.getEnvVar("releaseStage") ?? notSet;
+
+        console.log("─── variable precedence ─────────────────────────────");
+        console.log(`  global env      → ${globalStage}`);
+        console.log(`  collection env  → ${envStage}`);
+        console.log(`  {{releaseStage}} → ${envStage}   ← collection wins`);
+        console.log("");
+        console.log(`  pokeUrl      → ${bru.getEnvVar("pokeUrl") ?? notSet}`);
+        console.log(`  pokemonName  → ${bru.getEnvVar("pokemonName") ?? notSet}`);
+        console.log("─────────────────────────────────────────────────────");
+
+        if (globalStage !== noGlobal && globalStage !== envStage) {
+          console.log("  note: the global value is shadowed, not overwritten.");
+          console.log(`        bru.getGlobalEnvVar("releaseStage") is still "${globalStage}"`);
+        }
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the URL was built from environment variables", () => {
+          expect(bru.getEnvVar("pokeUrl")).to.be.a("string").and.not.be.empty;
+          expect(res.getBody().name).to.equal(bru.getEnvVar("pokemonName"));
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Which value actually got used?
+
+  The question every new user asks, answered in the console instead of in a
+  docs page.
+
+  Resolution order, highest priority first:
+
+  1. **Runtime** - `--env-var` on the CLI, or `bru.setVar()` in a script
+  2. **Collection environment** - the `--env` file, e.g. `Demo.yml`
+  3. **Global environment** - the `--global-env` file at the workspace root
+
+  `releaseStage` exists in both the collection env and the global env, which
+  is what makes the chain visible.
+
+  ```bash
+  # Collection env only
+  bru run "03-Variables/01-Variable Precedence.yml" --env Demo
+  # releaseStage = demo   |   global = (not loaded)
+
+  # Load the global env too - the collection value still wins
+  bru run "03-Variables/01-Variable Precedence.yml" --env Demo --global-env Globals
+  # releaseStage = demo   |   global = production
+
+  # Override at runtime
+  bru run "03-Variables/01-Variable Precedence.yml" --env Demo --global-env Globals \
+    --env-var releaseStage=staging
+  # releaseStage = staging   |   global still = production
+  ```
+
+  ### The subtlety worth stating
+
+  `--env-var` **shadows** the global value, it does not change it.
+  `bru.getGlobalEnvVar("releaseStage")` still returns the global. To change
+  the global, point `--global-env` at a different file.
+
+  ### setVar vs setEnvVar
+
+  In V4, `bru.setEnvVar()` writes to the environment file **on disk**
+  immediately. That is fine for a base URL and wrong for a token - a
+  credential written that way lands in a file you might commit. Use
+  `bru.setVar()` / `bru.deleteVar()` for anything sensitive: same API, memory
+  only, gone when the run ends.

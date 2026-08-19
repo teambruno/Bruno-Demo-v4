@@ -1,0 +1,70 @@
+info:
+  name: 02-Get the Pokemon
+  type: http
+  seq: 2
+  tags:
+    - smoke
+    - regression
+    - chain
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Step 2 of 4. The species link comes straight out of the response -
+        // the next request uses it as its whole URL.
+        const body = res.getBody();
+
+        bru.setVar("speciesUrl", body.species.url);
+        bru.setVar("pokemonId", body.id);
+        bru.setVar("primaryType", body.types[0].type.name);
+
+        console.log(`#${body.id} ${body.name} → ${body.species.url}`);
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("we got the Pokemon the previous request chose", () => {
+          expect(body.name).to.equal(bru.getVar("pokemonName"));
+        });
+
+        test("it really is an electric type", () => {
+          const types = body.types.map((t) => t.type.name);
+          expect(types).to.include("electric");
+        });
+
+        test("the response carries a species link to follow", () => {
+          expect(body.species.url).to.match(/\/pokemon-species\/\d+\/$/);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Step 2 - follow the pick
+
+  `{{pokemonName}}` in the URL was set by step 1. The test
+  `we got the Pokemon the previous request chose` is the one to point at: it
+  compares this response against a variable from the *previous* request, which
+  is a real cross-request assertion, not a shape check.
+
+  This step stashes `speciesUrl` - a full URL from the response body. Step 3
+  uses it as its entire URL.

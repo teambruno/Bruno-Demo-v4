@@ -1,0 +1,27 @@
+info:
+  name: 02-Tests-and-Scripts
+  type: folder
+  seq: 2
+
+docs:
+  content: |-
+    ## 02 - Tests and Scripts
+
+    | # | Request | Shows |
+    |---|---------|-------|
+    | 01 | Tests and Assertions | JS `test()` blocks **and** the no-code assertion table |
+    | 02 | Pre and Post Scripts | `before-request` and `after-response` hooks |
+    | 03 | Shared Script File | `require()` a JS module shared across collections |
+
+    **At the table:** open 01 and point at both tabs. "Your QA engineer writes
+    JS tests. Your PM fills in the assertion table. Same request, same file,
+    same report."
+
+    ```bash
+    bru run "02-Tests-and-Scripts" --env Demo --sandbox=developer
+    ```
+
+    The `--sandbox=developer` flag is only needed by request 03, which
+    `require()`s a file from outside the collection. The other two run under
+    the default safe sandbox.
+  type: text/markdown

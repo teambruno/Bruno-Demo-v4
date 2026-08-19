@@ -1,0 +1,57 @@
+info:
+  name: 02-Local-Secrets
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    # Secrets without a secret manager
+
+    Folder 01 answers "our secrets live in Azure/AWS/Vault". This folder
+    answers the two questions that come *before* that one: "we just use a
+    `.env` file" and "can Bruno hold the secret itself?"
+
+    Most conversations only need this folder - a `.env` file is where the
+    person you are talking to already is. Folder 01 is the answer to "and when
+    we outgrow that?"
+
+    Run these on **Demo-Local**. They do not use `externalSecrets` at all;
+    there is no vault in the loop.
+
+    | Source | Referenced as | Lives in |
+    |--------|---------------|----------|
+    | `.env` file | `{{process.env.NAME}}` | gitignored file at the workspace root |
+    | Bruno secret variable | `{{appOnlySecret}}` | the OS keychain, never on disk |
+
+    ## One-time setup for the CLI
+
+    The app reads `.env` from the workspace root. `bru run` reads it from the
+    **collection** root. Symlink once so both work:
+
+    ```bash
+    ln -s ../../.env "collections/03 - Secrets and OpenAPI/.env"
+    ```
+
+    Covered by the `.env` rule in `.gitignore`, so it stays local. Without it,
+    `{{process.env.*}}` stays an unresolved template under the CLI and request
+    01 fails - which is exactly what its assertions are there to catch.
+
+    ## Why these are separate from folder 01
+
+    Folder 01's requests reference `{{secretStore.oauth-client-secret}}`. That
+    dotted form is `externalSecrets` binding syntax and only resolves when the
+    environment declares a provider, so a plain environment cannot satisfy it.
+    Demo-Local gets its own requests rather than pretending to drive folder
+    01's.
+
+    Worth saying out loud if someone asks why there are two folders: the choice
+    of secret *source* is an environment-level decision, and the reference
+    syntax changes with it.
+
+    ```bash
+    bru run "02-Local-Secrets" --env Demo-Local
+    ```
+  type: text/markdown

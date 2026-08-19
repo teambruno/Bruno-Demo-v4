@@ -1,0 +1,22 @@
+name: Demo-Local
+color: "#2E8A54"
+variables:
+  - name: httpfakerUrl
+    value: https://www.httpfaker.org
+  - name: echoUrl
+    value: https://echo.usebruno.com
+  - name: specUrl
+    value: https://petstore3.swagger.io/api/v3/openapi.json
+    description: live OpenAPI document used by 03-OpenAPI
+  - name: providerLabel
+    value: Local - .env and Bruno secrets
+    description: shown in test output so the demo makes the source obvious
+  - name: dotenvWebhookSecret
+    value: "{{process.env.WEBHOOK_SIGNING_SECRET}}"
+    description: from .env - real value on the wire, masked in CLI reports
+  - name: dotenvStripeKey
+    value: "{{process.env.STRIPE_TEST_KEY}}"
+    description: from .env - never committed, only .env.example is
+  - secret: true
+    name: appOnlySecret
+    description: Bruno secret variable - stored in the OS keychain, never on disk

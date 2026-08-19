@@ -1,0 +1,88 @@
+opencollection: 1.0.0
+
+info:
+  name: 03 - Secrets and OpenAPI
+  version: v1.0.0
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+docs:
+  content: |-
+    # 03 - Secrets and OpenAPI
+
+    The two questions that decide whether a team can actually adopt this:
+    **where do our credentials live**, and **does it work with our OpenAPI
+    spec**.
+
+    | # | Folder | Environments | The point |
+    |---|--------|--------------|-----------|
+    | 01 | **Secret-Manager** | Demo-Azure / Demo-AWS / Demo-HashiCorp | one request, three vaults, switch by dropdown |
+    | 02 | **Local-Secrets** | Demo-Local | `.env` and Bruno's own secret vars, no cloud |
+    | 03 | **OpenAPI** | any | import, sync, export, and a spec-drift test |
+
+    ## The 60-second version
+
+    Open `01-Secret-Manager/02-OAuth2 Client Secret`. Its `clientSecret` is
+    `{{secretStore.oauth-client-secret}}`. Send it - real token exchange, 200.
+
+    Now switch the environment dropdown from **Demo-Azure** to **Demo-AWS**
+    and send it again. Same 200. **Nothing in the request changed** - the
+    provider is an environment-level decision, so the same collection runs
+    against Azure Key Vault, AWS Secrets Manager or HashiCorp Vault with no
+    edits.
+
+    Then put it next to
+    `02 - Advanced/04-Auth/03-OAuth2 Client Credentials.yml`, which has
+    `clientSecret: demo-client-secret` sitting in committed YAML. That
+    before-and-after is the whole pitch in one frame.
+
+    ## Which source works where
+
+    | Source | Reference | Works in CI |
+    |--------|-----------|-------------|
+    | Bruno secret variable | `{{name}}` | no - OS keychain, local only |
+    | `.env` file | `{{process.env.NAME}}` | yes, and masked in reports |
+    | Secret manager | `{{secretStore.keyname}}` | yes, with runner credentials |
+
+    The two folders are separate because the syntax is not interchangeable:
+    `{{secretStore.keyname}}` is `externalSecrets` binding syntax and only
+    resolves when the environment declares a provider.
+
+    ## Run it
+
+    ```bash
+    # Folder 02 needs no cloud credentials at all - start here
+    bru run "02-Local-Secrets" --env Demo-Local
+
+    # Folder 01 needs a live vault and a logged-in identity (az login etc.)
+    bru run "01-Secret-Manager" --env Demo-Azure --verbose
+
+    # Folder 03 hits a public spec URL - no credentials
+    bru run "03-OpenAPI" --env Demo-Local
+    ```
+
+    ### `--verbose` is not optional on folder 01
+
+    A vault fetch that fails - bad credentials, missing data-plane role, wrong
+    vault name - is **caught and swallowed** by the CLI. Without `--verbose`
+    the run just reports ordinary 401s from the API under test and never
+    mentions the vault, so you debug the wrong thing. `--verbose` logs the
+    vault name and whether each fetch succeeded (never a secret value), and
+    `1. Fetched secret for: bruno-demo-kv` is worth pointing at on a call
+    anyway.
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    scripts:
+      additionalContextRoots:
+        - ../../shared-scripts

@@ -1,0 +1,31 @@
+name: Demo
+color: "#346AB2"
+variables:
+  - name: pokeUrl
+    value: https://pokeapi.co/api/v2
+    description: PokeAPI REST base - no key required
+  - name: pokeGraphqlUrl
+    value: https://beta.pokeapi.co/graphql/v1beta
+    description: PokeAPI's public GraphQL endpoint (Hasura schema)
+  - name: dummyUrl
+    value: https://dummyjson.com
+    description: DummyJSON - real login returning a real JWT
+  - name: httpfakerUrl
+    value: https://www.httpfaker.org
+    description: Bruno's own echo and auth sandbox, so no third party can take the demo down
+  - name: echoUrl
+    value: https://echo.usebruno.com
+    description: Returns the request body verbatim
+  - name: username
+    value: emilys
+    description: DummyJSON demo user
+  - name: password
+    value: emilyspass
+    description: Public demo password - see 03 - Secrets and OpenAPI for the real pattern
+  - name: releaseStage
+    value: demo
+  - name: tokenTtlSeconds
+    value:
+      type: number
+      data: "3600"
+    description: number - compare against Date.now() without parseInt()

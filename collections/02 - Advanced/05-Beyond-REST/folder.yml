@@ -1,0 +1,43 @@
+info:
+  name: 05-Beyond-REST
+  type: folder
+  seq: 5
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    ## 05 - Beyond REST
+
+    The "do you support…" folder. Four protocols, one client, same tests and
+    scripts as any HTTP request.
+
+    | Request | Protocol | Runs in |
+    |---------|----------|---------|
+    | `01-GraphQL - PokeAPI` | GraphQL over HTTP | app **and** CLI |
+    | `02-WebSocket - Echo` | WebSocket | app only |
+    | `03-SSE - Wikimedia Firehose` | Server-Sent Events | app only |
+    | `04-gRPC - Sum` | gRPC (unary) | app only |
+
+    **At the table:** open the GraphQL request. It has a query editor with
+    schema-aware autocomplete and a separate variables pane - not a JSON body
+    with a `query` string in it.
+
+    Then open the SSE request if you want the demo that draws people in:
+    every page created across all of Wikimedia, streaming live.
+
+    ### app-only, and why
+
+    The CLI executes HTTP and GraphQL. WebSocket, SSE and gRPC are
+    interactive by nature and are app-only, so those three carry the
+    `app-only` tag and CI excludes them:
+
+    ```bash
+    bru run "05-Beyond-REST" --env Demo --exclude-tags app-only
+    ```
+
+    Running the folder without that flag will fail on the WebSocket request
+    with "Unsupported protocol wss:" - expected, not a bug, and better said
+    before someone discovers it mid-demo.
+  type: text/markdown

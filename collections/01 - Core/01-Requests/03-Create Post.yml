@@ -1,0 +1,66 @@
+info:
+  name: 03-Create Post
+  type: http
+  seq: 3
+  tags:
+    - regression
+
+http:
+  method: POST
+  url: "{{baseUrl}}/posts"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Bruno at API World",
+        "body": "Created by a Bruno collection run.",
+        "userId": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 201 Created", () => {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("the API echoed back what we posted", () => {
+          expect(body.title).to.equal("Bruno at API World");
+          expect(body.userId).to.equal(1);
+          expect(body.id).to.be.a("number");
+        });
+
+        // Hand the new id to the update and delete steps. setVar is run-scoped:
+        // in memory for this run, nothing written to disk.
+        bru.setVar("newPostId", body.id);
+        console.log("created post id:", body.id);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+    - expression: res.body.id
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## POST /posts
+
+  A JSON body, and the first half of the create-update-delete flow. The new
+  `id` is stashed with `bru.setVar("newPostId", ...)` so requests 04 and 05
+  can use it without anyone copy-pasting a value between tabs.
+
+  `bru.setVar()` is run-scoped and writes nothing to disk. Its counterpart
+  `bru.setEnvVar()` **does** write to the environment file in V4 - fine for a
+  base URL, wrong for a token. See `03-Variables` for that distinction.

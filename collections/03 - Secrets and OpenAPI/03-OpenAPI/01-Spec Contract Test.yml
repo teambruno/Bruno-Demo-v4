@@ -1,0 +1,151 @@
+info:
+  name: 01-Spec Contract Test
+  type: http
+  seq: 1
+  tags:
+    - openapi
+
+http:
+  method: GET
+  url: "{{specUrl}}"
+  headers:
+    - name: Accept
+      value: application/json
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Flatten the spec into a comparable list of operations.
+        const spec = res.getBody();
+        const VERBS = ["get", "post", "put", "delete", "patch", "head", "options"];
+
+        const live = Object.entries(spec.paths).flatMap(([path, item]) =>
+          Object.keys(item)
+            .filter((k) => VERBS.includes(k))
+            .map((verb) => `${verb.toUpperCase()} ${path}`)
+        ).sort();
+
+        bru.setVar("liveOperations", JSON.stringify(live));
+        console.log(`${spec.info.title} v${spec.info.version} (OpenAPI ${spec.openapi})`);
+        console.log(`${Object.keys(spec.paths).length} paths, ${live.length} operations`);
+    - type: tests
+      code: |-
+        const spec = res.getBody();
+        const live = JSON.parse(bru.getVar("liveOperations"));
+
+        // ── The baseline ────────────────────────────────────────────────────
+        // Captured from the live spec on 2026-08-19. This is the contract this
+        // collection was built against.
+        const BASELINE = [
+          "DELETE /pet/{petId}",
+          "DELETE /store/order/{orderId}",
+          "DELETE /user/{username}",
+          "GET /pet/findByStatus",
+          "GET /pet/findByTags",
+          "GET /pet/{petId}",
+          "GET /store/inventory",
+          "GET /store/order/{orderId}",
+          "GET /user/login",
+          "GET /user/logout",
+          "GET /user/{username}",
+          "POST /pet",
+          "POST /pet/{petId}",
+          "POST /pet/{petId}/uploadImage",
+          "POST /store/order",
+          "POST /user",
+          "POST /user/createWithList",
+          "PUT /pet",
+          "PUT /user/{username}"
+        ];
+
+        test("the spec is fetchable and is OpenAPI 3", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(spec.openapi, "openapi version").to.match(/^3\./);
+          expect(spec.info.title).to.be.a("string").and.not.be.empty;
+        });
+
+        test("the documented tags are still the three we group by", () => {
+          const tags = (spec.tags ?? []).map((t) => t.name).sort();
+          expect(tags).to.deep.equal(["pet", "store", "user"]);
+        });
+
+        test("no operation we depend on has been removed", () => {
+          // Removals are breaking. This is the test that should fail a pipeline.
+          const removed = BASELINE.filter((op) => !live.includes(op));
+          expect(removed, `removed from the spec: ${removed.join(", ")}`).to.be.empty;
+        });
+
+        test("every operation declares at least one response", () => {
+          const VERBS = ["get", "post", "put", "delete", "patch", "head", "options"];
+          Object.entries(spec.paths).forEach(([path, item]) => {
+            Object.entries(item)
+              .filter(([verb]) => VERBS.includes(verb))
+              .forEach(([verb, op]) => {
+                expect(op.responses, `${verb.toUpperCase()} ${path} has no responses`)
+                  .to.be.an("object").and.not.be.empty;
+              });
+          });
+        });
+
+        // ── Additions are reported, not failed ──────────────────────────────
+        // A spec growing is normal. Logging it keeps the run green while still
+        // telling you the contract moved.
+        const added = live.filter((op) => !BASELINE.includes(op));
+        if (added.length > 0) {
+          console.log(`⚠ ${added.length} new operation(s) since the baseline:`);
+          added.forEach((op) => console.log(`    + ${op}`));
+          console.log("  Re-sync the collection and update BASELINE in this test.");
+        } else {
+          console.log(`✓ operation set matches the ${BASELINE.length}-operation baseline`);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.paths
+      operator: isJson
+
+settings:
+  encodeUrl: true
+  timeout: 20000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Your contract, as a test
+
+  OpenAPI Sync is the UI answer to "the spec changed and our collection is
+  stale". This is the **pipeline** answer: one request, and a `test()` that
+  fails the build the day upstream breaks the contract.
+
+  It fetches the live spec from `{{specUrl}}` and compares its operation set
+  against a `BASELINE` array captured on 2026-08-19.
+
+  ### The asymmetry is deliberate
+
+  | Change upstream | What happens here |
+  |-----------------|-------------------|
+  | an operation is **removed** | test **fails** - this is a breaking change |
+  | an operation is **added** | logged as a warning, run stays green |
+
+  A spec growing is normal and should not wake anyone up. A spec losing an
+  endpoint your collection calls is exactly what you want a red build for.
+
+  It also checks the three `tags` still exist - because tag-based import groups
+  requests by them, so a renamed tag silently reshapes everyone's collection -
+  and that every operation declares at least one response, which is the most
+  common thing missing from a hand-maintained spec.
+
+  ### No credentials needed
+
+  This hits a public spec document, so it runs anywhere:
+
+  ```bash
+  bru run "03-OpenAPI" --env Demo-Local
+  ```
+
+  Point it at your own spec by changing `specUrl` in the environment. Against
+  an internal spec behind auth, add a Bearer token from the secret manager -
+  which is the rest of this collection.

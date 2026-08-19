@@ -3,7 +3,7 @@
 Third-party contracts. **Do not hand-edit** - re-vendor from upstream instead.
 
 Open-Meteo is the weather API this workspace already calls in
-`02 - Auth and Scripting` (`weatherUrl`), so these are the published contracts
+earlier versions of this kit (`weatherUrl`), so these are the published contracts
 for an API the demo kit uses for real.
 
 | File | Spec version | Operation | Live server |

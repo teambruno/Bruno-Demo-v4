@@ -1,0 +1,5 @@
+pokemonName,expectedType,expectedId
+pikachu,electric,25
+charizard,fire,6
+snorlax,normal,143
+gengar,ghost,94

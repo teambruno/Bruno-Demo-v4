@@ -1,0 +1,98 @@
+info:
+  name: 02-Response Visualization
+  type: http
+  seq: 3
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  headers:
+    - name: X-Request-Id
+      value: "{{requestId}}"
+      description: Built in the before-request script below
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const name = body.name || '';
+        const id = body.id || '';
+        const sprites = body.sprites || {};
+        const other = sprites.other || {};
+
+        const images = [
+          { label: 'Front Default', url: sprites.front_default },
+          { label: 'Back Default', url: sprites.back_default },
+          { label: 'Front Shiny', url: sprites.front_shiny },
+          { label: 'Back Shiny', url: sprites.back_shiny },
+          { label: 'Official Artwork', url: (other['official-artwork'] || {}).front_default },
+          { label: 'Home', url: (other.home || {}).front_default },
+          { label: 'Dream World', url: (other.dream_world || {}).front_default },
+          { label: 'Showdown (animated)', url: (other.showdown || {}).front_default },
+        ].filter(i => i.url);
+
+        const cards = images.map(i => `
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <img src="${i.url}" alt="${i.label}" style="width:120px;height:120px;object-fit:contain;image-rendering:pixelated;" />
+            <div style="margin-top:8px;font-size:13px;color:#374151;font-family:system-ui,sans-serif;">${i.label}</div>
+          </div>
+        `).join('');
+
+        const html = `
+          <div style="font-family:system-ui,sans-serif;padding:24px;background:#f9fafb;min-height:100vh;">
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:20px;">
+              <h1 style="margin:0;text-transform:capitalize;color:#111827;">${name}</h1>
+              <span style="color:#6b7280;">#${id}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;">
+              ${cards}
+            </div>
+          </div>
+        `;
+
+        bru.visualize('html', {
+          name: `${name} sprites`,
+          content: html
+        });
+    - type: tests
+      code: |-
+        test("the pre-request script's header reached the wire", () => {
+          const sent = req.getHeader("X-Request-Id");
+          expect(sent).to.be.a("string").and.match(/^apiworld-/);
+        });
+
+        test("the post-response script stashed a summary", () => {
+          const summary = JSON.parse(bru.getVar("pokemonSummary"));
+          expect(summary.name).to.equal(res.getBody().name);
+          expect(summary.types).to.be.an("array").with.length.greaterThan(0);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
+
+docs: |-
+  ## The two script hooks
+
+  | Hook | Runs | Typical job |
+  |------|------|-------------|
+  | `before-request` | after variables resolve, before the send | build a signature, a timestamp, a correlation id |
+  | `after-response` | once the reply is back | extract a value, reshape the body, log |
+
+  Here the pre-request script generates `X-Request-Id` - a header no human
+  should be typing - and the post-response script folds the 20-key PokeAPI
+  response down to four fields.
+
+  ### The bit that gets a reaction
+
+  `bru.getEnvVar("verboseLogging")` returns a real `false`, not the string
+  `"false"`. Typed variables (`number`, `boolean`, `object`) arrive parsed, so
+  `if (bru.getEnvVar("verboseLogging"))` does what it looks like it does. See
+  `03-Variables/02-Typed Variables`.

@@ -1,0 +1,53 @@
+info:
+  name: 03-Runner-and-Tags
+  type: folder
+  seq: 3
+
+docs:
+  content: |-
+    ## 03 - Runner and Tags
+
+    Tag a request, then run any slice of your suite by tag. Same collection
+    gates a 3-second PR check and a full nightly regression.
+
+    | Request | Tags |
+    |---------|------|
+    | 01-Health Check | `smoke` |
+    | 02-Pokemon Count | `smoke`, `regression` |
+    | 03-Ability Lookup | `regression` |
+    | 04-Type Sweep | `regression`, `slow` |
+
+    ```bash
+    # Fast gate: 2 requests
+    bru run "03-Runner-and-Tags" --env Demo --tags smoke
+
+    # Full regression: 3 requests
+    bru run "03-Runner-and-Tags" --env Demo --tags regression
+
+    # Regression minus the slow one: 2 requests
+    bru run "03-Runner-and-Tags" --env Demo --tags regression --exclude-tags slow
+
+    # Stop at the first failure
+    bru run "03-Runner-and-Tags" --env Demo --tags smoke --bail
+    ```
+
+    ### Reports, all three formats at once
+
+    ```bash
+    bru run "03-Runner-and-Tags" --env Demo \
+      --reporter-html  ../../reports/tags.html \
+      --reporter-json  ../../reports/tags.json \
+      --reporter-junit ../../reports/tags.xml \
+      --reporter-skip-headers authorization
+    ```
+
+    `--reporter-skip-headers` keeps named headers out of the report, which
+    matters the moment a pipeline publishes the HTML as a build artifact.
+
+    **At the table:** run `--tags smoke`, then `--tags regression`, then open
+    the HTML report. Three commands, and the "does this fit our CI" question
+    is answered.
+
+    In the app the same thing is the **Runner** - select the folder, hit Run,
+    and it streams results per request.
+  type: text/markdown

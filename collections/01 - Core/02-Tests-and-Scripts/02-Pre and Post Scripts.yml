@@ -1,0 +1,81 @@
+info:
+  name: 02-Pre and Post Scripts
+  type: http
+  seq: 2
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  headers:
+    - name: X-Request-Id
+      value: "{{requestId}}"
+      description: Built in the before-request script below
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // ── before-request: runs after interpolation, before the send ───────
+        // Anything the request needs but nobody should type by hand.
+        bru.setVar("requestId", `apiworld-${Date.now().toString(36)}`);
+
+        // Typed environment variables arrive parsed, not as strings. This is a
+        // real boolean, so it goes straight into an if().
+        if (bru.getEnvVar("verboseLogging")) {
+          console.log(`→ GET ${bru.getEnvVar("pokemonName")} (${bru.getVar("requestId")})`);
+        }
+    - type: after-response
+      code: |-
+        // ── after-response: runs once the reply is back ─────────────────────
+        // Reshape it, log it, or stash a value for the next request.
+        const body = res.getBody();
+
+        const summary = {
+          name: body.name,
+          types: body.types.map((t) => t.type.name),
+          heightM: body.height / 10,
+          weightKg: body.weight / 10
+        };
+
+        bru.setVar("pokemonSummary", JSON.stringify(summary));
+        console.log("summary:", summary);
+    - type: tests
+      code: |-
+        test("the pre-request script's header reached the wire", () => {
+          const sent = req.getHeader("X-Request-Id");
+          expect(sent).to.be.a("string").and.match(/^apiworld-/);
+        });
+
+        test("the post-response script stashed a summary", () => {
+          const summary = JSON.parse(bru.getVar("pokemonSummary"));
+          expect(summary.name).to.equal(res.getBody().name);
+          expect(summary.types).to.be.an("array").with.length.greaterThan(0);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## The two script hooks
+
+  | Hook | Runs | Typical job |
+  |------|------|-------------|
+  | `before-request` | after variables resolve, before the send | build a signature, a timestamp, a correlation id |
+  | `after-response` | once the reply is back | extract a value, reshape the body, log |
+
+  Here the pre-request script generates `X-Request-Id` - a header no human
+  should be typing - and the post-response script folds the 20-key PokeAPI
+  response down to four fields.
+
+  ### The bit that gets a reaction
+
+  `bru.getEnvVar("verboseLogging")` returns a real `false`, not the string
+  `"false"`. Typed variables (`number`, `boolean`, `object`) arrive parsed, so
+  `if (bru.getEnvVar("verboseLogging"))` does what it looks like it does. See
+  `03-Variables/02-Typed Variables`.

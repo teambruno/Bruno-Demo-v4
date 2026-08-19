@@ -1,0 +1,79 @@
+info:
+  name: 04-Type Sweep
+  type: http
+  seq: 4
+  tags:
+    - regression
+    - slow
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/type"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Fan out over every type returned above. One request in the file,
+        // nineteen calls on the wire - tagged `slow` for a reason.
+        const types = res.getBody().results;
+        const sample = types.slice(0, 6);
+
+        const results = [];
+        for (const t of sample) {
+          const detail = await bru.sendRequest({ method: "GET", url: t.url });
+          const body = typeof detail.data === "string" ? JSON.parse(detail.data) : detail.data;
+          results.push({ name: body.name, pokemon: body.pokemon.length });
+        }
+
+        bru.setVar("typeSample", JSON.stringify(results));
+        results.forEach((r) => console.log(`  ${r.name.padEnd(10)} ${r.pokemon} Pokemon`));
+    - type: tests
+      code: |-
+        const body = res.getBody();
+        const sample = JSON.parse(bru.getVar("typeSample"));
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("all 18 canonical types are present", () => {
+          // 18 real types plus PokeAPI's "unknown" and "stellar" entries
+          expect(body.count).to.be.at.least(18);
+        });
+
+        test("every sampled type has Pokemon in it", () => {
+          expect(sample).to.have.lengthOf(6);
+          sample.forEach((t) => {
+            expect(t.pokemon, `${t.name} has no Pokemon`).to.be.greaterThan(0);
+          });
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Tags: `regression`, `slow`
+
+  The one you exclude from a fast gate:
+
+  ```bash
+  bru run "03-Runner-and-Tags" --env Demo --tags regression --exclude-tags slow
+  ```
+
+  It is slow because it fans out. The post-response script calls
+  `bru.sendRequest()` in a loop to fetch six type details, so one request file
+  produces seven calls on the wire.
+
+  `bru.sendRequest()` is worth knowing about on its own - it lets a script make
+  arbitrary HTTP calls, which covers the cases a linear request list cannot:
+  polling until a job completes, paging until the cursor runs out, or
+  pre-fetching a value from a service the collection does not otherwise model.

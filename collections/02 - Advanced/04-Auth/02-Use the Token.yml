@@ -1,0 +1,60 @@
+info:
+  name: 02-Use the Token
+  type: http
+  seq: 2
+  tags:
+    - smoke
+    - regression
+    - auth
+
+http:
+  method: GET
+  url: "{{dummyUrl}}/auth/me"
+  auth:
+    type: bearer
+    token: "{{authToken}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("the captured token authenticated us", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the server identified the right user", () => {
+          expect(body.username).to.equal(bru.getEnvVar("username"));
+          expect(body.email).to.be.a("string").and.include("@");
+        });
+
+        test("Bruno sent the token as a Bearer header", () => {
+          expect(req.getHeader("Authorization")).to.equal(`Bearer ${bru.getVar("authToken")}`);
+        });
+
+        console.log(`authenticated as ${body.firstName} ${body.lastName} <${body.email}>`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Reuse it
+
+  **This request has no script for auth.** Its Bearer token field is
+  `{{authToken}}` - the variable request 01 set. Run the folder and the two
+  requests hand off with nothing typed in between.
+
+  The third test verifies the wire format: Bruno assembled
+  `Authorization: Bearer <token>` from the auth tab, so nobody hand-builds a
+  header.
+
+  Run this one on its own without running 01 first and it 401s - a useful
+  thing to show deliberately, because it makes the dependency real.

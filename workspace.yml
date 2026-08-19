@@ -1,22 +1,25 @@
 opencollection: 1.0.0
 info:
-  name: "Bruno-V4-Demo-Kit"
+  name: "Bruno-Conference-2026"
   type: workspace
 
+# Three collections, deliberately. Core -> Advanced -> Secrets/OpenAPI is the
+# order you walk them in at a table, and it is short enough to navigate under
+# pressure. The full demo kit (protocol coverage, more auth flows, CI matrix)
+# lives on the `main` branch.
 collections:
-  - name: "01 - Fundamentals"
-    path: "collections/01 - Fundamentals"
-  - name: "02 - Auth and Scripting"
-    path: "collections/02 - Auth and Scripting"
-  - name: "03 - Secrets and Vaults"
-    path: "collections/03 - Secrets and Vaults"
-  - name: "04 - CLI CI and V4 Features"
-    path: "collections/04 - CLI CI and V4 Features"
-  - name: "01 - Fundamentals"
-    path: "collections/01 - Fundamentals - 1"
+  - name: "01 - Core"
+    path: "collections/01 - Core"
+  - name: "02 - Advanced"
+    path: "collections/02 - Advanced"
+  - name: "03 - Secrets and OpenAPI"
+    path: "collections/03 - Secrets and OpenAPI"
 
+# Registered specs appear in the sidebar for view/design, and are what you
+# import from on a call. Petstore only - one spec keeps the sidebar clean.
+# The others in api-specs/ are on disk and importable by file picker.
 specs:
-  - name: "checkout-v71"
-    path: "api-specs/adyen/checkout-v71.json"
+  - name: "Swagger Petstore (OAS 3.0)"
+    path: "api-specs/petstore/openapi.yaml"
 
 docs: ''

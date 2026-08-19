@@ -1,0 +1,110 @@
+info:
+  name: 01-GraphQL - PokeAPI
+  type: graphql
+  seq: 1
+  tags:
+    - smoke
+    - regression
+    - graphql
+
+graphql:
+  method: POST
+  url: "{{pokeGraphqlUrl}}"
+  body:
+    query: |-
+      query GetPokemon($name: String!) {
+        pokemon_v2_pokemon(where: { name: { _eq: $name } }) {
+          id
+          name
+          height
+          weight
+          pokemon_v2_pokemontypes {
+            pokemon_v2_type {
+              name
+            }
+          }
+          pokemon_v2_pokemonstats {
+            base_stat
+            pokemon_v2_stat {
+              name
+            }
+          }
+        }
+      }
+    variables: |-
+      {
+        "name": "pikachu"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("no GraphQL errors", () => {
+          // A GraphQL error still returns HTTP 200, so checking the status
+          // alone would pass on a broken query. This is the check that matters.
+          expect(body.errors, JSON.stringify(body.errors)).to.be.undefined;
+        });
+
+        test("exactly one Pokemon matched the variable", () => {
+          expect(body.data.pokemon_v2_pokemon).to.be.an("array").with.lengthOf(1);
+        });
+
+        test("only the requested fields came back", () => {
+          const pokemon = body.data.pokemon_v2_pokemon[0];
+          expect(Object.keys(pokemon).sort()).to.deep.equal([
+            "height",
+            "id",
+            "name",
+            "pokemon_v2_pokemonstats",
+            "pokemon_v2_pokemontypes",
+            "weight"
+          ]);
+        });
+
+        test("nested selections resolved", () => {
+          const pokemon = body.data.pokemon_v2_pokemon[0];
+          const types = pokemon.pokemon_v2_pokemontypes.map((t) => t.pokemon_v2_type.name);
+          expect(types).to.include("electric");
+          expect(pokemon.pokemon_v2_pokemonstats).to.have.lengthOf(6);
+        });
+
+        const p = body.data.pokemon_v2_pokemon[0];
+        console.log(`#${p.id} ${p.name} - ${p.pokemon_v2_pokemonstats.length} stats, no over-fetching`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 15000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## GraphQL, as a first-class request type
+
+  `info.type` is `graphql`, not `http`, so the app gives you a query editor
+  with autocomplete against the introspected schema, a **Variables** pane, and
+  a formatted response - rather than a POST body with a `query` string jammed
+  into it.
+
+  This queries [PokeAPI's public GraphQL endpoint](https://beta.pokeapi.co/graphql/v1beta)
+  (a Hasura schema, hence the `pokemon_v2_` prefixes) with a real
+  `$name` variable rather than an interpolated string.
+
+  ### The test worth pointing at
+
+  `no GraphQL errors`. A failed GraphQL query returns **HTTP 200** with an
+  `errors` array in the body, so a status-code assertion passes while the query
+  is broken. Anyone who has debugged GraphQL in a REST-shaped client recognises
+  this immediately.
+
+  The `only the requested fields came back` test makes the other GraphQL point
+  concretely: you asked for six fields, you got six fields.
+
+  Unlike the other three requests in this folder, GraphQL runs in the CLI too.

@@ -1,0 +1,85 @@
+info:
+  name: 04-Walk the Evolution Chain
+  type: http
+  seq: 4
+  tags:
+    - smoke
+    - regression
+    - chain
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/evolution-chain/{{evolutionChainId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Step 4 of 4. Flatten the nested chain into a readable line.
+        const chain = res.getBody().chain;
+
+        const walk = (node, depth = 0) =>
+          [{ name: node.species.name, depth }].concat(
+            (node.evolves_to ?? []).flatMap((next) => walk(next, depth + 1))
+          );
+
+        const stages = walk(chain);
+        bru.setVar("evolutionStages", JSON.stringify(stages.map((s) => s.name)));
+
+        console.log(`chain: ${stages.map((s) => s.name).join(" → ")}`);
+    - type: tests
+      code: |-
+        const body = res.getBody();
+        const stages = JSON.parse(bru.getVar("evolutionStages"));
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the chain id matches the one extracted in step 3", () => {
+          expect(String(body.id)).to.equal(bru.getVar("evolutionChainId"));
+        });
+
+        test("the chain has a base form", () => {
+          expect(body.chain.species.name).to.be.a("string").and.not.be.empty;
+        });
+
+        test("the chain actually evolves (at least two stages)", () => {
+          expect(stages).to.have.length.of.at.least(2);
+        });
+
+        test("the Pokemon we started from appears in its own chain", () => {
+          // The payoff: an assertion spanning all four requests. Species name
+          // rather than Pokemon name, since forms like raichu-alola share a species.
+          expect(stages).to.include(bru.getVar("speciesName"));
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.chain
+      operator: isJson
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Step 4 - the payoff
+
+  The console line is the demo:
+
+  ```
+  chain: pichu → pikachu → raichu
+  ```
+
+  Four requests, and the only input was clicking Run. The last test is the
+  one worth reading out loud - it asserts that the Pokemon picked at random
+  back in **step 1** appears in the evolution chain fetched in **step 4**,
+  which means all four responses agree with each other.
+
+  That is what a chained test actually buys you: not "did each endpoint
+  return 200", but "does this API tell a consistent story across four calls".

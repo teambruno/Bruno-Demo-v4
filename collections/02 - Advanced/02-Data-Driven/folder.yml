@@ -1,0 +1,45 @@
+info:
+  name: 02-Data-Driven
+  type: folder
+  seq: 2
+
+docs:
+  content: |-
+    ## 02 - Data-Driven
+
+    One request file. Four rows. Four runs.
+
+    Bruno iterates the request over every row of a data file and injects that
+    row's columns as variables for that iteration. `{{pokemonName}}` in the
+    URL is a different Pokemon each time.
+
+    | pokemonName | expectedType | expectedId |
+    |-------------|--------------|-----------|
+    | pikachu | electric | 25 |
+    | charizard | fire | 6 |
+    | snorlax | normal | 143 |
+    | gengar | ghost | 94 |
+
+    `pokemon.csv` and `pokemon.json` hold the same four rows, so the two flags
+    below are interchangeable - handy for showing this is not a CSV-only
+    feature.
+
+    ```bash
+    # CSV
+    bru run "02-Data-Driven" --env Demo --csv-file-path "02-Data-Driven/pokemon.csv"
+
+    # JSON - same four rows, same result
+    bru run "02-Data-Driven" --env Demo --json-file-path "02-Data-Driven/pokemon.json"
+
+    # With an HTML report - each iteration is its own section
+    bru run "02-Data-Driven" --env Demo \
+      --csv-file-path "02-Data-Driven/pokemon.csv" \
+      --reporter-html ../../reports/data-driven.html
+    ```
+
+    Run these from the collection root (`collections/02 - Advanced`) - the
+    data-file path resolves relative to the working directory.
+
+    **At the table:** open `pokemon.csv` in an editor, add a row, re-run.
+    "Your test data is a spreadsheet your QA lead can edit. No code change."
+  type: text/markdown

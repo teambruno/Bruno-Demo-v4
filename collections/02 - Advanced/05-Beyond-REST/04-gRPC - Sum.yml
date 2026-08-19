@@ -1,0 +1,46 @@
+info:
+  name: 04-gRPC - Sum
+  type: grpc
+  seq: 4
+  tags:
+    - app-only
+    - grpc
+
+grpc:
+  url: https://grpcb.in/
+  method: /addsvc.Add/Sum
+  methodType: unary
+  message: |-
+    {
+      "a": 988,
+      "b": 67
+    }
+  auth: inherit
+
+docs:
+  content: |-
+    ## gRPC
+
+    `info.type: grpc`. Bruno reflects the server's schema, lists its methods,
+    and sends a unary call with a JSON message - no `grpcurl`, no hand-written
+    protobuf.
+
+    All four method types are supported: unary (this one), server streaming,
+    client streaming, and bidirectional.
+
+    `/addsvc.Add/Sum` with `a: 988, b: 67` returns `1055`.
+
+    ### Before you demo
+
+    `grpcb.in` is a community-run public sandbox and it is the least reliable
+    endpoint in this workspace - check it before the doors open. If it is down,
+    say so and move on; the point of this request is that the request *type*
+    exists, and one unreachable public sandbox does not undercut that.
+
+    For a reliable version, point it at a gRPC service of your own and enable
+    server reflection.
+
+    ### app-only
+
+    Tagged `app-only` - the CLI does not execute gRPC requests.
+  type: text/markdown

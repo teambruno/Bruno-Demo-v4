@@ -1,0 +1,121 @@
+info:
+  name: 03-OpenAPI
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    # OpenAPI: import, sync, export
+
+    Bruno treats a spec as a first-class input, not an import wizard you use
+    once. The specs themselves are in [`api-specs/`](../../../api-specs/) at
+    the workspace root, vendored unmodified from upstream - so "is that a real
+    spec?" has a one-word answer.
+
+    | Capability | Where in the app |
+    |------------|------------------|
+    | **Import** a spec into a collection | right-click a collection → Import → OpenAPI |
+    | **OpenAPI Sync (Beta)** - track a remote spec | right-click a collection → OpenAPI Sync (Beta) |
+    | **View / design** a spec inside Bruno | the `specs:` block in `workspace.yml` puts them in the sidebar |
+    | **Export** a collection back out as OAS 3 | collection → Share → OpenAPI Specification |
+
+    Docs: <https://docs.usebruno.com/open-api/overview>
+
+    ## The 90-second import demo
+
+    Right-click a collection → **Import** → **OpenAPI** →
+    `api-specs/petstore/openapi.yaml`.
+
+    Choose **tag-based** grouping (the default): 19 operations land in three
+    folders - `pet`, `store`, `user` - matching the spec's `tags`. Choose
+    **path-based** instead and you get folders mirroring the URL structure,
+    which is what people migrating from Postman expect.
+
+    Two things to point out on the way past, because they are what saves real
+    time:
+
+    - request bodies arrive **pre-filled from the schema examples**
+    - `PUT /pet` arrives with its auth mode already set to **OAuth2** - Bruno
+      read `petstore_auth` out of `components.securitySchemes` rather than
+      leaving you a blank auth tab
+
+    Then import `api-specs/petstore/swagger-2.0.json` to make the "and your old
+    Swagger 2 files too" point without leaving the room.
+
+    Import **live on the call** rather than showing a checked-in collection.
+    The audience should watch the requests appear.
+
+    ## OpenAPI Sync (Beta) - the one that answers the real objection
+
+    Right-click a collection → **OpenAPI Sync (Beta)** → **Add URL**:
+
+    ```
+    https://petstore3.swagger.io/api/v3/openapi.json
+    ```
+
+    Tick **Check for Spec Updates**. The spec is cached under
+    `<collection>/resources/spec/` so it keeps working offline, and Bruno
+    re-checks every 5 minutes.
+
+    The line that matters to anyone who has maintained a collection by hand:
+    **syncing updates URLs, parameters, request bodies and folder structure,
+    and leaves your tests, scripts and assertions intact.**
+
+    Make that concrete - add a test to an imported request, *then* sync, then
+    show the test still there. That is the objection this feature answers, and
+    it lands far better demonstrated than asserted.
+
+    > Sync overwrites the collection from the spec and cannot be undone. Demo
+    > it on a throwaway import, never on a collection you spent the morning
+    > building.
+
+    ### Showing drift without waiting for upstream to change
+
+    Sync polls a URL, so serve the specs locally and edit your copy:
+
+    ```bash
+    cd api-specs && python3 -m http.server 8080
+    # point Sync at http://localhost:8080/petstore/openapi.yaml
+    # then edit that file - add a path, add a required param - and re-check
+    ```
+
+    `01-Spec Contract Test` in this folder is the same idea expressed as a
+    **test** instead of a UI gesture, so it can gate a pipeline.
+
+    ## Before you demo live
+
+    `petstore3.swagger.io` is a shared public sandbox and parts of it are
+    broken. **Checked 2026-08-19:**
+
+    | Reliable | Broken right now |
+    |----------|------------------|
+    | `GET /api/v3/openapi.json` (the spec itself) | `POST /pet` → 500 |
+    | | `GET /pet/{petId}` → 500 |
+
+    So: **import from the spec and sync against it, but do not click Send on
+    the imported Petstore requests** - the write path is 500ing today. That is
+    the server, not Bruno, and it is why this folder ships a test against the
+    spec document rather than against the Petstore API.
+
+    Open-Meteo (`api-specs/open-meteo/`) has been stable and needs no key -
+    a good fallback if Swagger's sandbox is having a bad day.
+
+    ## The offline answer: mock the spec
+
+    Better than a fallback, if the venue wifi is bad or the sandbox is down:
+    **generate a mock server from the spec itself.** Bruno reads the same
+    `openapi.yaml`, builds a route per response, and fills the bodies from the
+    spec's examples - so every Petstore request returns a realistic 200 with no
+    network and no third party involved.
+
+    In the app: the mock server panel, sourced from the registered spec
+    (`workspace.yml` → `specs:`), on a local port. Point the imported
+    collection's `baseUrl` at that port and the whole Petstore flow - create,
+    read, update, delete - works on a plane.
+
+    Worth having ready before the doors open. It turns "the demo server is
+    500ing" from an apology into a feature.
+  type: text/markdown

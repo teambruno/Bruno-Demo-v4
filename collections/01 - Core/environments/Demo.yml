@@ -1,0 +1,37 @@
+name: Demo
+color: "#2E8A54"
+variables:
+  - name: pokeUrl
+    value: https://pokeapi.co/api/v2
+    description: PokeAPI - no key, no signup, no rate limit worth worrying about
+  - name: baseUrl
+    value: https://jsonplaceholder.typicode.com
+    description: JSONPlaceholder - fake REST API that accepts writes
+  - name: pokemonName
+    value: pikachu
+    description: Override at the table with --env-var pokemonName=snorlax
+  - name: postId
+    value: "1"
+  - name: releaseStage
+    value: demo
+    description: Also set in Globals.yml - that overlap is the precedence demo
+  - name: retryLimit
+    value:
+      type: number
+      data: "2"
+    description: number - arrives in scripts as 2, not "2", so arithmetic just works
+  - name: verboseLogging
+    value:
+      type: boolean
+      data: "true"
+    description: boolean - use it directly in an if(), no string comparison needed
+  - name: featureFlags
+    value:
+      type: object
+      data: |-
+        {
+          "betaSearch": true,
+          "newAuthFlow": false,
+          "maxBatchSize": 25
+        }
+    description: object - read nested keys, e.g. bru.getEnvVar("featureFlags").betaSearch

@@ -1,0 +1,38 @@
+info:
+  name: 04-Auth
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    ## 04 - Auth
+
+    Log in once, reuse the token. Three requests:
+
+    | # | Request | Scheme |
+    |---|---------|--------|
+    | 01 | Login | POST credentials, capture the JWT |
+    | 02 | Use the Token | Bearer, reading the captured token |
+    | 03 | OAuth2 Client Credentials | full client-credentials flow, handled by Bruno |
+
+    **At the table:** run 01 then 02. Point out that request 02 has no script
+    at all - its Bearer field is `{{authToken}}`, which request 01 put there.
+    "Nobody copies a token between tabs."
+
+    Bruno supports Basic, Bearer, API key, JWT, WSSE, NTLM, AWS SigV4, Digest
+    and OAuth2 (all four flows) natively - what is here is the two people
+    actually ask to see.
+
+    ```bash
+    bru run "04-Auth" --env Demo
+    ```
+
+    ### Where the credentials should live
+
+    The username and password in `Demo.yml` are DummyJSON's public demo pair,
+    so they are fine in a committed file. Real ones are not - see
+    **03 - Secrets and OpenAPI** for the `.env` and secret-manager patterns.
+  type: text/markdown

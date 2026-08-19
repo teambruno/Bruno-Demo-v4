@@ -1,0 +1,28 @@
+info:
+  name: 01-Requests
+  type: folder
+  seq: 1
+
+docs:
+  content: |-
+    ## 01 - Requests
+
+    Every HTTP verb that matters, against two APIs that need no credentials.
+
+    | # | Request | Verb | API |
+    |---|---------|------|-----|
+    | 01 | Get Pokemon | GET | PokeAPI |
+    | 02 | List Pokemon | GET + query params | PokeAPI |
+    | 03 | Create Post | POST | JSONPlaceholder |
+    | 04 | Update Post | PUT | JSONPlaceholder |
+    | 05 | Delete Post | DELETE | JSONPlaceholder |
+
+    **At the table:** send `01-Get Pokemon`, then open the same file in a
+    text editor. "That's the request. It's YAML, it's in git, your reviewer
+    can read it." That lands better than any feature list.
+
+    ```bash
+    bru run "01-Requests" --env Demo
+    bru run "01-Requests/01-Get Pokemon.yml" --env Demo --env-var pokemonName=snorlax
+    ```
+  type: text/markdown

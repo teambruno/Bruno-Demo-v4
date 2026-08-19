@@ -1,0 +1,84 @@
+info:
+  name: 01-Get Pokemon
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // Each test() is one named row in the app's Tests tab and one case in
+        // the CLI / JUnit report. expect() is Chai - nothing to import.
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("content-type is JSON", () => {
+          expect(res.getHeader("content-type")).to.include("application/json");
+        });
+
+        test("response time is under 2s", () => {
+          expect(res.getResponseTime()).to.be.below(2000);
+        });
+
+        test("the Pokemon we asked for is the one we got", () => {
+          expect(body.name).to.equal(bru.getEnvVar("pokemonName"));
+        });
+
+        test("core fields have the right types", () => {
+          expect(body.id, "id").to.be.a("number");
+          expect(body.height, "height").to.be.a("number");
+          expect(body.weight, "weight").to.be.a("number");
+          expect(body.types, "types").to.be.an("array").with.length.greaterThan(0);
+          expect(body.stats, "stats").to.be.an("array").with.lengthOf(6);
+        });
+
+        const primaryType = body.types[0].type.name;
+        console.log(`#${body.id} ${body.name} - ${primaryType}, ${body.weight / 10}kg`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.id
+      operator: isNumber
+    - expression: res.body.types
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
+
+docs: |-
+  ## GET /pokemon/:name
+
+  The simplest thing Bruno does, and the one to open first.
+
+  Three things are visible in this one file:
+
+  - the **request** - method, URL, and `{{pokemonName}}` from the environment
+  - five **tests** in JS, plus three no-code **assertions** underneath them
+  - these **docs**, which travel with the request in the same file
+
+  ### At the table
+
+  Send it. Then switch the environment dropdown from `Demo` to `Production`
+  and send it again - `pokemonName` changes from `pikachu` to `ditto`, the
+  test still passes, and nothing in the request was edited.
+
+  ```bash
+  bru run "01-Requests/01-Get Pokemon.yml" --env Demo
+  bru run "01-Requests/01-Get Pokemon.yml" --env Demo --env-var pokemonName=gengar
+  ```

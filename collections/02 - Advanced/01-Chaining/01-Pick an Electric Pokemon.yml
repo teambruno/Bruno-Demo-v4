@@ -1,0 +1,100 @@
+info:
+  name: 01-Pick an Electric Pokemon
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+    - chain
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/type/electric"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Step 1 of 4. Pick a target and stash it. Everything downstream
+        // reads what this script writes - no ids in any URL below.
+        const body = res.getBody();
+        const roster = body.pokemon.map((p) => p.pokemon.name);
+
+        // Every electric Pokemon that has a multi-stage evolution chain, so
+        // step 4 always has something interesting to walk. The list is
+        // intersected with the live roster rather than trusted blindly - if
+        // PokeAPI's data changes, we fall back to the full roster instead of
+        // picking a name the API no longer has.
+        const EVOLVERS = [
+          "pichu", "pikachu", "magnemite", "voltorb", "elekid", "shinx",
+          "mareep", "blitzle", "tynamo", "joltik", "helioptile", "grubbin",
+          "toxel", "pawmi", "wattrel"
+        ];
+
+        const candidates = EVOLVERS.filter((name) => roster.includes(name));
+        const pool = candidates.length > 0 ? candidates : roster;
+        const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+        bru.setVar("pokemonName", chosen);
+        bru.setVar("electricCount", roster.length);
+
+        console.log(`picked ${chosen} from ${pool.length} candidates (${roster.length} electric Pokemon total)`);
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the type has a roster to pick from", () => {
+          expect(body.pokemon).to.be.an("array").with.length.greaterThan(50);
+        });
+
+        test("electric takes double damage from ground", () => {
+          // A real fact about the API's data, not just a shape check.
+          const weakTo = body.damage_relations.double_damage_from.map((t) => t.name);
+          expect(weakTo).to.include("ground");
+        });
+
+        test("a Pokemon was chosen for the next request", () => {
+          expect(bru.getVar("pokemonName")).to.be.a("string").and.not.be.empty;
+        });
+
+        test("the chosen name really exists in this type's roster", () => {
+          const roster = body.pokemon.map((p) => p.pokemon.name);
+          expect(roster).to.include(bru.getVar("pokemonName"));
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.pokemon
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Step 1 - pick a target
+
+  `GET /type/electric` returns every electric Pokemon. The post-response
+  script picks one at random and stores it with `bru.setVar("pokemonName", …)`.
+
+  Nothing else in this folder contains a Pokemon name. Run it twice and watch
+  a different one come out - the chain still passes, because the tests check
+  relationships rather than fixed values.
+
+  ### Why the pick is from a shortlist
+
+  About half of all electric Pokemon are single-stage (legendaries, Paradox
+  forms), and those make step 4 print a one-name "chain" - technically correct,
+  visibly dull. So the script picks from the fifteen electric Pokemon that
+  *do* evolve, and **intersects that list with the live roster** before
+  choosing, falling back to the full roster if PokeAPI's data ever moves. The
+  pick is still random on every run, and the test below proves the name came
+  from the response rather than from the list.

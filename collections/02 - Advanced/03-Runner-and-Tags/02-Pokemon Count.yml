@@ -1,0 +1,58 @@
+info:
+  name: 02-Pokemon Count
+  type: http
+  seq: 2
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon?limit=1"
+  params:
+    - name: limit
+      value: "1"
+      type: query
+      description: we only want the count, so ask for the smallest page
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the dex has not shrunk", () => {
+          // A contract check rather than a shape check: if this number drops,
+          // something upstream broke.
+          expect(body.count).to.be.a("number").and.be.at.least(1300);
+        });
+
+        console.log(`${body.count} Pokemon in the dex`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.count
+      operator: isNumber
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Tags: `smoke`, `regression`
+
+  A request can carry more than one tag, so it runs in both slices. `--tags`
+  matches requests having **all** the listed tags; `--exclude-tags` drops any
+  request having **any** of them.
+
+  The interesting test here is `the dex has not shrunk` - a floor on a value
+  the API controls. That is the kind of assertion that catches a real upstream
+  regression, as opposed to one that only proves the server is up.

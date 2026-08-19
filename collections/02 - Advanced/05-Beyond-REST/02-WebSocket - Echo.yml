@@ -1,0 +1,54 @@
+info:
+  name: 02-WebSocket - Echo
+  type: websocket
+  seq: 2
+  tags:
+    - app-only
+    - websocket
+
+websocket:
+  url: wss://echo.websocket.org
+  message:
+    - title: Greeting
+      selected: true
+      message:
+        type: json
+        data: |-
+          {
+            "type": "message",
+            "content": "Hello from Bruno at API World",
+            "from": "booth"
+          }
+    - title: Ping
+      selected: false
+      message:
+        type: text
+        data: ping
+  auth: inherit
+
+docs:
+  content: |-
+    ## WebSocket, with more than one saved message
+
+    A single WebSocket request stores multiple named payloads - **Greeting**
+    and **Ping** here - and you switch between them without editing anything.
+    Fire them in any order and watch the Messages pane fill up.
+
+    `wss://echo.websocket.org` sends a "Request served by …" banner frame on
+    connect, then echoes whatever you send.
+
+    ### Before you demo
+
+    Verified reachable 2026-08-19. If it is down on the day, the same operator
+    runs `wss://ws.ifelse.io` with identical behaviour - swap the URL and
+    carry on.
+
+    Avoid `wss://echo.websocket.events`, which has been unreliable.
+    `wss://ws.postman-echo.com/raw` also works, but do not put a Postman URL
+    on screen during a Bruno demo.
+
+    ### app-only
+
+    Tagged `app-only`. The CLI cannot execute WebSocket requests - it fails
+    with "Unsupported protocol wss:" - so CI excludes this tag.
+  type: text/markdown

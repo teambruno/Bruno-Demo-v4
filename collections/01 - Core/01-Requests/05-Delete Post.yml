@@ -1,0 +1,45 @@
+info:
+  name: 05-Delete Post
+  type: http
+  seq: 5
+  tags:
+    - regression
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/posts/{{postId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("body is empty on delete", () => {
+          // JSONPlaceholder returns {} rather than a 204, so assert the shape
+          // it actually sends rather than the one the spec would suggest.
+          expect(Object.keys(res.getBody() ?? {})).to.have.lengthOf(0);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## DELETE /posts/:id
+
+  Closes the CRUD loop. Run the whole folder in order and you have create,
+  read, update, delete in four sends:
+
+  ```bash
+  bru run "01-Requests" --env Demo
+  ```

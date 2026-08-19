@@ -1,0 +1,93 @@
+info:
+  name: 01-Tests and Assertions
+  type: http
+  seq: 1
+  tags:
+    - smoke
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // ── The scripted half ──────────────────────────────────────────────
+        // Anything you can express in JS. Loops, lookups, computed values,
+        // named failure messages.
+        const body = res.getBody();
+        const stats = Object.fromEntries(
+          body.stats.map((s) => [s.stat.name, s.base_stat])
+        );
+
+        test("all six base stats are present and in range", () => {
+          ["hp", "attack", "defense", "special-attack", "special-defense", "speed"]
+            .forEach((name) => {
+              expect(stats, `missing stat: ${name}`).to.have.property(name);
+              expect(stats[name], name).to.be.within(1, 255);
+            });
+        });
+
+        test("sprite URLs are https", () => {
+          expect(body.sprites.front_default).to.match(/^https:\/\//);
+        });
+
+        test("abilities are named, not just referenced", () => {
+          expect(body.abilities).to.be.an("array").with.length.greaterThan(0);
+          body.abilities.forEach((a, i) => {
+            expect(a.ability.name, `abilities[${i}]`).to.be.a("string").and.not.be.empty;
+          });
+        });
+
+        console.log(
+          `${body.name}: ` +
+          Object.entries(stats).map(([k, v]) => `${k}=${v}`).join("  ")
+        );
+  assertions:
+    # ── The no-code half ────────────────────────────────────────────────────
+    # Same run, same report. No JS involved - pick a field, pick an operator.
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.responseTime
+      operator: lt
+      value: "2000"
+    - expression: res.body.name
+      operator: isString
+    - expression: res.body.stats
+      operator: isArray
+    - expression: res.body.base_experience
+      operator: gt
+      value: "0"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Two ways to check a response
+
+  This request does both, on purpose.
+
+  **Tests** (the `tests` tab) are JavaScript. Loops, lookups, computed
+  expectations, custom failure messages - the six-stat check below is a
+  `forEach` with a named message per stat, which no assertion table can
+  express.
+
+  **Assertions** (the `assert` tab) are a table: pick an expression, pick an
+  operator, type a value. No JS, no syntax to learn. Five of them here cover
+  status, latency, and three field types.
+
+  Both run on every send, both appear in the CLI output, and both land in the
+  JUnit report. The point worth making out loud: **you do not have to be a
+  programmer to add a check**, and you are not limited by the table when you
+  are one.
+
+  ```bash
+  bru run "02-Tests-and-Scripts/01-Tests and Assertions.yml" --env Demo
+  ```

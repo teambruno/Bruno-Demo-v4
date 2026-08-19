@@ -1,0 +1,71 @@
+info:
+  name: 03-Get the Species
+  type: http
+  seq: 3
+  tags:
+    - smoke
+    - regression
+    - chain
+
+http:
+  method: GET
+  url: "{{speciesUrl}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Step 3 of 4. Pull the evolution-chain id out of its URL so the last
+        // request can address it directly.
+        const body = res.getBody();
+        const chainUrl = body.evolution_chain.url;
+        const chainId = chainUrl.match(/\/evolution-chain\/(\d+)\//)[1];
+
+        bru.setVar("evolutionChainId", chainId);
+        bru.setVar("speciesName", body.name);
+
+        console.log(`${body.name} (${body.color.name}) → evolution chain ${chainId}`);
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the whole URL came from the previous response", () => {
+          // Nothing in this request's URL field is a literal path.
+          expect(bru.getVar("speciesUrl")).to.include("/pokemon-species/");
+          expect(res.getUrl()).to.equal(bru.getVar("speciesUrl"));
+        });
+
+        test("species metadata is present", () => {
+          expect(body.name, "name").to.be.a("string").and.not.be.empty;
+          expect(body.capture_rate, "capture_rate").to.be.a("number");
+          expect(body.color.name, "color").to.be.a("string");
+        });
+
+        test("an evolution chain id was extracted", () => {
+          expect(bru.getVar("evolutionChainId")).to.match(/^\d+$/);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Step 3 - the URL *is* a variable
+
+  Look at the URL field: `{{speciesUrl}}`. That is the whole thing. No host,
+  no path, no version - Bruno is following a link the API handed back in step
+  2's response.
+
+  This is the answer to "our API is hypermedia / our ids are opaque / our URLs
+  are signed". You do not have to model the URL, you just follow it.

@@ -1,0 +1,6 @@
+[
+  { "pokemonName": "pikachu",   "expectedType": "electric", "expectedId": 25 },
+  { "pokemonName": "charizard", "expectedType": "fire",     "expectedId": 6 },
+  { "pokemonName": "snorlax",   "expectedType": "normal",   "expectedId": 143 },
+  { "pokemonName": "gengar",    "expectedType": "ghost",    "expectedId": 94 }
+]

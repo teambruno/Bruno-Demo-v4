@@ -1,0 +1,74 @@
+info:
+  name: 02-List Pokemon
+  type: http
+  seq: 2
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon?limit=20&offset=0"
+  params:
+    - name: limit
+      value: "20"
+      type: query
+      description: page size
+    - name: offset
+      value: "0"
+      type: query
+      description: where the page starts
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("returned exactly the page size we asked for", () => {
+          expect(body.results).to.be.an("array").with.lengthOf(20);
+        });
+
+        test("pagination metadata is present", () => {
+          expect(body.count, "count").to.be.a("number").and.be.greaterThan(20);
+          expect(body.next, "next").to.be.a("string").and.include("offset=20");
+        });
+
+        test("every entry has a name and a URL", () => {
+          body.results.forEach((r, i) => {
+            expect(r.name, `results[${i}].name`).to.be.a("string").and.not.be.empty;
+            expect(r.url, `results[${i}].url`).to.match(/^https:\/\/pokeapi\.co/);
+          });
+        });
+
+        console.log(`${body.results.length} of ${body.count} Pokemon`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.results
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## GET /pokemon?limit=20&offset=0
+
+  Query parameters, and the params table in the app stays in sync with the
+  URL bar either way you type it.
+
+  ### One thing to know before you run this in CI
+
+  The query string is written **inline in the URL** as well as in the params
+  table. That is deliberate: on the current CLI, params listed only in the
+  table do not reach the wire, so a request that works in the app can lose
+  its query string under `bru run`. Inline is the safe form for anything that
+  has to pass in a pipeline.

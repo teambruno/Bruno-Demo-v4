@@ -1,0 +1,58 @@
+info:
+  name: 04-Update Post
+  type: http
+  seq: 4
+  tags:
+    - regression
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/posts/{{postId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "id": 1,
+        "title": "Updated from Bruno",
+        "body": "PUT replaces the whole resource.",
+        "userId": 1
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the update took", () => {
+          expect(body.title).to.equal("Updated from Bruno");
+          expect(body.id).to.equal(Number(bru.getEnvVar("postId")));
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## PUT /posts/:id
+
+  `{{postId}}` comes from the environment, so the same request targets a
+  different resource per environment with no edit.
+
+  JSONPlaceholder is a fake API - it validates and echoes, it does not
+  actually persist. That is why request 05 can delete the same id every time
+  and still return 200.

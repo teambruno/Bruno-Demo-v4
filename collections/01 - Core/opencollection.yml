@@ -1,0 +1,66 @@
+opencollection: 1.0.0
+
+info:
+  name: 01 - Core
+  version: v1.0.0
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+docs:
+  content: |-
+    # 01 - Core
+
+    **What an API client has to do.** Requests, tests, scripts, variables,
+    docs. Everything here runs against public APIs with no key and no
+    signup - [PokeAPI](https://pokeapi.co) and
+    [JSONPlaceholder](https://jsonplaceholder.typicode.com).
+
+    Default environment at the table: **Demo**.
+
+    ## The 90-second version
+
+    | Open | Say |
+    |------|-----|
+    | `01-Requests/01-Get Pokemon` | "Plain GET. Tests on the right, docs on the far right, all of it in one file." |
+    | that same file in a terminal | "That file *is* the request. It's YAML, it's in git, and you can read it in a PR." |
+    | `02-Tests-and-Scripts/01-Tests and Assertions` | "Two ways to check a response - JS tests, or a no-code assertion table." |
+    | `03-Variables/01-Variable Precedence` | "Same request, four scopes, and it tells you which one won." |
+
+    ## Why this collection exists
+
+    The thing people underestimate is that a Bruno request is **a file on
+    disk**. Open `01-Requests/01-Get Pokemon.yml` in an editor next to the
+    app and the point makes itself: no proprietary workspace, no cloud
+    account, no export step. Branch it, diff it, review it.
+
+    ## Run it
+
+    ```bash
+    # Everything
+    bru run --env Demo
+
+    # One folder
+    bru run "01-Requests" --env Demo
+
+    # One request, with a variable overridden
+    bru run "01-Requests/01-Get Pokemon.yml" --env Demo --env-var pokemonName=snorlax
+
+    # The shared-script request needs the developer sandbox (see 02-Tests-and-Scripts)
+    bru run --env Demo --sandbox=developer
+    ```
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    scripts:
+      additionalContextRoots:
+        - ../../shared-scripts

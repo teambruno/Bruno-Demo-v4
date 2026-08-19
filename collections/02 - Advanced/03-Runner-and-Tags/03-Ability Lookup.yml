@@ -1,0 +1,56 @@
+info:
+  name: 03-Ability Lookup
+  type: http
+  seq: 3
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/ability/static"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("the ability has an English description", () => {
+          const en = body.effect_entries.find((e) => e.language.name === "en");
+          expect(en, "no English effect entry").to.exist;
+          expect(en.effect).to.be.a("string").and.not.be.empty;
+        });
+
+        test("pikachu is among the Pokemon with this ability", () => {
+          const names = body.pokemon.map((p) => p.pokemon.name);
+          expect(names).to.include("pikachu");
+        });
+
+        console.log(`${body.name}: ${body.pokemon.length} Pokemon have it`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body.pokemon
+      operator: isArray
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Tag: `regression`
+
+  Not in the smoke slice - it checks depth (localised text, cross-referenced
+  Pokemon lists) rather than availability, so it belongs in the fuller run.
+
+  ```bash
+  bru run "03-Runner-and-Tags" --env Demo --tags regression
+  ```

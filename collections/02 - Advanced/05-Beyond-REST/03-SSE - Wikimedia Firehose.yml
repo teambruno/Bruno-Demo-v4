@@ -1,0 +1,57 @@
+info:
+  name: 03-SSE - Wikimedia Firehose
+  type: http
+  seq: 3
+  tags:
+    - app-only
+    - sse
+
+http:
+  method: GET
+  url: https://stream.wikimedia.org/v2/stream/page-create
+  headers:
+    - name: Accept
+      value: text/event-stream
+      description: what makes Bruno treat the response as a stream
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Server-Sent Events - the one that draws a crowd
+
+  Bruno sees the `text/event-stream` response and renders each event as it
+  arrives, instead of waiting for a response that never ends.
+
+  This is [Wikimedia EventStreams](https://stream.wikimedia.org/?doc): every
+  page created across every Wikimedia wiki, live, no auth, no key. Roughly one
+  event a second - fast enough to look impressive, slow enough to read.
+
+  Swap `page-create` for `recentchange` to get the full firehose at ~40
+  events/second. Good for a photo, useless for reading.
+
+  Leave it running on a second monitor at the booth. It is the cheapest way to
+  make a table look busy, and it is a genuine feature demo.
+
+  Verified live 2026-08-19.
+
+  ### Why the timeout is 30s and not 0
+
+  `timeout: 0` (no timeout) is the natural setting for a stream, and it is what
+  this request used to carry. The problem is the CLI: a stream never returns a
+  final response, so `bru run` sat on this request until the socket died -
+  turning a whole-collection run into a **3.5 minute** run. 30 seconds is long
+  enough to watch events arrive on a call and short enough that nobody at a
+  booth thinks the CLI is broken.
+
+  If you want it as a permanent backdrop on a second monitor, set the timeout
+  to `0` in the app and leave it open.
+
+  ### app-only
+
+  Tagged `app-only`: a stream has no final response for the CLI to assert
+  against, so CI excludes it.

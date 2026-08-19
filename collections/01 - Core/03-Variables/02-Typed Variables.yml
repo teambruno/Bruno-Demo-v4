@@ -1,0 +1,139 @@
+info:
+  name: 02-Typed Variables
+  type: http
+  seq: 2
+  tags:
+    - regression
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/{{pokemonName}}"
+  headers:
+    - name: Accept
+      value: application/json
+      description: Headers carry descriptions in V4 too
+  auth: inherit
+
+runtime:
+  variables:
+    - name: retryCount
+      value:
+        type: number
+        data: "3"
+      description: a real number - arithmetic works without parseInt()
+    - name: dryRun
+      value:
+        type: boolean
+        data: "false"
+      description: a real boolean - drop it straight into an if()
+    - name: clientConfig
+      value:
+        type: object
+        data: |-
+          {
+            "host": "pokeapi.co",
+            "port": 443,
+            "keepAlive": true
+          }
+      description: structured config - read keys off it directly
+  scripts:
+    - type: tests
+      code: |-
+        // Typed variables arrive PARSED. No Number(), no === "true", no
+        // JSON.parse().
+        //
+        // Note which getter: request-level variables are bru.getRequestVar().
+        // bru.getVar() reads only what a script put there with bru.setVar().
+        const retryCount = bru.getRequestVar("retryCount");
+        const dryRun = bru.getRequestVar("dryRun");
+        const clientConfig = bru.getRequestVar("clientConfig");
+
+        test("a number is a number", () => {
+          expect(retryCount).to.be.a("number");
+          expect(retryCount + 1).to.equal(4); // not "31"
+        });
+
+        test("a boolean is a boolean", () => {
+          expect(dryRun).to.be.a("boolean");
+          expect(dryRun).to.equal(false); // not the truthy string "false"
+        });
+
+        test("an object is an object", () => {
+          expect(clientConfig).to.be.an("object");
+          expect(clientConfig.host).to.equal("pokeapi.co");
+          expect(clientConfig.port).to.equal(443);
+        });
+
+        test("the same types work on environment variables", () => {
+          expect(bru.getEnvVar("retryLimit"), "retryLimit").to.be.a("number");
+          expect(bru.getEnvVar("verboseLogging"), "verboseLogging").to.be.a("boolean");
+          expect(bru.getEnvVar("featureFlags").maxBatchSize, "featureFlags").to.be.a("number");
+        });
+
+        test("object-typed variables support dot access in {{...}}", () => {
+          // {{clientConfig.host}} resolves to the nested key, not to [object Object]
+          expect(bru.interpolate("{{clientConfig.host}}")).to.equal("pokeapi.co");
+        });
+
+        console.log(`retryCount + 1 = ${retryCount + 1}   (string maths would give "31")`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Typed variables and descriptions
+
+  Every variable used to be a string, so every script started with `Number()`
+  or `=== "true"`. In V4 a variable carries a type - `string` (the default),
+  `number`, `boolean`, or `object` - and scripts receive the parsed value.
+
+  In YAML the type sits next to the raw data:
+
+  ```yaml
+  - name: retryCount
+    value:
+      type: number
+      data: "3"
+    description: a real number - arithmetic works without parseInt()
+  ```
+
+  In the app it is a dropdown in the Value column.
+
+  The failing-before / passing-now line to read out loud is in the test:
+  `retryCount + 1` is `4`. Untyped it was `"31"`.
+
+  ### Descriptions
+
+  Params, headers, multipart fields and variables all take a `description`.
+  They show as tooltips in the app and they survive in the file - so the
+  reason a header exists lives next to the header, not in a wiki.
+
+  The same types are available on **environment** variables: `retryLimit`,
+  `verboseLogging` and `featureFlags` in `Demo.yml` are a number, a boolean
+  and an object, and the last test here proves it.
+
+  Older Bruno versions (pre-3.4.0) may fail to load requests using this
+  syntax - worth knowing if the team upgrades in stages.
+
+  ### Which getter reads which scope
+
+  Easy to trip over, so worth knowing before you demo it:
+
+  | Where the variable is set | Read it with |
+  |---|---|
+  | this request's Vars tab (`runtime.variables`) | `bru.getRequestVar()` |
+  | a script, via `bru.setVar()` | `bru.getVar()` |
+  | the collection environment | `bru.getEnvVar()` |
+  | the workspace global environment | `bru.getGlobalEnvVar()` |
+
+  All of them interpolate as plain `{{name}}` in the request itself - the
+  getters only matter inside scripts. Object-typed variables also support
+  dot access in a template: `{{clientConfig.host}}` resolves to the nested
+  key.
