@@ -1,8 +1,0 @@
-name: Prod-Env
-variables:
-  - name: breweryUrl
-    value: https://api.openbrewerydb.org/v1
-    description: Open Brewery DB base URL - no auth required
-  - name: weatherUrl
-    value: https://api.open-meteo.com/v1
-    description: Open-Meteo base URL - no auth required

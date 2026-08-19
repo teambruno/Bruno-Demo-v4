@@ -1,7 +1,0 @@
-info:
-  name: Basic-Auth-Bearer
-  type: folder
-  seq: 1
-
-request:
-  auth: inherit
