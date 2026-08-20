@@ -8,7 +8,7 @@ whole CI story — is on the `main` branch. This branch is the version you can
 navigate while someone is talking to you.
 
 ```
-01 - Core                  11 requests   what an API client has to do
+01 - Core                  12 requests   what an API client has to do
 02 - Advanced              28 requests   what people don't expect it to do
 03 - Secrets and OpenAPI    7 requests   what decides whether they can adopt it
 ```
@@ -54,9 +54,10 @@ across four scopes, typed variables, prompt variables, and per-request docs.
 Everything runs under the default `safe` sandbox — no flags.
 Environments: **Demo** (booth default), Production.
 
-`bru run --env Demo` → **10 passed, 1 skipped, 29 tests**. The skip is
-`03-Variables/03-Prompt Variables`, which uses `{{?pokemonName}}` — the CLI
-cannot prompt, so it skips rather than fails, and the run stays green.
+`bru run --env Demo` → **10 passed, 2 skipped, 29 tests**. Both skips are
+prompt-variable requests — `03-Variables/03-Prompt Variables` and
+`01-Requests/06-Search Giphy` — which use `{{?var}}`; the CLI cannot prompt, so
+they skip rather than fail and the run stays green.
 
 ### 02 - Advanced
 Script chaining (a four-request PokéAPI evolution walk), data files (CSV and
