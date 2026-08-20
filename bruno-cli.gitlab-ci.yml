@@ -136,15 +136,17 @@ regression:
     # any request carrying ANY of them.
     BRU_ARGS: "-r --tags regression --exclude-tags slow"
 
-shared-scripts:
+reusable-scripts:
   stage: test
   extends: .bru
   variables:
-    COLLECTION: "01 - Core"
-    BRU_ENV: "Demo"
-    # require()-ing /shared-scripts through additionalContextRoots needs the
-    # developer sandbox - the default has been `safe` since CLI 3.0.0.
-    BRU_ARGS: "-r --tags shared-scripts --sandbox developer"
+    COLLECTION: "02 - Advanced"
+    BRU_ENV: "CI"
+    # Both flavours of reusable JS module. The collection-local one needs no
+    # flag; the /shared-scripts one reaches outside the collection via
+    # additionalContextRoots and needs the developer sandbox - the default has
+    # been `safe` since CLI 3.0.0.
+    BRU_ARGS: "-r --tags js-file --sandbox developer"
 
 data-driven:
   stage: test
@@ -180,7 +182,7 @@ pages:
       artifacts: true
     - job: regression
       artifacts: true
-    - job: shared-scripts
+    - job: reusable-scripts
       artifacts: true
     - job: data-driven
       artifacts: true

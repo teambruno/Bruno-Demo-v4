@@ -16,6 +16,12 @@ docs:
     | Collection env | `environments/*.yml` via `--env` | `bru.getEnvVar()` | global |
     | Global env | `../../environments/*.yml` via `--global-env` | `bru.getGlobalEnvVar()` | - |
 
+    | # | Request | Shows |
+    |---|---------|-------|
+    | 01 | Variable Precedence | which scope won, printed to the console |
+    | 02 | Typed Variables | `number` / `boolean` / `object`, and the right getter |
+    | 03 | Prompt Variables | `{{?name}}` - Bruno asks for the value at send time |
+
     **At the table:** run request 01, then run it again with
     `--env-var releaseStage=staging` and show the console output change while
     the *file* stays identical.
@@ -25,4 +31,20 @@ docs:
     bru run "03-Variables" --env Demo --global-env Globals
     bru run "03-Variables" --env Demo --global-env Globals --env-var releaseStage=staging
     ```
+
+    ### Prompt variables are an app-only feature
+
+    Request 03 uses the `{{?pokemonName}}` form, which makes Bruno pop a dialog
+    asking for the value each time you send. Lovely in a demo - you type
+    `snorlax` in front of the person you are talking to.
+
+    The CLI cannot prompt, so it **skips** that request rather than failing it:
+
+    ```
+    Skipped: Prompt variables detected in request. CLI execution is not
+    supported for requests with prompt variables.
+    ```
+
+    So a `bru run` of this folder reports 2 passed and 1 skipped, and the run
+    still goes green. Worth knowing before you point at a summary table.
   type: text/markdown

@@ -53,10 +53,11 @@ docs:
 
     # One request, with a variable overridden
     bru run "01-Requests/01-Get Pokemon.yml" --env Demo --env-var pokemonName=snorlax
-
-    # The shared-script request needs the developer sandbox (see 02-Tests-and-Scripts)
-    bru run --env Demo --sandbox=developer
     ```
+
+    Everything in this collection runs under the default `safe` sandbox - no
+    flags needed. Reusable `.js` modules live in
+    `02 - Advanced / 06-Reusable-Scripts`.
   type: text/markdown
 bundled: false
 extensions:

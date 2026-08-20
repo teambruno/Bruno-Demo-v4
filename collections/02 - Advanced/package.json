@@ -1,0 +1,9 @@
+{
+  "name": "bruno-advanced-collection-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "npm dependencies available to Bruno scripts in the '02 - Advanced' collection. Bruno resolves require('<pkg>') from this collection's node_modules under the developer sandbox. See 06-Reusable-Scripts/03-NPM Module.yml",
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

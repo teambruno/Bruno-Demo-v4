@@ -7,7 +7,7 @@ docs:
   content: |-
     ## 02 - Data-Driven
 
-    One request file. Four rows. Four runs.
+    One request file. Eight rows. Eight runs.
 
     Bruno iterates the request over every row of a data file and injects that
     row's columns as variables for that iteration. `{{pokemonName}}` in the
@@ -19,8 +19,16 @@ docs:
     | charizard | fire | 6 |
     | snorlax | normal | 143 |
     | gengar | ghost | 94 |
+    | bulbasaur | grass | 1 |
+    | squirtle | water | 7 |
+    | mewtwo | psychic | 150 |
+    | dragonite | dragon | 149 |
 
-    `pokemon.csv` and `pokemon.json` hold the same four rows, so the two flags
+    Eight rows, eight **distinct primary types** - so the run visibly exercises
+    different data rather than the same shape eight times. Every id and type
+    was checked against the live API on 2026-08-20.
+
+    `pokemon.csv` and `pokemon.json` hold the same eight rows, so the two flags
     below are interchangeable - handy for showing this is not a CSV-only
     feature.
 
@@ -28,7 +36,7 @@ docs:
     # CSV
     bru run "02-Data-Driven" --env Demo --csv-file-path "02-Data-Driven/pokemon.csv"
 
-    # JSON - same four rows, same result
+    # JSON - same eight rows, same result
     bru run "02-Data-Driven" --env Demo --json-file-path "02-Data-Driven/pokemon.json"
 
     # With an HTML report - each iteration is its own section

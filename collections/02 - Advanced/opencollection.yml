@@ -24,10 +24,11 @@ docs:
     | # | Folder | The one-line pitch |
     |---|--------|--------------------|
     | 01 | **Chaining** | Four requests walk a Pokemon's evolution chain by following links in each response. Nobody pastes an id. |
-    | 02 | **Data-Driven** | One request file, four rows of a CSV, four runs. |
+    | 02 | **Data-Driven** | One request file, eight rows of a CSV, eight runs. |
     | 03 | **Runner-and-Tags** | Tag requests `smoke` / `regression` / `slow` and run any slice of them. |
     | 04 | **Auth** | Log in once, reuse the token. Bearer and OAuth2 client-credentials. |
     | 05 | **Beyond-REST** | GraphQL, WebSocket, SSE and gRPC in the same client. |
+    | 06 | **Reusable-Scripts** | `require()` a real JS module: one local, one shared across collections, one npm package. |
 
     Default environment at the table: **Demo**.
 
@@ -44,19 +45,22 @@ docs:
     ## Run it
 
     ```bash
-    # The whole collection. The exclusions matter - see the note below.
-    bru run --env Demo --exclude-tags app-only,data-driven
+    # The whole collection. The flags matter - see the notes below.
+    bru run --env Demo --exclude-tags app-only,data-driven --sandbox=developer
 
     # The chain
     bru run "01-Chaining" --env Demo
 
-    # Data-driven: 4 rows -> 4 iterations
+    # Data-driven: 8 rows -> 8 iterations
     bru run "02-Data-Driven" --env Demo --csv-file-path "02-Data-Driven/pokemon.csv"
     bru run "02-Data-Driven" --env Demo --json-file-path "02-Data-Driven/pokemon.json"
 
     # Tag slices
     bru run --env Demo --tags smoke
     bru run --env Demo --tags regression --exclude-tags slow
+
+    # Reusable JS modules: request 01 needs no flag, 02 and 03 do
+    bru run "06-Reusable-Scripts" --env Demo --sandbox=developer
 
     # Reports in all three formats
     bru run "03-Runner-and-Tags" --env Demo \
@@ -82,6 +86,30 @@ docs:
     `--exclude-tags` takes **one comma-separated value**. Repeating the flag
     (`--exclude-tags a --exclude-tags b`) fails with
     `excludeTags.split is not a function` on bru 4.0.0.
+
+    ### And one flag, plus one install
+
+    `--sandbox=developer` is needed by two requests in `06-Reusable-Scripts`:
+    `02-Shared JS File` (requires a module from outside the collection) and
+    `03-NPM Module` (requires an npm package from `node_modules`). Without it
+    they fail with
+    `Access to files outside of the collectionPath is not allowed.`
+
+    Their sibling `01-Collection JS File` requires a `.js` file from *inside*
+    the collection and needs no flag at all. That difference is the point of
+    folder 06.
+
+    **First-run setup for `03-NPM Module`.** This collection has a
+    `package.json` (committed) and a `node_modules` (gitignored), so once per
+    clone:
+
+    ```bash
+    cd "collections/02 - Advanced" && npm install
+    ```
+
+    A lot of what people want is bundled already - `ajv`, `crypto-js`,
+    `jsonwebtoken`, `axios`, `chai`, `uuid`, `moment` - and needs no install
+    and no flag. See the folder docs for the full verified list.
   type: text/markdown
 bundled: false
 extensions:

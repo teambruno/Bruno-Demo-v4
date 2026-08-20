@@ -181,13 +181,15 @@ jobs:
             env: CI
             args: "-r --tags regression --exclude-tags slow"
 
-          # -- shared-scripts: require()-ing /shared-scripts through
-          #    additionalContextRoots needs the developer sandbox (the default
-          #    has been `safe` since CLI 3.0.0)
-          - slug: shared-scripts
-            collection: "01 - Core"
-            env: Demo
-            args: "-r --tags shared-scripts --sandbox developer"
+          # -- js-file: both flavours of reusable JS module. The collection-local
+          #    one needs no flag; the /shared-scripts one reaches outside the
+          #    collection via additionalContextRoots and needs the developer
+          #    sandbox (the default has been `safe` since CLI 3.0.0), so the
+          #    whole folder runs with it.
+          - slug: reusable-scripts
+            collection: "02 - Advanced"
+            env: CI
+            args: "-r --tags js-file --sandbox developer"
 
           # -- data-driven: 4 CSV rows -> 4 iterations, each its own section in
           #    the report. Swap the flag for

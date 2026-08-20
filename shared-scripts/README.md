@@ -68,7 +68,7 @@ test('status is 200', () => {
 
 ## Where it's used in this workspace
 
-- `01 - Core/02-Tests-and-Scripts/03-Shared Script File.yml`
+- `02 - Advanced/06-Reusable-Scripts/02-Shared JS File.yml`
 
 All three collections opt in via `additionalContextRoots`, so any request in
 any of them can `require()` these modules. Only that one request does today —
@@ -77,6 +77,22 @@ it is the demo, not the only permitted caller.
 Run it with:
 
 ```bash
-cd "collections/01 - Core"
-bru run "02-Tests-and-Scripts" --env Demo --sandbox=developer
+cd "collections/02 - Advanced"
+bru run "06-Reusable-Scripts" --env Demo --sandbox=developer
 ```
+
+## Collection-local JS files are the other option
+
+Contrast with `02 - Advanced/06-Reusable-Scripts/pokemonAsserts.js`, which is a
+**collection-local** module: it lives inside the collection, so it needs no
+`additionalContextRoots` entry and **no developer sandbox** — but only requests
+in that one collection can reach it. Requests 01 and 02 of that folder sit side
+by side so the trade-off is visible.
+
+Two path rules worth knowing, verified on bru 4.0.0:
+
+- `require()` resolves from the **collection root**, not from the request file.
+- Reaching outside the collection gives one of two errors —
+  `Access to files outside of the collectionPath is not allowed.` (safe sandbox)
+  or `Access to files outside of the allowed context roots is not allowed: .`
+  (developer sandbox, path not declared).

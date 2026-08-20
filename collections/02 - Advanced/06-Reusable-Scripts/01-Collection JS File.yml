@@ -1,0 +1,104 @@
+info:
+  name: 01-Collection JS File
+  type: http
+  seq: 1
+  tags:
+    - regression
+    - js-file
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/pikachu"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // A collection-local module. No config, no sandbox flag - it works
+        // because the file is inside this collection.
+        //
+        // The path is relative to the COLLECTION ROOT, not to this request,
+        // which is why it starts with the folder name even though the .js file
+        // sits right next to this request. './pokemonAsserts.js' would fail
+        // with "Cannot find module".
+        const {
+          assertPokemonShape,
+          assertStatsInRange,
+          statMap,
+          primaryType,
+          describe
+        } = require('./06-Reusable-Scripts/pokemonAsserts.js');
+
+        const body = res.getBody();
+
+        test('status is 200', () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test('payload has every field this collection relies on (local helper)', () => {
+          // Throws a plain Error listing exactly what is missing; test() turns
+          // that into this named failure.
+          assertPokemonShape(body);
+        });
+
+        test('all six base stats are present and in range (local helper)', () => {
+          assertStatsInRange(body, { min: 1, max: 255 });
+        });
+
+        test('helpers return usable values, not just pass/fail', () => {
+          expect(primaryType(body)).to.equal('electric');
+          expect(statMap(body).speed).to.be.a('number').and.be.greaterThan(0);
+        });
+
+        console.log(describe(body));
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## A JS file inside the collection
+
+  The simplest form of reuse, and the one to show first because it needs
+  **nothing configured**:
+
+  ```js
+  const { assertPokemonShape } = require('./06-Reusable-Scripts/pokemonAsserts.js');
+  ```
+
+  Drop a `.js` file anywhere in the collection, require it, done. It runs under
+  the default `safe` sandbox - no `--sandbox=developer`, no
+  `additionalContextRoots`, no Developer Mode toggle in the app.
+
+  The module is [`pokemonAsserts.js`](./pokemonAsserts.js), sitting right next
+  to this request. Open it on a call: it is ordinary CommonJS with
+  `module.exports`, not a Bruno-specific format.
+
+  ### The path gotcha
+
+  `require()` resolves from the **collection root**, not from this file. This
+  request is *inside* `06-Reusable-Scripts/` and still writes
+  `./06-Reusable-Scripts/pokemonAsserts.js`. Using `./pokemonAsserts.js` fails
+  with `Cannot find module ./pokemonAsserts.js`, which is a confusing error for
+  a file that is visibly right there.
+
+  ### Why the helpers take arguments
+
+  Bruno's globals (`res`, `bru`, `expect`, `test`) are not injected into a
+  required module, so `assertPokemonShape(body)` receives the body rather than
+  reaching for `res` itself. The helpers throw plain `Error`s with a useful
+  message and the surrounding `test()` reports it as a failed test.
+
+  ### Where this stops working
+
+  It cannot reach outside the collection. Try `require('../../shared-scripts/…')`
+  here and it fails with
+  `Access to files outside of the collectionPath is not allowed.` - which is
+  what request 02 is for.

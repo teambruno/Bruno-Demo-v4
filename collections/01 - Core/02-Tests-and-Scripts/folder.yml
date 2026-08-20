@@ -11,17 +11,28 @@ docs:
     |---|---------|-------|
     | 01 | Tests and Assertions | JS `test()` blocks **and** the no-code assertion table |
     | 02 | Pre and Post Scripts | `before-request` and `after-response` hooks |
-    | 03 | Shared Script File | `require()` a JS module shared across collections |
+    | 03 | Response Visualization | `bru.visualize()` - render the response as HTML |
 
     **At the table:** open 01 and point at both tabs. "Your QA engineer writes
     JS tests. Your PM fills in the assertion table. Same request, same file,
     same report."
 
     ```bash
-    bru run "02-Tests-and-Scripts" --env Demo --sandbox=developer
+    bru run "02-Tests-and-Scripts" --env Demo
     ```
 
-    The `--sandbox=developer` flag is only needed by request 03, which
-    `require()`s a file from outside the collection. The other two run under
-    the default safe sandbox.
+    All three run under the default `safe` sandbox - nothing here needs a flag.
+    Pulling test logic out into reusable `.js` modules is
+    `02 - Advanced / 06-Reusable-Scripts`.
+
+    ### Request 03 is the one to show a non-developer
+
+    `bru.visualize('html', { name, content })` takes over the response pane with
+    whatever HTML you build - here a grid of the Pokemon's sprites, pulled out
+    of the response body. Same request, same tests, but the response is rendered
+    instead of read.
+
+    It reads two variables that request 02's `before-request` script sets
+    (`requestId`, `pokemonSummary`), so run the **folder** rather than request 03
+    on its own.
   type: text/markdown

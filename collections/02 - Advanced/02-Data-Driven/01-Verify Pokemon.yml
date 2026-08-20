@@ -74,7 +74,7 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  ## One request, four iterations
+  ## One request, eight iterations
 
   Each row of `pokemon.csv` (or `pokemon.json`) becomes the variables for one
   iteration, so `{{pokemonName}}` in the URL resolves to a different Pokemon
@@ -122,5 +122,5 @@ docs: |-
 
   ### CSV vs JSON
 
-  Both files hold the same four rows, so the two flags are interchangeable.
+  Both files hold the same eight rows, so the two flags are interchangeable.
   Verified against bru 4.0.0.

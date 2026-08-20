@@ -2,5 +2,9 @@
   { "pokemonName": "pikachu",   "expectedType": "electric", "expectedId": 25 },
   { "pokemonName": "charizard", "expectedType": "fire",     "expectedId": 6 },
   { "pokemonName": "snorlax",   "expectedType": "normal",   "expectedId": 143 },
-  { "pokemonName": "gengar",    "expectedType": "ghost",    "expectedId": 94 }
+  { "pokemonName": "gengar",    "expectedType": "ghost",    "expectedId": 94 },
+  { "pokemonName": "bulbasaur", "expectedType": "grass",    "expectedId": 1 },
+  { "pokemonName": "squirtle",  "expectedType": "water",    "expectedId": 7 },
+  { "pokemonName": "mewtwo",    "expectedType": "psychic",  "expectedId": 150 },
+  { "pokemonName": "dragonite", "expectedType": "dragon",   "expectedId": 149 }
 ]

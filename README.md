@@ -8,9 +8,9 @@ whole CI story — is on the `main` branch. This branch is the version you can
 navigate while someone is talking to you.
 
 ```
-01 - Core                  what an API client has to do
-02 - Advanced              what people don't expect it to do
-03 - Secrets and OpenAPI   what decides whether they can adopt it
+01 - Core                  11 requests   what an API client has to do
+02 - Advanced              19 requests   what people don't expect it to do
+03 - Secrets and OpenAPI    7 requests   what decides whether they can adopt it
 ```
 
 Everything runs against public APIs with **no key and no signup**: PokéAPI,
@@ -27,8 +27,9 @@ JSONPlaceholder, DummyJSON, Wikimedia EventStreams, and Bruno's own
 | 2 | the same file in a text editor | "That file **is** the request. YAML, in git, reviewable in a PR. No cloud account." |
 | 3 | `01 - Core / 02-Tests-and-Scripts / 01-Tests and Assertions` | "JS tests for your engineers, a no-code assertion table for everyone else." |
 | 4 | `02 - Advanced / 01-Chaining` → **Run folder** | "Four requests. It picked a Pokémon, followed the species link, walked the evolution chain. Zero hardcoded ids." |
-| 5 | `02 - Advanced / 02-Data-Driven` + open `pokemon.csv` | "Same request, four rows of a spreadsheet, four runs." |
-| 6 | `03 - Secrets and OpenAPI / 01-Secret-Manager / 02-OAuth2 Client Secret` | "The client secret comes from Azure Key Vault. Switch the dropdown to AWS — same request, no edits." |
+| 5 | `02 - Advanced / 02-Data-Driven` + open `pokemon.csv` | "Same request, eight rows of a spreadsheet, eight runs." |
+| 6 | `02 - Advanced / 06-Reusable-Scripts` | "Reusable modules: a local `.js` file, one shared across collections, and an **npm package** — your own libraries, in your tests." |
+| 7 | `03 - Secrets and OpenAPI / 01-Secret-Manager / 02-OAuth2 Client Secret` | "The client secret comes from Azure Key Vault. Switch the dropdown to AWS — same request, no edits." |
 
 If they only get one thing, make it **step 4**. It is the most visual and the
 hardest to dismiss.
@@ -46,18 +47,30 @@ hardest to dismiss.
 
 ### 01 - Core
 Requests (every verb), tests **and** declarative assertions, pre/post-request
-scripts, shared JS modules, variable precedence across four scopes, typed
-variables, and per-request docs. Environments: **Demo** (booth default),
-Production.
+scripts, `bru.visualize()` rendering the response as HTML, variable precedence
+across four scopes, typed variables, prompt variables, and per-request docs.
+Everything runs under the default `safe` sandbox — no flags.
+Environments: **Demo** (booth default), Production.
+
+`bru run --env Demo` → **10 passed, 1 skipped, 29 tests**. The skip is
+`03-Variables/03-Prompt Variables`, which uses `{{?pokemonName}}` — the CLI
+cannot prompt, so it skips rather than fails, and the run stays green.
 
 ### 02 - Advanced
 Script chaining (a four-request PokéAPI evolution walk), data files (CSV and
 JSON), the collection runner with tag filtering, auth (bearer capture +
-OAuth2 client credentials), and non-REST protocols (GraphQL, WebSocket, SSE,
-gRPC). Environments: **Demo**, CI.
+OAuth2 client credentials), non-REST protocols (GraphQL, WebSocket, SSE, gRPC),
+and reusable JS modules — collection-local, workspace-shared, and a
+third-party **npm package**, side by side. Environments: **Demo**, CI.
+
+`bru run --env Demo --exclude-tags app-only,data-driven --sandbox=developer` →
+**15 passed, 52 tests**. The other four requests are the three app-only
+protocols and the data-driven one, which needs its own command.
 
 ### 03 - Secrets and OpenAPI
-External secret managers behind one provider-neutral alias — the same four
+Run this one **folder by folder** — the three vault environments do not define
+the endpoints `02-Local-Secrets` uses, and vice versa, so a whole-collection
+run mixes incompatible environments. External secret managers behind one provider-neutral alias — the same four
 requests run against Azure Key Vault, AWS Secrets Manager or HashiCorp Vault
 by switching the environment dropdown. Plus `.env` and keychain-backed
 secrets, and the OpenAPI story: import, Sync (Beta), export, and a spec-drift
@@ -80,9 +93,6 @@ bru run --env Demo                                   # everything
 bru run "01-Requests" --env Demo                     # one folder
 bru run "01-Requests/01-Get Pokemon.yml" --env Demo   # one request
 bru run "01-Requests/01-Get Pokemon.yml" --env Demo --env-var pokemonName=snorlax
-
-# shared JS modules need the developer sandbox
-bru run --env Demo --sandbox=developer
 ```
 
 ```bash
@@ -95,8 +105,11 @@ bru run "02-Data-Driven" --env Demo --json-file-path "02-Data-Driven/pokemon.jso
 bru run --env Demo --tags smoke                       # 9 requests
 bru run --env Demo --tags regression --exclude-tags slow
 
-# whole collection — the exclusions matter, see below
-bru run --env Demo --exclude-tags app-only,data-driven
+# reusable JS modules — 01 needs no flag; 02 and 03 do
+bru run "06-Reusable-Scripts" --env Demo --sandbox=developer
+
+# whole collection — the flags matter, see below
+bru run --env Demo --exclude-tags app-only,data-driven --sandbox=developer
 
 bru run --env Demo --tags smoke \
   --reporter-html  ../../reports/smoke.html \
@@ -120,21 +133,28 @@ bru run "01-Secret-Manager" --env Demo-Azure --verbose # needs `az login`
 - **`--verbose` on any secret-manager run.** The CLI *swallows* vault fetch
   errors, so a failed fetch looks like an ordinary 401 from the API under
   test and you debug the wrong thing.
-- **`--sandbox=developer`** for anything that `require()`s
-  `/shared-scripts/`. The default has been `safe` since CLI 3.0.0.
+- **`--sandbox=developer`** for anything that `require()`s a file *outside* its
+  own collection (`/shared-scripts/`) or an npm package from `node_modules`. A
+  `.js` file **inside** the collection needs no flag, and neither do Bruno's
+  inbuilt libraries (`ajv`, `crypto-js`, `jsonwebtoken`, `axios`, `chai`,
+  `uuid`, `moment`, …). The default has been `safe` since CLI 3.0.0.
 - **`--workspace-path ../..`** if you use `--global-env`, so the workspace
   `environments/` resolve from a collection directory.
 
-### Why a whole-collection run of `02 - Advanced` needs exclusions
+### Why a whole-collection run of `02 - Advanced` needs flags
 
-Two requests fail on purpose without them:
+Three requests fail without them, two of them on purpose:
 
 - **`app-only`** — the CLI cannot execute WebSocket or gRPC requests, and an
   SSE stream has no final response to assert against.
 - **`data-driven`** — `02-Data-Driven` is *designed* to fail when no data file
   is attached, so forgetting `--csv-file-path` is loud rather than silent.
+- **`--sandbox=developer`** — `06-Reusable-Scripts/02-Shared JS File` reaches
+  outside the collection for `/shared-scripts/`, and `03-NPM Module` reaches
+  into `node_modules`. The default `safe` sandbox blocks both.
 
-Both are correct behaviour and both look bad at a table. Use the exclusions.
+The first two are correct behaviour that still looks bad at a table. Use the
+flags.
 
 ---
 
@@ -151,6 +171,16 @@ ln -s ../../.env "collections/03 - Secrets and OpenAPI/.env"
 
 Both are covered by `.gitignore`, so they stay local. Only `.env.example` is
 committed, with fake values.
+
+And one `npm install`, for the npm-package demo in
+`02 - Advanced / 06-Reusable-Scripts / 03-NPM Module`:
+
+```bash
+cd "collections/02 - Advanced" && npm install
+```
+
+`package.json` is committed, `node_modules` is not. Skip it and that one
+request fails with an instruction to run it — nothing else is affected.
 
 The Azure vault (`bruno-demo-kv`) is already populated. Seeding commands for
 all three providers are in
@@ -224,10 +254,13 @@ is documented in the request that exercises it.
 | Vault fetch failures are swallowed without `--verbose` | `03 / 01-Secret-Manager` |
 | `settings.timeout: 0` on an SSE request makes `bru run` hang until the socket dies | `02 / 05-Beyond-REST / 03-SSE` (set to 30s) |
 | Bruno secret variables resolve to `""` under the CLI (keychain is local-only) | `03 / 02-Local-Secrets / 02` |
+| `require()` resolves from the **collection root**, not the request file — a `.js` file next to a request still needs the folder in its path | `02 / 06-Reusable-Scripts / 01` |
+| npm packages resolve from the **collection's own** `node_modules`; Node built-ins (`fs`, `os`, `crypto`, `child_process`) are blocked in both sandboxes | `02 / 06-Reusable-Scripts / 03` |
 
 ## Bruno V4 features covered
 
 Typed variables and descriptions, `externalSecrets` in the environment file
 with `{{alias.keyname}}` references, `setVar` vs `setEnvVar` disk persistence,
 multiple saved WebSocket messages, and shared scripts across collections via
-`additionalContextRoots`. Release notes: <https://www.usebruno.com/v4-release>
+`additionalContextRoots` (`02 - Advanced / 06-Reusable-Scripts`).
+Release notes: <https://www.usebruno.com/v4-release>

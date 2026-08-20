@@ -1,0 +1,186 @@
+info:
+  name: 03-NPM Module
+  type: http
+  seq: 3
+  tags:
+    - npm-module
+    - js-file
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/pikachu"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // ── Requiring a third-party npm package ─────────────────────────────
+        // zod is NOT one of Bruno's inbuilt libraries. It is an ordinary npm
+        // dependency: declared in this collection's package.json, installed
+        // into "02 - Advanced/node_modules", and required by name. Bruno
+        // resolves it from the collection's own node_modules - but only under
+        // the developer sandbox.
+        let z = null;
+        let loadError = null;
+        try {
+          ({ z } = require('zod'));
+        } catch (err) {
+          loadError = err;
+        }
+
+        test('the npm package "zod" loaded from node_modules', () => {
+          if (loadError) {
+            // Fail with the fix rather than with "Cannot find module zod".
+            throw new Error(
+              'zod did not load. The two causes, in order of likelihood: ' +
+              '(1) dependencies are not installed - run `npm install` in ' +
+              '"collections/02 - Advanced", since node_modules is gitignored; ' +
+              '(2) you are on the default safe sandbox - add --sandbox=developer. ' +
+              'Original error: ' + loadError.message
+            );
+          }
+          expect(z, 'zod export').to.be.an('object');
+        });
+
+        // Everything below needs the package. Guarded so a missing install
+        // produces the one clear failure above instead of four cryptic ones.
+        if (z) {
+          // The schema a team would already have in their own codebase.
+          const PokemonSchema = z.object({
+            id: z.number().int().positive(),
+            name: z.string().min(1),
+            height: z.number().int().nonnegative(),
+            weight: z.number().int().positive(),
+            base_experience: z.number().int().nullable(),
+            types: z.array(z.object({
+              slot: z.number().int(),
+              type: z.object({ name: z.string(), url: z.string() })
+            })).min(1),
+            stats: z.array(z.object({
+              base_stat: z.number().int(),
+              stat: z.object({ name: z.string() })
+            })).length(6),
+            sprites: z.object({ front_default: z.string().nullable() })
+          });
+
+          const result = PokemonSchema.safeParse(res.getBody());
+
+          test('the response validates against the zod schema', () => {
+            // One call replaces a dozen hand-written expect() lines, and it
+            // checks nested shapes the eye would skip.
+            const detail = result.success
+              ? ''
+              : result.error.issues
+                  .map((i) => `${i.path.join('.')}: ${i.message}`)
+                  .join(' | ');
+            expect(result.success, detail).to.be.true;
+          });
+
+          test('unknown keys are stripped, not rejected', () => {
+            // PokeAPI returns ~22 keys; the schema declares 8. zod's default
+            // object mode ignores the rest, so a growing API does not break
+            // the test. z.strictObject() is the opt-in if you want the
+            // opposite - that is a real contract-testing choice.
+            expect(Object.keys(result.data)).to.have.lengthOf(8);
+            expect(res.getBody()).to.have.property('moves'); // present, just not validated
+          });
+
+          test('a bad payload produces a precise, per-field error', () => {
+            // The reason to reach for a schema library rather than more
+            // expect() calls: you get every failure at once, with a path.
+            const bad = PokemonSchema.safeParse({
+              ...res.getBody(),
+              id: -1,
+              name: '',
+              weight: 'heavy'
+            });
+
+            expect(bad.success, 'deliberately invalid payload should fail').to.be.false;
+
+            const paths = bad.error.issues.map((i) => i.path.join('.'));
+            expect(paths).to.include.members(['id', 'name', 'weight']);
+
+            const weightIssue = bad.error.issues.find((i) => i.path[0] === 'weight');
+            expect(weightIssue.message).to.include('expected number');
+          });
+
+          console.log(`zod ${require('zod/package.json').version} validated ${result.data.name} - ${result.error ? 'FAILED' : 'clean'}`);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Using a third-party npm package
+
+  The most common question after "can I write tests?" is **"can I use our own
+  libraries?"** Yes - any npm package, required by name.
+
+  ```js
+  const { z } = require('zod');
+  ```
+
+  Three steps, once per collection:
+
+  ```bash
+  cd "collections/02 - Advanced"
+  npm init -y                  # creates package.json (already committed here)
+  npm install zod              # installs into ./node_modules
+  ```
+
+  Then run with the developer sandbox:
+
+  ```bash
+  bru run "06-Reusable-Scripts/03-NPM Module.yml" --env Demo --sandbox=developer
+  ```
+
+  Bruno resolves `require('zod')` from **this collection's** `node_modules`.
+  `package.json` is committed; `node_modules` is gitignored, so a fresh clone
+  needs one `npm install` - which is exactly how every other Node project
+  behaves, and is why the first test fails with that instruction rather than
+  with `Cannot find module zod`.
+
+  ## Why zod, and why this is the good answer
+
+  The pitch is not "look, npm works". It is: **the schema already exists in
+  their codebase.** Teams that define their API types in zod (or Yup, or
+  io-ts, or a generated client) can import those same definitions into their
+  API tests instead of re-describing the payload by hand in a different
+  language. The test and the application cannot drift apart, because there is
+  one definition.
+
+  That is worth saying out loud, because it reframes the question from "does
+  your tool support npm" to "your existing types are now your test suite".
+
+  ## Check the inbuilt list first
+
+  A lot of what people reach for is already bundled, needs **no install**, and
+  works under the default `safe` sandbox. Verified on bru 4.0.0:
+
+  | Purpose | Available |
+  |---|---|
+  | HTTP | `axios` |
+  | Crypto / auth | `crypto-js`, `jsonwebtoken` |
+  | Schema validation | `ajv`, `tv4` |
+  | Assertions | `chai` (this is where `expect` comes from) |
+  | Ids | `uuid`, `nanoid` |
+  | Dates | `moment` |
+  | Encoding | `atob`, `btoa`, `buffer` |
+  | Paths | `path` |
+
+  So `ajv` would have validated this response with no `npm install` at all.
+  This request uses zod deliberately - it is the one that proves an
+  *arbitrary* package works, and it is what a modern TypeScript team is most
+  likely to already have.
+
+  Node's own built-ins are **not** exposed: `fs`, `os`, `child_process`,
+  `crypto`, `stream` and `util` all fail to resolve, in both sandboxes. Script
+  sandboxing is not a formality.

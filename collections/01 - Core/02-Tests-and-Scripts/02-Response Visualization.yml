@@ -18,44 +18,69 @@ runtime:
   scripts:
     - type: after-response
       code: |-
-        const body = res.getBody();
-        const name = body.name || '';
-        const id = body.id || '';
+        const body = res.getBody() || {};
+        const name = body.name || 'Unknown';
+        const id = body.id != null ? `#${String(body.id).padStart(3, '0')}` : '';
         const sprites = body.sprites || {};
         const other = sprites.other || {};
-
-        const images = [
-          { label: 'Front Default', url: sprites.front_default },
-          { label: 'Back Default', url: sprites.back_default },
-          { label: 'Front Shiny', url: sprites.front_shiny },
-          { label: 'Back Shiny', url: sprites.back_shiny },
-          { label: 'Official Artwork', url: (other['official-artwork'] || {}).front_default },
-          { label: 'Home', url: (other.home || {}).front_default },
-          { label: 'Dream World', url: (other.dream_world || {}).front_default },
-          { label: 'Showdown (animated)', url: (other.showdown || {}).front_default },
-        ].filter(i => i.url);
-
-        const cards = images.map(i => `
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <img src="${i.url}" alt="${i.label}" style="width:120px;height:120px;object-fit:contain;image-rendering:pixelated;" />
-            <div style="margin-top:8px;font-size:13px;color:#374151;font-family:system-ui,sans-serif;">${i.label}</div>
-          </div>
-        `).join('');
+        const artwork = (other['official-artwork'] || {}).front_default;
+        const home = (other.home || {}).front_default;
+        const dream = (other.dream_world || {}).front_default;
+        const front = sprites.front_default;
+        const shiny = sprites.front_shiny;
+        const back = sprites.back_default;
+        const primaryImage = artwork || home || dream || front || '';
+        const types = (body.types || []).map(t => t && t.type && t.type.name).filter(Boolean);
+        const typeColors = {
+          normal: '#A8A77A', fire: '#EE8130', water: '#6390F0', electric: '#F7D02C',
+          grass: '#7AC74C', ice: '#96D9D6', fighting: '#C22E28', poison: '#A33EA1',
+          ground: '#E2BF65', flying: '#A98FF3', psychic: '#F95587', bug: '#A6B91A',
+          rock: '#B6A136', ghost: '#735797', dragon: '#6F35FC', dark: '#705746',
+          steel: '#B7B7CE', fairy: '#D685AD'
+        };
+        const typeBadges = types.map(t => `<span style="background:${typeColors[t] || '#777'};color:#fff;padding:4px 12px;border-radius:12px;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-right:6px;">${t}</span>`).join('');
+        const height = body.height != null ? `${(body.height / 10).toFixed(1)} m` : '—';
+        const weight = body.weight != null ? `${(body.weight / 10).toFixed(1)} kg` : '—';
+        const spriteThumb = (url, label) => url ? `<figure style="margin:0;text-align:center;"><img src="${url}" alt="${label}" style="width:96px;height:96px;object-fit:contain;background:#f4f4f5;border-radius:8px;"/><figcaption style="font-size:11px;color:#666;margin-top:4px;">${label}</figcaption></figure>` : '';
+        const thumbnails = [
+          spriteThumb(front, 'Front'),
+          spriteThumb(back, 'Back'),
+          spriteThumb(shiny, 'Shiny'),
+          spriteThumb(home, 'Home'),
+          spriteThumb(dream, 'Dream World')
+        ].filter(Boolean).join('');
+        const cry = (body.cries || {}).latest;
+        const cryPlayer = cry ? `<audio controls src="${cry}" style="margin-top:12px;width:100%;max-width:320px;"></audio>` : '';
 
         const html = `
-          <div style="font-family:system-ui,sans-serif;padding:24px;background:#f9fafb;min-height:100vh;">
-            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:20px;">
-              <h1 style="margin:0;text-transform:capitalize;color:#111827;">${name}</h1>
-              <span style="color:#6b7280;">#${id}</span>
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;color:#fff;">
+          <div style="background:rgba(255,255,255,0.95);color:#222;border-radius:12px;padding:24px;box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;">
+              <h1 style="margin:0;text-transform:capitalize;font-size:32px;">${name}</h1>
+              <span style="color:#888;font-size:20px;font-weight:600;">${id}</span>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;">
-              ${cards}
+            <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:center;">
+              <div style="flex:0 0 auto;text-align:center;">
+                ${primaryImage ? `<img src="${primaryImage}" alt="${name}" style="width:240px;height:240px;object-fit:contain;background:#f4f4f5;border-radius:12px;"/>` : '<div style="width:240px;height:240px;background:#f4f4f5;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;">No image</div>'}
+                ${cryPlayer}
+              </div>
+              <div style="flex:1;min-width:220px;">
+                <div style="margin-bottom:12px;">${typeBadges || '<span style="color:#888;">No types</span>'}</div>
+                <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px;">
+                  <strong>Height</strong><span>${height}</span>
+                  <strong>Weight</strong><span>${weight}</span>
+                  <strong>Base XP</strong><span>${body.base_experience ?? '—'}</span>
+                  <strong>Order</strong><span>${body.order ?? '—'}</span>
+                </div>
+              </div>
             </div>
+            ${thumbnails ? `<hr style="border:none;border-top:1px solid #eee;margin:20px 0;"/><div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">${thumbnails}</div>` : ''}
           </div>
+        </div>
         `;
 
         bru.visualize('html', {
-          name: `${name} sprites`,
+          name: `${name} ${id}`,
           content: html
         });
     - type: tests

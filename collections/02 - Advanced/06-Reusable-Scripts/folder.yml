@@ -1,0 +1,93 @@
+info:
+  name: 06-Reusable-Scripts
+  type: folder
+  seq: 6
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    ## 06 - Reusable Scripts
+
+    Stop pasting the same `expect()` block into thirty requests. A Bruno script
+    can `require()` a real JS module - and there are **four tiers**, which is
+    the whole point of this folder.
+
+    | # | Module | Comes from | Config needed | Sandbox |
+    |---|--------|-----------|---------------|---------|
+    | — | `ajv`, `crypto-js`, `axios`, `jsonwebtoken`… | **bundled with Bruno** | none | default `safe` |
+    | 01 | `pokemonAsserts.js` | inside this collection | none | default `safe` |
+    | 02 | `/shared-scripts/*.js` | the workspace root | `additionalContextRoots` | `developer` |
+    | 03 | `zod` | `node_modules` via `npm install` | `package.json` | `developer` |
+
+    Work down the list, not up. Most people asking "can I use my own
+    libraries?" are already served by tier 0 or 1 and do not need a sandbox
+    flag at all.
+
+    ```bash
+    # 01 needs nothing
+    bru run "06-Reusable-Scripts/01-Collection JS File.yml" --env Demo
+
+    # 02 and 03 reach outside the collection, or into node_modules
+    bru run "06-Reusable-Scripts" --env Demo --sandbox=developer
+    ```
+
+    ### First-run setup for request 03
+
+    `package.json` is committed; `node_modules` is gitignored. So once per
+    clone:
+
+    ```bash
+    cd "collections/02 - Advanced" && npm install
+    ```
+
+    Without it, request 03 fails with an instruction to do exactly that,
+    rather than with `Cannot find module zod`.
+
+    ## The inbuilt list, so you can skip the install
+
+    Verified on bru 4.0.0, all available under the default `safe` sandbox:
+
+    `axios` · `crypto-js` · `jsonwebtoken` · `ajv` · `tv4` · `chai` · `uuid` ·
+    `nanoid` · `moment` · `atob` · `btoa` · `buffer` · `path`
+
+    `chai` is where `expect()` comes from. `ajv` means **JSON Schema
+    validation needs no install** - worth knowing before anyone reaches for
+    npm.
+
+    Node's own built-ins are deliberately **not** exposed: `fs`, `os`,
+    `child_process`, `crypto`, `stream` and `util` all fail to resolve in both
+    sandboxes.
+
+    ## Three things that trip people up
+
+    **Paths resolve from the collection root, not the request file.** Request
+    01 sits in `06-Reusable-Scripts/` and still requires
+    `./06-Reusable-Scripts/pokemonAsserts.js`. Writing `./pokemonAsserts.js`
+    fails with `Cannot find module`.
+
+    **Runtime globals are not injected into a module.** `res`, `req`, `bru`,
+    `expect` and `test` do not exist inside a required file, so anything a
+    helper needs is passed in as an argument. Helpers throw plain `Error`s and
+    the surrounding `test()` turns that into a named failure.
+
+    **npm packages resolve from the collection's own `node_modules`,** not from
+    the workspace root and not from a global install.
+
+    ## Reading the error you get
+
+    Four distinct messages, and each points at a different fix:
+
+    | Message | Fix |
+    |---|---|
+    | `Cannot find module ./pokemonAsserts.js` | path is relative to the collection root - add the folder |
+    | `Access to files outside of the collectionPath is not allowed.` | add `--sandbox=developer` |
+    | `Access to files outside of the allowed context roots is not allowed: .` | add the directory to `additionalContextRoots` |
+    | `Could not resolve module "zod"` | run `npm install` in the collection |
+
+    All four verified on bru 4.0.0. Note the last two are easy to confuse: a
+    package blocked by the *safe sandbox* reports `Cannot find module zod`,
+    while one that is genuinely *not installed* reports
+    `Could not resolve module "zod"`.
+  type: text/markdown
