@@ -77,3 +77,7 @@ docs: |-
   arbitrary HTTP calls, which covers the cases a linear request list cannot:
   polling until a job completes, paging until the cursor runs out, or
   pre-fetching a value from a service the collection does not otherwise model.
+
+  `07-Script-Driven-Requests` is the full story - fan-out, running another
+  saved request, and a real polling loop - plus the **Timeline** tab, which
+  shows every script-made call as its own inspectable row.

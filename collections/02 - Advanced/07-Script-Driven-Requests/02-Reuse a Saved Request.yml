@@ -1,0 +1,131 @@
+info:
+  name: 02-Reuse a Saved Request
+  type: http
+  seq: 2
+  tags:
+    - regression
+    - timeline
+    - script-requests
+
+http:
+  method: GET
+  url: "{{dummyUrl}}/auth/me"
+  auth:
+    type: bearer
+    token: "{{authToken}}"
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // ── Run a request that already exists, instead of duplicating it ────
+        // bru.runRequest() takes a path from the COLLECTION ROOT and runs that
+        // saved request - its auth, its body, and its own scripts and tests.
+        const LOGIN = '04-Auth/01-Token-Handoff/01-Login.yml';
+
+        console.log(`[pre-request] running ${LOGIN} as a precondition…`);
+        const login = await bru.runRequest(LOGIN);
+
+        // runRequest fails SILENTLY on a bad path: it returns {} rather than
+        // throwing, so a folder rename turns into a confusing 401 downstream.
+        // Check the shape and say what actually went wrong.
+        if (!login || login.status === undefined) {
+          throw new Error(
+            `bru.runRequest('${LOGIN}') returned nothing. The path is resolved ` +
+            `from the collection root and a wrong one fails silently - check ` +
+            `the request still lives there.`
+          );
+        }
+        if (login.status !== 200) {
+          throw new Error(`Login returned ${login.status}, expected 200.`);
+        }
+
+        // The token was set by the LOGIN request's own after-response script.
+        // Nothing in this file knows how to log in.
+        console.log(`[pre-request] login ok (${login.status}) in ${login.responseTime}ms`);
+        console.log(`[pre-request] authToken is now ${String(bru.getVar('authToken')).length} chars`);
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test('the main request authenticated', () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test('the token came from the request we ran, not from this file', () => {
+          // This request has no login logic at all - only a Bearer field
+          // reading {{authToken}}, which the nested request populated.
+          const token = bru.getVar('authToken');
+          expect(token, 'authToken').to.be.a('string').and.have.length.greaterThan(20);
+          expect(req.getHeader('Authorization')).to.equal(`Bearer ${token}`);
+        });
+
+        test('the server identified the logged-in user', () => {
+          expect(body.username).to.equal(bru.getEnvVar('username'));
+          expect(body.email).to.be.a('string').and.include('@');
+        });
+
+        console.log(`[tests] authenticated as ${body.firstName} ${body.lastName}`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 20000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Run another *saved request*, not just another URL
+
+  Request 01 used `bru.sendRequest()` to call an arbitrary endpoint. This one
+  uses **`bru.runRequest()`**, which is different in an important way: it runs a
+  request that already exists in the collection - with its auth, its body, its
+  headers, and **its own scripts and tests**.
+
+  ```js
+  const login = await bru.runRequest('04-Auth/01-Token-Handoff/01-Login.yml');
+  ```
+
+  That is the whole point here. This request contains **no login logic**. Its
+  Bearer token field is `{{authToken}}`, and the variable is set by the *Login*
+  request's own `after-response` script when the line above runs it.
+
+  So the credential flow is defined once, in one file, and any request that
+  needs a session just runs it. Compare with
+  `04-Auth/01-Token-Handoff`, where the same handoff happens by running two
+  requests in order - fine in a folder run, useless if you want to send *this*
+  request on its own.
+
+  ### sendRequest vs runRequest
+
+  | | `bru.sendRequest()` | `bru.runRequest()` |
+  |---|---|---|
+  | Target | any URL you construct | a saved request in this collection |
+  | Sends | exactly what you pass it | the saved request's auth, body, headers |
+  | Runs the target's scripts/tests | no | **yes** |
+  | Good for | a service the collection does not model | reusing a login, a setup step, a teardown |
+
+  ## In the Timeline tab
+
+  Send this and open **Timeline**. The nested login shows up as its own row
+  under the **Pre-Request** tab, fully expandable - its URL, its JSON body, its
+  response with the JWT, its timing. You can see the credential exchange that
+  this request never describes.
+
+  Docs: <https://docs.usebruno.com/debugging/timeline>
+
+  ## The gotcha worth showing
+
+  **`bru.runRequest()` fails silently on a wrong path.** It returns `{}` -
+  no throw, no warning - so the only symptom is a 401 further down, which sends
+  you debugging auth instead of a typo. Verified on bru 4.0.0.
+
+  The pre-request script here checks the returned shape and throws a message
+  naming the real cause. Worth copying into any script that uses it, and worth
+  demoing: rename the folder, re-send, and read the error.
+
+  Paths are resolved from the **collection root** and include the `.yml`
+  extension. Spaces are fine.

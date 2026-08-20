@@ -3,7 +3,6 @@ info:
   type: http
   seq: 2
   tags:
-    - regression
     - auth
     - app-only
 
@@ -65,7 +64,9 @@ docs: |-
 
   ### Run this one in the app
 
-  Tagged `app-only`. On **bru CLI 4.0.0** a query-placed API key does not
+  Tagged `app-only` and deliberately **not** `regression` - same as the three
+  protocol requests in `05-Beyond-REST`, so the CI regression job never picks
+  it up. On **bru CLI 4.0.0** a query-placed API key does not
   survive the run: the CLI builds the URL before variables are interpolated,
   so a templated URL like `{{httpfakerUrl}}/api/echo` throws `Invalid URL`
   internally and the key is dropped, and a literal URL gets the key appended

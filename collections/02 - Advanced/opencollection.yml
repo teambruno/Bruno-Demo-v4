@@ -29,6 +29,7 @@ docs:
     | 04 | **Auth** | Four schemes in subfolders: JWT handoff, Bearer inherited from the folder, API key header-or-query, OAuth2. |
     | 05 | **Beyond-REST** | GraphQL, WebSocket, SSE and gRPC in the same client. |
     | 06 | **Reusable-Scripts** | `require()` a real JS module: one local, one shared across collections, one npm package. |
+    | 07 | **Script-Driven-Requests** | Scripts that call APIs themselves - fan-out, reusing a saved request, polling - and the **Timeline** tab that shows every call. |
 
     Default environment at the table: **Demo**.
 
@@ -41,6 +42,11 @@ docs:
 
     Then `02-Data-Driven` for "and the same request over a spreadsheet of test
     data", and `05-Beyond-REST` if they ask about protocols.
+
+    If they ask "can a script call another endpoint?" - or anything about
+    debugging - go to `07-Script-Driven-Requests/01-Fan Out and Aggregate`,
+    send it, and open the **Timeline** tab. Six HTTP calls from one request,
+    grouped by phase, each expandable.
 
     ## Run it
 
@@ -64,6 +70,9 @@ docs:
 
     # Reusable JS modules: request 01 needs no flag, 02 and 03 do
     bru run "06-Reusable-Scripts" --env Demo --sandbox=developer
+
+    # Scripts making their own HTTP calls - no flag needed
+    bru run "07-Script-Driven-Requests" --env Demo
 
     # Reports in all three formats
     bru run "03-Runner-and-Tags" --env Demo \
@@ -90,7 +99,7 @@ docs:
     Without them a whole-collection run reports five failures, all expected -
     which is a bad look at a table even when you can explain it.
 
-    With them: **20 passed, 66 tests, ~3s.**
+    With them: **23 passed, 78 tests.**
 
     `--exclude-tags` takes **one comma-separated value**. Repeating the flag
     (`--exclude-tags a --exclude-tags b`) fails with

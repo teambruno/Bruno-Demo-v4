@@ -1,0 +1,95 @@
+info:
+  name: 06-Search Giphy
+  type: http
+  seq: 6
+
+http:
+  method: GET
+  url: api.giphy.com/v1/gifs/search?api_key={{giphyAPI}}&q={{?search key}}&limit=5
+  params:
+    - name: api_key
+      value: "{{giphyAPI}}"
+      type: query
+    - name: q
+      value: "{{?search key}}"
+      type: query
+    - name: limit
+      value: "5"
+      type: query
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const gifs = (body && body.data) || [];
+
+        const searchQuery = (req.getUrl && req.getUrl().match(/[?&]q=([^&]*)/)) ? decodeURIComponent(req.getUrl().match(/[?&]q=([^&]*)/)[1].replace(/\+/g, ' ')) : '';
+
+        const cards = gifs.map((gif, idx) => {
+          const img = gif.images && gif.images.fixed_height && gif.images.fixed_height.url
+            ? gif.images.fixed_height.url
+            : (gif.images && gif.images.original && gif.images.original.url) || '';
+          const title = gif.title || '(untitled)';
+          const rating = gif.rating || '';
+          const user = (gif.user && (gif.user.display_name || gif.user.username)) || gif.username || 'anonymous';
+          const url = gif.url || '#';
+          const altText = gif.alt_text || title;
+          const slug = gif.slug || '';
+          const importDate = gif.import_datetime ? gif.import_datetime.split(' ')[0] : '';
+
+          return `
+            <div style="background:#1e1e2e;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.3);display:flex;flex-direction:column;">
+              <a href="${url}" target="_blank" style="display:block;background:#000;">
+                <img src="${img}" alt="${altText}" style="width:100%;height:220px;object-fit:cover;display:block;" />
+              </a>
+              <div style="padding:12px;color:#eee;font-family:system-ui,sans-serif;">
+                <div style="font-size:14px;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${title}">#${idx + 1} ${title}</div>
+                <div style="font-size:12px;color:#aaa;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;">👤 ${user}</span>
+                  <span style="background:#444;padding:2px 8px;border-radius:10px;text-transform:uppercase;font-size:10px;">${rating}</span>
+                </div>
+                <div style="font-size:11px;color:#666;display:flex;justify-content:space-between;">
+                  <span>${importDate}</span>
+                  <span>ID: ${gif.id || ''}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        const meta = body && body.meta ? body.meta : {};
+        const pagination = body && body.pagination ? body.pagination : {};
+
+        const noResults = gifs.length === 0
+          ? `<div style="background:#1e1e2e;padding:40px;border-radius:12px;text-align:center;color:#aaa;">
+               <div style="font-size:48px;margin-bottom:12px;">🔍</div>
+               <div>No GIFs found${searchQuery ? ` for "<strong>${searchQuery}</strong>"` : ''}.</div>
+             </div>`
+          : '';
+
+        const html = `
+          <div style="background:#11111b;padding:20px;font-family:system-ui,sans-serif;color:#eee;min-height:100vh;">
+            <h1 style="margin:0 0 8px 0;">Giphy Search Results${searchQuery ? `: <span style="color:#a78bfa;">"${searchQuery}"</span>` : ''}</h1>
+            <div style="font-size:13px;color:#aaa;margin-bottom:20px;">
+              Status: ${meta.status || '?'} · ${meta.msg || ''} · Showing ${pagination.count || gifs.length} of ${pagination.total_count || '?'} matches · Offset: ${pagination.offset != null ? pagination.offset : '?'} · Response ID: <code>${meta.response_id || ''}</code>
+            </div>
+            ${noResults}
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+              ${cards}
+            </div>
+          </div>
+        `;
+
+        bru.visualize('html', {
+          name: 'Giphy Search',
+          content: html
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

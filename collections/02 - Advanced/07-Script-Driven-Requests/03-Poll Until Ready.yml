@@ -1,0 +1,144 @@
+info:
+  name: 03-Poll Until Ready
+  type: http
+  seq: 3
+  tags:
+    - regression
+    - timeline
+    - script-requests
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/1"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // ── Poll until a condition is met ───────────────────────────────────
+        // The pattern behind "kick off a job, then wait for it to finish".
+        // A linear request list cannot express it: you do not know in advance
+        // how many calls it takes.
+        const THRESHOLD = 235;   // stop once we find a Pokemon worth this much XP
+        const MAX_ATTEMPTS = 8;  // always bound a poll loop
+        const DELAY_MS = 200;    // be kind to the API between attempts
+
+        const base = bru.getEnvVar('pokeUrl');
+        const attempts = [];
+        let found = null;
+
+        for (let id = 1; id <= MAX_ATTEMPTS && !found; id++) {
+          if (id > 1) {
+            // bru.sleep() takes milliseconds. Without it a retry loop is just
+            // a denial-of-service attempt against your own API.
+            await bru.sleep(DELAY_MS);
+          }
+
+          const r = await bru.sendRequest({ method: 'GET', url: `${base}/pokemon/${id}` });
+          const b = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+
+          attempts.push({ id, name: b.name, xp: b.base_experience });
+          const verdict = b.base_experience >= THRESHOLD ? 'MATCH - stopping' : 'below threshold';
+          console.log(`[poll ${id}/${MAX_ATTEMPTS}] ${b.name.padEnd(12)} xp=${String(b.base_experience).padEnd(4)} ${verdict}`);
+
+          if (b.base_experience >= THRESHOLD) {
+            found = { name: b.name, id: b.id, xp: b.base_experience };
+          }
+        }
+
+        bru.setVar('pollAttempts', JSON.stringify(attempts));
+        bru.setVar('pollResult', JSON.stringify(found));
+
+        console.log(
+          found
+            ? `[poll] found ${found.name} (xp ${found.xp}) after ${attempts.length} attempt(s)`
+            : `[poll] gave up after ${attempts.length} attempts`
+        );
+    - type: tests
+      code: |-
+        const attempts = JSON.parse(bru.getVar('pollAttempts'));
+        const found = JSON.parse(bru.getVar('pollResult'));
+        const THRESHOLD = 235;
+        const MAX_ATTEMPTS = 8;
+
+        test('the poll loop terminated with a result', () => {
+          expect(found, 'nothing met the threshold within the attempt budget').to.not.be.null;
+        });
+
+        test('the match actually satisfies the condition', () => {
+          expect(found.xp).to.be.at.least(THRESHOLD);
+        });
+
+        test('the loop stopped as soon as it matched', () => {
+          // Every attempt before the last must have failed the condition -
+          // otherwise the loop kept polling after it had an answer.
+          const before = attempts.slice(0, -1);
+          before.forEach((a) => {
+            expect(a.xp, `${a.name} should not have matched`).to.be.below(THRESHOLD);
+          });
+          expect(attempts[attempts.length - 1].xp).to.be.at.least(THRESHOLD);
+        });
+
+        test('the loop respected its attempt budget', () => {
+          expect(attempts.length).to.be.at.most(MAX_ATTEMPTS);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 30000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Polling: the loop a request list cannot express
+
+  "Start an export, then poll the status endpoint until it says ready" is the
+  most common thing people ask for that a flat list of requests genuinely
+  cannot do - because the number of calls is not known until you make them.
+
+  A script can:
+
+  ```js
+  for (let id = 1; id <= MAX_ATTEMPTS && !found; id++) {
+    if (id > 1) await bru.sleep(DELAY_MS);
+    const r = await bru.sendRequest({ method: 'GET', url: `${base}/pokemon/${id}` });
+    // …check the response, set `found`, break out
+  }
+  ```
+
+  This one walks the Pokédex until it finds something worth 235+ XP, which
+  lands on **venusaur** at attempt 3. Substitute your own status endpoint and
+  it is a real job-completion poller.
+
+  Three things it does that a hand-rolled loop usually forgets:
+
+  - **`bru.sleep(ms)`** between attempts. Without it, a retry loop is a
+    denial-of-service attempt against your own API.
+  - **A bounded attempt budget.** `MAX_ATTEMPTS` means a stuck job fails the
+    test rather than hanging the run.
+  - **Stops on the first match.** The third test proves it - every attempt
+    before the last is asserted to have *failed* the condition, so a loop that
+    kept going after finding its answer would go red.
+
+  ## In the Timeline tab
+
+  This is the best of the three for showing the Timeline off, because the row
+  count is not fixed - it is however many attempts the poll took.
+
+  Open **Timeline** after sending: the **Post-Response** tab holds one row per
+  attempt, in order, each expandable to its own request, response and timing.
+  Read down the rows and you can see the loop deciding to continue, then stop.
+
+  The `[poll n/8]` console lines are interleaved in the same view, so the
+  script's reasoning sits next to the calls it made. That combination - logs
+  and HTTP calls on one timeline - is the thing worth pointing at.
+
+  Docs: <https://docs.usebruno.com/debugging/timeline>
+
+  > `--verbose` on the CLI is the rough equivalent, but the Timeline is far
+  > easier to read and lets you expand a single attempt.

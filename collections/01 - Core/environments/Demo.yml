@@ -35,3 +35,6 @@ variables:
           "maxBatchSize": 25
         }
     description: object - read nested keys, e.g. bru.getEnvVar("featureFlags").betaSearch
+  - secret: true
+    name: giphyAPI
+    description: ""

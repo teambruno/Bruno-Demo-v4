@@ -9,7 +9,7 @@ navigate while someone is talking to you.
 
 ```
 01 - Core                  11 requests   what an API client has to do
-02 - Advanced              25 requests   what people don't expect it to do
+02 - Advanced              28 requests   what people don't expect it to do
 03 - Secrets and OpenAPI    7 requests   what decides whether they can adopt it
 ```
 
@@ -30,7 +30,8 @@ JSONPlaceholder, DummyJSON, Wikimedia EventStreams, and Bruno's own
 | 5 | `02 - Advanced / 02-Data-Driven` + open `pokemon.csv` | "Same request, eight rows of a spreadsheet, eight runs." |
 | 6 | `02 - Advanced / 06-Reusable-Scripts` | "Reusable modules: a local `.js` file, one shared across collections, and an **npm package** — your own libraries, in your tests." |
 | 7 | `02 - Advanced / 04-Auth / 02-Bearer-and-Inheritance` | "The token is configured **once, on the folder**. Every request under it inherits — and this one overrides it and asserts a 401 to prove the override won." |
-| 8 | `03 - Secrets and OpenAPI / 01-Secret-Manager / 02-OAuth2 Client Secret` | "The client secret comes from Azure Key Vault. Switch the dropdown to AWS — same request, no edits." |
+| 8 | `02 - Advanced / 07-Script-Driven-Requests / 01` → **Timeline** tab | "One request, six HTTP calls. Scripts can call APIs too — and the Timeline shows every one, grouped by phase, each expandable." |
+| 9 | `03 - Secrets and OpenAPI / 01-Secret-Manager / 02-OAuth2 Client Secret` | "The client secret comes from Azure Key Vault. Switch the dropdown to AWS — same request, no edits." |
 
 If they only get one thing, make it **step 4**. It is the most visual and the
 hardest to dismiss.
@@ -62,12 +63,14 @@ Script chaining (a four-request PokéAPI evolution walk), data files (CSV and
 JSON), the collection runner with tag filtering, auth in four subfolders (JWT
 capture, Bearer inherited from a folder, API key as header or query param, and
 OAuth2 client credentials both inherited and referenced by variable), non-REST
-protocols (GraphQL, WebSocket, SSE, gRPC), and reusable JS modules —
-collection-local, workspace-shared, and a third-party **npm package**, side by
-side. Environments: **Demo**, CI.
+protocols (GraphQL, WebSocket, SSE, gRPC), reusable JS modules —
+collection-local, workspace-shared, and a third-party **npm package** — and
+scripts that make their own HTTP calls (`bru.sendRequest`, `bru.runRequest`,
+polling with `bru.sleep`), which doubles as the **Timeline tab** demo.
+Environments: **Demo**, CI.
 
 `bru run --env Demo --exclude-tags app-only,data-driven --sandbox=developer` →
-**20 passed, 66 tests**. The other five requests are the three app-only
+**23 passed, 78 tests**. The other five requests are the three app-only
 protocols, the query-placed API key (app-only on bru 4.0.0), and the
 data-driven one, which needs its own command.
 
@@ -111,6 +114,9 @@ bru run --env Demo --tags regression --exclude-tags slow
 
 # reusable JS modules — 01 needs no flag; 02 and 03 do
 bru run "06-Reusable-Scripts" --env Demo --sandbox=developer
+
+# scripts making their own HTTP calls — no flag needed
+bru run "07-Script-Driven-Requests" --env Demo
 
 # whole collection — the flags matter, see below
 bru run --env Demo --exclude-tags app-only,data-driven --sandbox=developer
@@ -260,6 +266,7 @@ is documented in the request that exercises it.
 | Bruno secret variables resolve to `""` under the CLI (keychain is local-only) | `03 / 02-Local-Secrets / 02` |
 | `require()` resolves from the **collection root**, not the request file — a `.js` file next to a request still needs the folder in its path | `02 / 06-Reusable-Scripts / 01` |
 | npm packages resolve from the **collection's own** `node_modules`; Node built-ins (`fs`, `os`, `crypto`, `child_process`) are blocked in both sandboxes | `02 / 06-Reusable-Scripts / 03` |
+| `bru.runRequest()` fails **silently** on a wrong path — returns `{}`, no throw, so a renamed folder surfaces as a 401 further down | `02 / 07-Script-Driven-Requests / 02` |
 
 ## Bruno V4 features covered
 

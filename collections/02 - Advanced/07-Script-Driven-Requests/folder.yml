@@ -1,0 +1,92 @@
+info:
+  name: 07-Script-Driven-Requests
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    ## 07 - Script-Driven Requests
+
+    A script can make HTTP calls of its own. Two functions, and the
+    **Timeline** tab is what makes them debuggable rather than a black box.
+
+    | # | Request | Function | Shows |
+    |---|---------|----------|-------|
+    | 01 | Fan Out and Aggregate | `bru.sendRequest()` | 6 calls across all three phases |
+    | 02 | Reuse a Saved Request | `bru.runRequest()` | runs the real Login request as a precondition |
+    | 03 | Poll Until Ready | `bru.sendRequest()` + `bru.sleep()` | a loop whose length is not known up front |
+
+    ## Open the Timeline tab
+
+    This folder exists to show it off. Send any request here, then switch from
+    **Response** to **Timeline**.
+    Docs: <https://docs.usebruno.com/debugging/timeline>
+
+    The Timeline shows *everything that happened* during the run - the main
+    HTTP call, every extra call a script made, and the fully resolved details
+    of each. It groups them by phase, with a count on each filter tab:
+
+    | Tab | Shows |
+    |-----|-------|
+    | **All** | every HTTP call in the run |
+    | **Request** | just the call in the URL bar |
+    | **Pre-Request** | calls made from the pre-request script |
+    | **Post-Response** | calls made from post-response / test scripts |
+
+    Expand any row for its URL, query params, headers, auth, body, response,
+    size and timing - plus **Network Logs** for the low-level protocol and
+    timing breakdown. `console.log` output appears on the same timeline,
+    interleaved in order, so a script's reasoning sits next to the calls it
+    made.
+
+    **Clear Timeline** resets the list. Worth hitting between takes so the
+    counts read cleanly for the next person.
+
+    ### Which request to demo it with
+
+    Start with **01** - the call counts are fixed (1 pre-request, 1 main, 4
+    post-response), so you can point at each tab and the number matches what
+    you just said. Its last test asserts the total, so the tab is
+    self-verifying.
+
+    Then **03**, where the row count *is* the point: however many attempts the
+    poll needed.
+
+    ## sendRequest vs runRequest
+
+    | | `bru.sendRequest()` | `bru.runRequest()` |
+    |---|---|---|
+    | Target | any URL you build | a saved request in this collection |
+    | Sends | exactly what you pass | the saved request's auth, body, headers |
+    | Runs the target's scripts and tests | no | **yes** |
+    | Good for | a service the collection does not model | reusing a login, a setup step, a teardown |
+
+    Both are `await`ed. `sendRequest` returns an axios-shaped response
+    (`status`, `data`, `headers`); `runRequest` returns
+    `{ status, statusText, headers, data, url, responseTime, duration, size }`.
+
+    ## Two gotchas, both verified on bru 4.0.0
+
+    **`bru.runRequest()` fails silently on a wrong path.** It returns `{}` -
+    no throw, no warning - so a renamed folder surfaces as a confusing 401
+    further down rather than as "file not found". Paths resolve from the
+    **collection root** and include the `.yml` extension. Request 02 guards
+    for this and throws a message naming the real cause; copy that guard.
+
+    **`sendRequest` gives you `data`, not a parsed body.** Depending on the
+    response it may arrive as a string, so the scripts here all do:
+
+    ```js
+    const body = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+    ```
+
+    ```bash
+    bru run "07-Script-Driven-Requests" --env Demo
+    ```
+
+    No sandbox flag needed - these use built-in `bru` functions, not
+    `require()`.
+  type: text/markdown

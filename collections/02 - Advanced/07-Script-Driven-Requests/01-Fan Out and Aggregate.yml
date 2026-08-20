@@ -1,0 +1,160 @@
+info:
+  name: 01-Fan Out and Aggregate
+  type: http
+  seq: 1
+  tags:
+    - regression
+    - timeline
+    - script-requests
+
+http:
+  method: GET
+  url: "{{pokeUrl}}/pokemon/pikachu"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // ── 1 call, in the PRE-REQUEST phase ────────────────────────────────
+        // Timeline groups by phase, so this one lands under the "Pre-Request"
+        // tab - separate from the main call and from the post-response fan-out.
+        console.log('[pre-request] picking a party from the electric roster…');
+
+        const typeRes = await bru.sendRequest({
+          method: 'GET',
+          url: `${bru.getEnvVar('pokeUrl')}/type/electric`
+        });
+
+        const typeBody = typeof typeRes.data === 'string' ? JSON.parse(typeRes.data) : typeRes.data;
+        const roster = typeBody.pokemon.map((p) => p.pokemon.name);
+
+        // A fixed party so the aggregate is reproducible on a call, but
+        // intersected with the live roster so we never request a name the API
+        // does not have.
+        const WANTED = ['pikachu', 'magnemite', 'electabuzz', 'jolteon'];
+        const party = WANTED.filter((n) => roster.includes(n));
+
+        bru.setVar('party', JSON.stringify(party));
+        console.log(`[pre-request] party of ${party.length}: ${party.join(', ')}`);
+    - type: after-response
+      code: |-
+        // ── N calls, in the POST-RESPONSE phase ─────────────────────────────
+        // These land under the Timeline's "Post-Response" tab. Expand any row
+        // to see its own URL, headers, response body and network timing.
+        const party = JSON.parse(bru.getVar('party'));
+        const base = bru.getEnvVar('pokeUrl');
+
+        const results = [];
+        for (const name of party) {
+          const r = await bru.sendRequest({ method: 'GET', url: `${base}/pokemon/${name}` });
+          const b = typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+
+          const total = b.stats.reduce((sum, s) => sum + s.base_stat, 0);
+          results.push({ name: b.name, id: b.id, total });
+          console.log(`[post-response] ${b.name.padEnd(12)} ${total} total base stats  (${r.status})`);
+        }
+
+        results.sort((a, b) => b.total - a.total);
+        bru.setVar('partyStats', JSON.stringify(results));
+        bru.setVar('scriptCallCount', party.length + 1); // + the pre-request call
+
+        console.log(`[post-response] strongest: ${results[0].name} (${results[0].total})`);
+        console.log(`[post-response] ${party.length + 1} script calls + 1 main call = ${party.length + 2} rows in Timeline`);
+    - type: tests
+      code: |-
+        const stats = JSON.parse(bru.getVar('partyStats'));
+        const scriptCalls = Number(bru.getVar('scriptCallCount'));
+
+        test('the main request succeeded', () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().name).to.equal('pikachu');
+        });
+
+        test('the pre-request script built a party', () => {
+          expect(JSON.parse(bru.getVar('party'))).to.be.an('array').with.length.greaterThan(0);
+        });
+
+        test('every party member was fetched and scored', () => {
+          expect(stats).to.have.length.greaterThan(0);
+          stats.forEach((p) => {
+            expect(p.total, `${p.name} base stat total`).to.be.a('number').and.be.greaterThan(0);
+          });
+        });
+
+        test('the aggregate is sorted strongest first', () => {
+          const totals = stats.map((p) => p.total);
+          expect(totals).to.deep.equal([...totals].sort((a, b) => b - a));
+        });
+
+        test('the Timeline should show exactly this many rows', () => {
+          // Self-verifying demo: the number the console printed is the number
+          // the Timeline's "All" tab shows. 1 pre-request + N post-response
+          // + the main call.
+          expect(scriptCalls + 1).to.equal(stats.length + 2);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 20000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Scripts that call APIs - and the Timeline tab that shows them
+
+  This is the request to open when someone asks *"can a script call another
+  endpoint?"* - and then the **Timeline** tab is the answer to *"how would I
+  ever debug that?"*
+
+  `bru.sendRequest()` makes an HTTP call from inside a script. Here it runs in
+  **both** script phases on purpose:
+
+  | Phase | Calls | What it does |
+  |-------|:-----:|--------------|
+  | `before-request` | 1 | fetches the electric roster, picks a party |
+  | *the request itself* | 1 | `GET /pokemon/pikachu` |
+  | `after-response` | 4 | fetches each party member, sums its base stats |
+
+  ## Open the Timeline tab
+
+  Send this, then switch from **Response** to **Timeline**. Docs:
+  <https://docs.usebruno.com/debugging/timeline>
+
+  The Timeline shows *everything* that happened, not just the main call - and
+  it groups by phase, with a count on each filter tab:
+
+  | Tab | Shows | Count here |
+  |-----|-------|:----------:|
+  | **All** | every HTTP call in the run | **6** |
+  | **Request** | just the call in the URL bar | 1 |
+  | **Pre-Request** | calls made from the pre-request script | 1 |
+  | **Post-Response** | calls made from post-response / test scripts | 4 |
+
+  Click any row to expand it: its own URL, query params, headers, auth,
+  request body, response body, status, size, timing - plus a **Network Logs**
+  view with the low-level protocol and timing breakdown. Every script-made
+  call is as inspectable as the main one.
+
+  The `console.log` lines from both scripts appear here too, interleaved in
+  order, which is what makes a fan-out loop followable rather than a black box.
+
+  There is a **Clear Timeline** button - worth hitting between takes so the
+  counts read cleanly for the next person.
+
+  ### The self-verifying bit
+
+  The last test asserts that the number of calls the scripts made matches what
+  the Timeline displays. So the tab is not just decoration: if the fan-out
+  silently made the wrong number of calls, the test goes red.
+
+  ### Why this matters beyond the demo
+
+  A single request list is linear. Real APIs are not: you need a token from
+  one service, an id from another, or a page you cannot know the URL of ahead
+  of time. `bru.sendRequest()` covers those, and the Timeline is what keeps it
+  debuggable. See request 03 for the polling version.
