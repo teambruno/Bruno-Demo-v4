@@ -10,29 +10,50 @@ docs:
   content: |-
     ## 04 - Auth
 
-    Log in once, reuse the token. Three requests:
+    Four subfolders, each one a scheme people actually ask about. Grouped so
+    you can open just the one that came up in conversation.
 
-    | # | Request | Scheme |
-    |---|---------|--------|
-    | 01 | Login | POST credentials, capture the JWT |
-    | 02 | Use the Token | Bearer, reading the captured token |
-    | 03 | OAuth2 Client Credentials | full client-credentials flow, handled by Bruno |
+    | # | Subfolder | The one-line pitch |
+    |---|-----------|--------------------|
+    | 01 | **Token-Handoff** | Real login, real JWT, captured and reused - no copy-paste between tabs. |
+    | 02 | **Bearer-and-Inheritance** | Bearer configured **once on the folder**; requests inherit it, or override it. |
+    | 03 | **API-Key** | Same key as a header or a query param - a dropdown, and the echo proves it. |
+    | 04 | **OAuth2** | Client credentials fetched and attached by Bruno - then the same token referenced by hand with `{{$oauth2.…}}`. |
 
-    **At the table:** run 01 then 02. Point out that request 02 has no script
-    at all - its Bearer field is `{{authToken}}`, which request 01 put there.
-    "Nobody copies a token between tabs."
+    **The 60-second version:** open `02-Bearer-and-Inheritance`, run the
+    folder, then open request 02 and show that its whole auth config is the
+    word *Inherit*. "The token is configured in one place. Every request under
+    it is authenticated, and any one of them can still override it - request 03
+    does, and asserts a 401 to prove the override won."
 
-    Bruno supports Basic, Bearer, API key, JWT, WSSE, NTLM, AWS SigV4, Digest
-    and OAuth2 (all four flows) natively - what is here is the two people
-    actually ask to see.
+    Inheritance runs the whole tree: **collection → folder → subfolder →
+    request**, nearest setting wins.
+
+    Natively supported, no scripting: Basic, Bearer, API key, JWT, WSSE, NTLM,
+    AWS SigV4, Digest and OAuth2 (all four flows).
 
     ```bash
-    bru run "04-Auth" --env Demo
+    # All four subfolders - 8 requests, 22 tests
+    bru run "04-Auth" -r --env Demo --exclude-tags app-only
+
+    # Just the one they asked about
+    bru run "04-Auth/02-Bearer-and-Inheritance" --env Demo
     ```
+
+    **`-r` is not optional here.** Point `bru run` at a folder whose requests
+    live in subfolders and without `-r` it walks the folder's own files only -
+    which is none - and reports a green run of **0 requests**. Leaf folders
+    like `02-Bearer-and-Inheritance` need no flag.
+
+    `--exclude-tags app-only` skips `03-API-Key/02-Key in the Query String`,
+    which the CLI cannot send correctly on 4.0.0; that request's docs explain
+    why.
 
     ### Where the credentials should live
 
-    The username and password in `Demo.yml` are DummyJSON's public demo pair,
-    so they are fine in a committed file. Real ones are not - see
-    **03 - Secrets and OpenAPI** for the `.env` and secret-manager patterns.
+    Every credential here is a public sandbox value - DummyJSON's demo pair,
+    httpfaker's `admin`/`password`, a made-up API key - so committing them is
+    fine. Real ones are not, and that conversation has its own collection:
+    **03 - Secrets and OpenAPI**, for `.env`, OS keychain and vault-backed
+    values.
   type: text/markdown

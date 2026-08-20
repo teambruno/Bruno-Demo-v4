@@ -1,0 +1,60 @@
+info:
+  name: 04-OAuth2
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    ## 04 - OAuth2
+
+    One token fetch, and the two documented ways to spend it.
+
+    | # | Request | Method | Where the token goes |
+    |---|---------|--------|----------------------|
+    | 01 | Client Credentials | **1 - inheritance** | wherever the auth config says |
+    | 02 | Direct Token Reference | **2 - `{{$oauth2.<tokenId>.access_token}}`** | wherever you put the variable |
+
+    Request 01 is the everyday case: `autoFetchToken` is on, so Bruno calls the
+    token endpoint, reads `access_token` out of the response and places it on
+    the request, all before the send. There is no "get token" request in this
+    folder because you do not need one.
+
+    Request 02 is for the API that wants the token somewhere the auth tab does
+    not offer - a second custom header, a body field, a nested query param, or
+    inside a script. **Auth is None** and the token is pulled out of Bruno's
+    token store by variable:
+
+    ```
+    ?access_token={{$oauth2.credentials.access_token}}
+    ```
+
+    `credentials` there is the **Token ID** from the OAuth2 config on request
+    01. Give each OAuth2 config its own id - two configs sharing an id
+    overwrite each other's token in the store.
+
+    Bruno supports all four flows - client credentials (here), authorization
+    code with PKCE, implicit and password credentials - with token caching and
+    auto-refresh.
+
+    **At the table:** open the Auth tab on 01 and scroll it. Token URL, client
+    id and secret, scope, token placement, auto-fetch, auto-refresh - the whole
+    flow is form fields, and the thing people expect to script is
+    configuration. Then open 02: "same token, one fetch, but here I decide
+    where it goes."
+
+    ```bash
+    # Run the folder, not request 02 alone - 01 is what fills the token store
+    bru run "04-Auth/04-OAuth2" --env Demo
+    ```
+
+    ### Then the question you will get
+
+    "Where does the client secret live?" It is in plain text in request 01,
+    which is the wrong place, and the fix is one collection over:
+    **03 - Secrets and OpenAPI / 01-Secret-Manager / 02-OAuth2 Client Secret**
+    is this exact request with the secret read from a vault. Put the two files
+    side by side.
+  type: text/markdown

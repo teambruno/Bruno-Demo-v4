@@ -1,0 +1,78 @@
+info:
+  name: 01-Fetch a Bearer Token
+  type: http
+  seq: 1
+  tags:
+    - regression
+    - auth
+
+http:
+  method: POST
+  url: "{{httpfakerUrl}}/api/auth/bearer/login"
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "username": "{{bearerUser}}",
+        "password": "{{bearerPass}}"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+
+        if (body && body.token) {
+          // The folder's Auth tab reads {{bearerToken}}. Setting it here is the
+          // whole handoff - run-scoped, in memory, never written to disk.
+          bru.setVar("bearerToken", body.token);
+        }
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("the login was accepted", () => {
+          // Wrong credentials return 401 here - the endpoint really checks.
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("a token came back", () => {
+          expect(body.token).to.be.a("string").and.not.be.empty;
+        });
+
+        test("this request sent no Authorization header of its own", () => {
+          // Auth is None on this request, so the folder's Bearer is not applied.
+          // A login endpoint should not need the token it is about to issue.
+          expect(req.getHeader("Authorization")).to.not.exist;
+        });
+
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Get the token
+
+  A plain POST with credentials, returning a token. The post-response script
+  stashes it as `bearerToken` with `bru.setVar()` - memory only, gone when the
+  run ends.
+
+  **This request's Auth is set to None**, on purpose. It sits inside a folder
+  that configures Bearer auth, and if it inherited that it would send an empty
+  `Authorization: Bearer` header to the endpoint whose job is to *issue* the
+  token. The third test asserts the header is absent, so the override is
+  visible rather than assumed.
+
+  That is the rule worth saying out loud: **inheritance is a default, and the
+  nearest setting wins.** Folder says Bearer, request says None, request wins.

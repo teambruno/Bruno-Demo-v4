@@ -41,7 +41,7 @@ docs:
     edits.
 
     Then put it next to
-    `02 - Advanced/04-Auth/03-OAuth2 Client Credentials.yml`, which has
+    `02 - Advanced/04-Auth/04-OAuth2/01-Client Credentials.yml`, which has
     `clientSecret: demo-client-secret` sitting in committed YAML. That
     before-and-after is the whole pitch in one frame.
 

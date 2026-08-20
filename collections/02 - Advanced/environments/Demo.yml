@@ -22,6 +22,15 @@ variables:
   - name: password
     value: emilyspass
     description: Public demo password - see 03 - Secrets and OpenAPI for the real pattern
+  - name: bearerUser
+    value: admin
+    description: httpfaker's bearer-login user - a public sandbox credential
+  - name: bearerPass
+    value: password
+    description: public sandbox password - the login really checks it, wrong values 401
+  - name: demoApiKey
+    value: bruno-demo-key-4f2a9c
+    description: stand-in API key for 04-Auth/03-API-Key - echoed back, gates nothing
   - name: releaseStage
     value: demo
   - name: tokenTtlSeconds

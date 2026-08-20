@@ -1,0 +1,45 @@
+info:
+  name: 03-API-Key
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    ## 03 - API Key, header or query
+
+    Two requests, same key, two placements - and a response that shows exactly
+    where the key landed.
+
+    | # | Auth tab | On the wire |
+    |---|----------|-------------|
+    | 01 | key `x-api-key`, placement **Header** | `headers["x-api-key"]` |
+    | 02 | key `api_key`, placement **Query** | `?api_key=…` |
+
+    Both post to `httpfaker.org/api/echo`, which returns the request it
+    received, so the response body **is** the wire. The tests assert the key
+    reached the right place *and* that it is absent from the other - so a
+    misplacement fails rather than passing quietly.
+
+    **At the table:** open 01, send it, point at `headers.x-api-key` in the
+    response. Then flip the placement dropdown to Query, send again, and watch
+    the key move into the URL. "The API decides where the key goes. That's a
+    dropdown, not a code change."
+
+    The key itself is `{{demoApiKey}}` from the environment - so it is one
+    value in one place, not pasted into every request. Which raises the
+    obvious question, and the answer is in
+    **03 - Secrets and OpenAPI**: point that same field at a vault.
+
+    ```bash
+    bru run "04-Auth/03-API-Key" --env Demo --exclude-tags app-only
+    ```
+
+    Request 02 is tagged `app-only`: on bru CLI 4.0.0 a query-placed key is
+    built into the URL *before* variables are interpolated, so it never
+    reaches the wire. Header placement is fine in both. Its docs have the
+    detail - worth knowing before someone runs the folder headless in front of
+    you.
+  type: text/markdown

@@ -1,0 +1,60 @@
+info:
+  name: 02-Inherited from the Folder
+  type: http
+  seq: 2
+  tags:
+    - regression
+    - auth
+
+http:
+  method: GET
+  url: "{{httpfakerUrl}}/api/auth/bearer/resource"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("the inherited token authenticated us", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("Bruno built the header from the folder's Auth tab", () => {
+          // Nothing on this request mentions a token. The header below was
+          // assembled from the parent folder's Bearer config.
+          expect(req.getHeader("Authorization")).to.equal(`Bearer ${bru.getVar("bearerToken")}`);
+        });
+
+        test("we got the protected payload", () => {
+          expect(body.name).to.be.a("string");
+          expect(body.email).to.include("@");
+        });
+
+        console.log(`protected resource returned: ${body.name} <${body.email}>`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Inherit
+
+  **This request's entire auth configuration is the word `inherit`.** No
+  token, no header, no script. Open its Auth tab: *Inherit*, and that is all
+  there is to see.
+
+  The `Authorization: Bearer …` header on the wire came from the folder, and
+  the second test proves it by comparing the sent header against the variable
+  request 01 stashed.
+
+  This is the answer to "we have forty endpoints behind one bearer token, do I
+  configure it forty times?" - no. Configure it on the folder, or on the
+  collection, and every request underneath is done.

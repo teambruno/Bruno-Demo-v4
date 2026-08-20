@@ -1,0 +1,54 @@
+info:
+  name: 03-Overridden per Request
+  type: http
+  seq: 3
+  tags:
+    - regression
+    - auth
+
+http:
+  method: GET
+  url: "{{httpfakerUrl}}/api/auth/bearer/resource"
+  auth:
+    type: bearer
+    token: expired-token-from-last-week
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("the request's own token was used, not the folder's", () => {
+          // 401 is the pass condition here. The folder's token is valid, so a
+          // rejection is only possible if this request's override took effect.
+          expect(res.getStatus()).to.equal(401);
+        });
+
+        test("the wrong token is the one that reached the wire", () => {
+          expect(req.getHeader("Authorization")).to.equal("Bearer expired-token-from-last-week");
+          expect(req.getHeader("Authorization")).to.not.include(bru.getVar("bearerToken"));
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "401"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Override
+
+  Same URL as request 02, inside the same folder, with one difference: this
+  one sets its own Bearer token - a deliberately dead one.
+
+  **A 401 is the passing result.** The folder's token works, so the only way
+  this request can be rejected is if its own setting beat the inherited one.
+  That makes the precedence rule testable rather than a claim in a docs page.
+
+  **At the table**, this is the request to open when someone asks "what if one
+  endpoint in the API uses a different credential?" - a service token for one
+  call, a user token for the rest. Set it on that request; leave the other
+  thirty-nine on Inherit.

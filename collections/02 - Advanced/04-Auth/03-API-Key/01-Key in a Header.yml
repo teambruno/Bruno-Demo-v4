@@ -1,0 +1,71 @@
+info:
+  name: 01-Key in a Header
+  type: http
+  seq: 1
+  tags:
+    - regression
+    - auth
+
+http:
+  method: POST
+  url: "{{httpfakerUrl}}/api/echo"
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "placement": "header"
+      }
+  auth:
+    type: apikey
+    key: x-api-key
+    value: "{{demoApiKey}}"
+    placement: header
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // httpfaker's /api/echo hands the request back as
+        // { url, method, headers, body } - so the response *is* the wire.
+        const echo = res.getBody();
+        const expected = bru.getEnvVar("demoApiKey");
+
+        test("the key was sent as a header", () => {
+          expect(echo.headers["x-api-key"]).to.equal(expected);
+        });
+
+        test("and not in the query string", () => {
+          expect(echo.url).to.not.include("api_key");
+          expect(echo.url).to.not.include(expected);
+        });
+
+        test("the key resolved from the environment", () => {
+          expect(echo.headers["x-api-key"]).to.not.include("{{");
+        });
+
+        console.log(`x-api-key on the wire: ${echo.headers["x-api-key"]}`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## API key, in a header
+
+  Auth type **API Key**, key `x-api-key`, value `{{demoApiKey}}`, placement
+  **Header**. Bruno adds the header at send time - there is no header row for
+  it in the Headers tab, and no script.
+
+  This runs against `httpfaker.org/api/echo`, which returns the request it
+  received, so the response body **is** the evidence: `headers.x-api-key`
+  holds the resolved key, and the tests check it landed in the header and not
+  in the URL.

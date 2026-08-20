@@ -26,7 +26,7 @@ docs:
     | 01 | **Chaining** | Four requests walk a Pokemon's evolution chain by following links in each response. Nobody pastes an id. |
     | 02 | **Data-Driven** | One request file, eight rows of a CSV, eight runs. |
     | 03 | **Runner-and-Tags** | Tag requests `smoke` / `regression` / `slow` and run any slice of them. |
-    | 04 | **Auth** | Log in once, reuse the token. Bearer and OAuth2 client-credentials. |
+    | 04 | **Auth** | Four schemes in subfolders: JWT handoff, Bearer inherited from the folder, API key header-or-query, OAuth2. |
     | 05 | **Beyond-REST** | GraphQL, WebSocket, SSE and gRPC in the same client. |
     | 06 | **Reusable-Scripts** | `require()` a real JS module: one local, one shared across collections, one npm package. |
 
@@ -55,6 +55,9 @@ docs:
     bru run "02-Data-Driven" --env Demo --csv-file-path "02-Data-Driven/pokemon.csv"
     bru run "02-Data-Driven" --env Demo --json-file-path "02-Data-Driven/pokemon.json"
 
+    # Auth: subfolders, so -r or nothing runs
+    bru run "04-Auth" -r --env Demo --exclude-tags app-only
+
     # Tag slices
     bru run --env Demo --tags smoke
     bru run --env Demo --tags regression --exclude-tags slow
@@ -75,13 +78,19 @@ docs:
 
     - **`app-only`** - the CLI cannot execute WebSocket or gRPC requests, and
       an SSE stream has no final response to assert against. Those three
-      requests live in `05-Beyond-REST` and are app demos.
+      requests live in `05-Beyond-REST` and are app demos. A fourth carries
+      the tag for a different reason: `04-Auth/03-API-Key/02-Key in the Query
+      String` - on bru 4.0.0 the CLI assembles the URL before interpolating
+      variables, so a query-placed API key never reaches the wire. It works in
+      the app; its docs have the detail.
     - **`data-driven`** - `02-Data-Driven` is *designed* to fail when no data
       file is attached, so that forgetting `--csv-file-path` is loud rather
       than silent. Run that folder with its own command.
 
-    Without them a whole-collection run reports four failures, all expected -
+    Without them a whole-collection run reports five failures, all expected -
     which is a bad look at a table even when you can explain it.
+
+    With them: **20 passed, 66 tests, ~3s.**
 
     `--exclude-tags` takes **one comma-separated value**. Repeating the flag
     (`--exclude-tags a --exclude-tags b`) fails with

@@ -9,7 +9,7 @@ navigate while someone is talking to you.
 
 ```
 01 - Core                  11 requests   what an API client has to do
-02 - Advanced              19 requests   what people don't expect it to do
+02 - Advanced              25 requests   what people don't expect it to do
 03 - Secrets and OpenAPI    7 requests   what decides whether they can adopt it
 ```
 
@@ -29,7 +29,8 @@ JSONPlaceholder, DummyJSON, Wikimedia EventStreams, and Bruno's own
 | 4 | `02 - Advanced / 01-Chaining` → **Run folder** | "Four requests. It picked a Pokémon, followed the species link, walked the evolution chain. Zero hardcoded ids." |
 | 5 | `02 - Advanced / 02-Data-Driven` + open `pokemon.csv` | "Same request, eight rows of a spreadsheet, eight runs." |
 | 6 | `02 - Advanced / 06-Reusable-Scripts` | "Reusable modules: a local `.js` file, one shared across collections, and an **npm package** — your own libraries, in your tests." |
-| 7 | `03 - Secrets and OpenAPI / 01-Secret-Manager / 02-OAuth2 Client Secret` | "The client secret comes from Azure Key Vault. Switch the dropdown to AWS — same request, no edits." |
+| 7 | `02 - Advanced / 04-Auth / 02-Bearer-and-Inheritance` | "The token is configured **once, on the folder**. Every request under it inherits — and this one overrides it and asserts a 401 to prove the override won." |
+| 8 | `03 - Secrets and OpenAPI / 01-Secret-Manager / 02-OAuth2 Client Secret` | "The client secret comes from Azure Key Vault. Switch the dropdown to AWS — same request, no edits." |
 
 If they only get one thing, make it **step 4**. It is the most visual and the
 hardest to dismiss.
@@ -58,14 +59,17 @@ cannot prompt, so it skips rather than fails, and the run stays green.
 
 ### 02 - Advanced
 Script chaining (a four-request PokéAPI evolution walk), data files (CSV and
-JSON), the collection runner with tag filtering, auth (bearer capture +
-OAuth2 client credentials), non-REST protocols (GraphQL, WebSocket, SSE, gRPC),
-and reusable JS modules — collection-local, workspace-shared, and a
-third-party **npm package**, side by side. Environments: **Demo**, CI.
+JSON), the collection runner with tag filtering, auth in four subfolders (JWT
+capture, Bearer inherited from a folder, API key as header or query param, and
+OAuth2 client credentials both inherited and referenced by variable), non-REST
+protocols (GraphQL, WebSocket, SSE, gRPC), and reusable JS modules —
+collection-local, workspace-shared, and a third-party **npm package**, side by
+side. Environments: **Demo**, CI.
 
 `bru run --env Demo --exclude-tags app-only,data-driven --sandbox=developer` →
-**15 passed, 52 tests**. The other four requests are the three app-only
-protocols and the data-driven one, which needs its own command.
+**20 passed, 66 tests**. The other five requests are the three app-only
+protocols, the query-placed API key (app-only on bru 4.0.0), and the
+data-driven one, which needs its own command.
 
 ### 03 - Secrets and OpenAPI
 Run this one **folder by folder** — the three vault environments do not define

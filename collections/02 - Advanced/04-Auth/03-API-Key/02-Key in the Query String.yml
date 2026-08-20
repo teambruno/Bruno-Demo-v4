@@ -1,0 +1,80 @@
+info:
+  name: 02-Key in the Query String
+  type: http
+  seq: 2
+  tags:
+    - regression
+    - auth
+    - app-only
+
+http:
+  method: POST
+  url: "{{httpfakerUrl}}/api/echo"
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "placement": "query"
+      }
+  auth:
+    type: apikey
+    key: api_key
+    value: "{{demoApiKey}}"
+    placement: query
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const echo = res.getBody();
+        const expected = bru.getEnvVar("demoApiKey");
+
+        test("the key was appended to the query string", () => {
+          expect(echo.url).to.include(`api_key=${expected}`);
+        });
+
+        test("and was not sent as a header", () => {
+          expect(echo.headers["api_key"]).to.not.exist;
+          expect(echo.headers["x-api-key"]).to.not.exist;
+        });
+
+        console.log(`URL on the wire: ${echo.url}`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## The same key, moved
+
+  Identical to request 01 apart from two fields in the Auth tab: the key is
+  named `api_key` and the placement dropdown says **Query**. No URL editing,
+  no script.
+
+  The echoed `url` now carries `?api_key=…` and the header is gone. Put the
+  two requests side by side - that dropdown is the whole diff.
+
+  ### Run this one in the app
+
+  Tagged `app-only`. On **bru CLI 4.0.0** a query-placed API key does not
+  survive the run: the CLI builds the URL before variables are interpolated,
+  so a templated URL like `{{httpfakerUrl}}/api/echo` throws `Invalid URL`
+  internally and the key is dropped, and a literal URL gets the key appended
+  with its value still `{{demoApiKey}}`, double-encoded. Header placement
+  (request 01) is unaffected and runs fine in both.
+
+  So the whole-collection CLI run excludes it along with the other app-only
+  requests:
+
+  ```bash
+  bru run "04-Auth" -r --env Demo --exclude-tags app-only
+  ```

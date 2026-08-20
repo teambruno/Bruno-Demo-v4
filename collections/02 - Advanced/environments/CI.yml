@@ -15,6 +15,12 @@ variables:
     value: emilys
   - name: password
     value: emilyspass
+  - name: bearerUser
+    value: admin
+  - name: bearerPass
+    value: password
+  - name: demoApiKey
+    value: bruno-demo-key-4f2a9c
   - name: releaseStage
     value: ci
   - name: tokenTtlSeconds

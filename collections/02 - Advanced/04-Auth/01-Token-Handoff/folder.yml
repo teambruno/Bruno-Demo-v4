@@ -1,0 +1,39 @@
+info:
+  name: 01-Token-Handoff
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
+
+docs:
+  content: |-
+    ## 01 - Log in once, reuse the token
+
+    The pair everyone asks to see. A real login against
+    `dummyjson.com/auth/login` returns a real signed JWT; the next request
+    sends it.
+
+    | # | Request | What it does |
+    |---|---------|--------------|
+    | 01 | Login | POST credentials, capture the JWT into `authToken` |
+    | 02 | Use the Token | Bearer auth reading `{{authToken}}` |
+
+    **At the table:** run the folder, then open request 02 and show that its
+    Bearer field is just `{{authToken}}` - the variable request 01 set. "Nobody
+    copies a token between tabs."
+
+    Run 02 on its own without 01 and it 401s. Worth doing deliberately once:
+    it makes the dependency real.
+
+    ```bash
+    bru run "04-Auth/01-Token-Handoff" --env Demo
+    ```
+
+    ### The detail that matters in a repo
+
+    Request 01's script uses `bru.setVar()`, **not** `bru.setEnvVar()`. In V4
+    `setEnvVar` writes to the environment file on disk, so storing a token that
+    way puts a live credential in a file someone can commit. `setVar` is
+    memory-only for the run.
+  type: text/markdown

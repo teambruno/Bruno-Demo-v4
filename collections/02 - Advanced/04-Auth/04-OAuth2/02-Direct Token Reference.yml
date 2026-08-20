@@ -1,0 +1,87 @@
+info:
+  name: 02-Direct Token Reference
+  type: http
+  seq: 2
+  tags:
+    - regression
+    - auth
+
+http:
+  method: GET
+  url: "{{httpfakerUrl}}/api/auth/oauth2/client-credentials/resource?access_token={{$oauth2.credentials.access_token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const sentUrl = req.getUrl();
+        // Decode first: an unresolved template reaches the wire percent-encoded
+        // as %7B%7B%24oauth2… , which a plain indexOf("{{") would miss.
+        const decoded = decodeURIComponent(sentUrl);
+
+        test("the referenced token authenticated us", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("$oauth2.credentials.access_token resolved to a real token", () => {
+          // With an empty token store this is what fails: the URL carries the
+          // literal template instead of a token, and the endpoint 401s.
+          expect(decoded, "token store was empty").to.not.include("$oauth2");
+          expect(decoded).to.not.include("{{");
+          expect(decoded).to.match(/access_token=.+/);
+        });
+
+        test("this request has no auth of its own", () => {
+          // Auth is None. The token is in the URL because we put it there.
+          expect(req.getHeader("Authorization")).to.not.exist;
+        });
+
+        console.log(`token pulled from the store: ${sentUrl.split("access_token=")[1]}`);
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 15000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Method 2 - reference the token directly
+
+  Request 01 lets Bruno attach the token. This one takes the other route from
+  the docs: **Auth is None**, and the token is referenced by variable in the
+  URL.
+
+  ```
+  {{httpfakerUrl}}/api/auth/oauth2/client-credentials/resource
+    ?access_token={{$oauth2.credentials.access_token}}
+  ```
+
+  `$oauth2.<tokenId>.access_token` reads out of Bruno's OAuth2 token store.
+  The `tokenId` is the **Token ID** field in the OAuth2 config - `credentials`
+  here, set on request 01 - so give each OAuth2 config a distinct id or they
+  overwrite each other in the store.
+
+  **Why you would want this.** Method 1 puts the token where the auth config
+  says. This puts it wherever *you* need it: a second custom header, a signed
+  body field, a nested query param, or into a script. One fetch, and the token
+  is a variable like any other.
+
+  **At the table:** open 01 and 02 side by side. "Same token, one fetch. The
+  first request lets Bruno place it; the second one places it by hand because
+  this API wants it somewhere unusual."
+
+  ### Run order matters
+
+  The store has to be populated first. Request 01 fills it (`autoFetchToken`
+  is on), so run the folder rather than this request alone. On its own the
+  variable stays unresolved and is sent percent-encoded -
+  `access_token=%7B%7B%24oauth2…` - and the endpoint 401s. That is what the
+  second test catches; it decodes the URL before checking, because
+  `%7B%7B` is easy to miss.
+
+  In the app you can fill the store by hand instead: **Get Access Token** in
+  the OAuth2 config, then send this request on its own.

@@ -1,0 +1,48 @@
+info:
+  name: 02-Bearer-and-Inheritance
+  type: folder
+  seq: 2
+
+request:
+  auth:
+    type: bearer
+    token: "{{bearerToken}}"
+
+docs:
+  content: |-
+    ## 02 - Bearer, configured once
+
+    **The Bearer token on this folder is the only place it is configured.**
+    Open the folder's Auth tab: `type: bearer`, token `{{bearerToken}}`. The
+    three requests inside are where the point lands:
+
+    | # | Request | Its own Auth setting | Result |
+    |---|---------|----------------------|--------|
+    | 01 | Fetch a Bearer Token | **None** | logs in, stashes `bearerToken` |
+    | 02 | Inherited from the Folder | **Inherit** | 200 - folder's Bearer applied |
+    | 03 | Overridden per Request | **Bearer**, wrong token | 401 - the request wins |
+
+    **At the table:** run the folder, then open request 02 and show its Auth
+    tab set to *Inherit* with nothing else in it. "One place to configure the
+    scheme. Add a fourth request to this folder and it is already
+    authenticated."
+
+    Then open 03 and show the deliberately wrong token. "Inheritance is a
+    default, not a lock - a request can always override it, and that one
+    asserts a 401 to prove the override took effect."
+
+    Inheritance walks the whole tree: **collection → folder → subfolder →
+    request**, nearest setting wins. So this could be set once at the
+    collection level for an entire API.
+
+    ```bash
+    bru run "04-Auth/02-Bearer-and-Inheritance" --env Demo
+    ```
+
+    ### The endpoint
+
+    `httpfaker.org/api/auth/bearer/*` - Bruno's own sandbox. The login checks
+    the credentials and the resource checks the token, so both a wrong
+    password and a wrong token return a real 401. Nothing here passes by
+    accident.
+  type: text/markdown
