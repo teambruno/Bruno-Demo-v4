@@ -1,0 +1,137 @@
+info:
+  name: Create a token to store payment details
+  type: http
+  seq: 3
+  tags:
+    - Recurring
+
+http:
+  method: POST
+  url: "{{baseUrl}}/storedPaymentMethods"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+        "shopperReference": "YOUR_SHOPPER_REFERENCE",
+        "paymentMethod": {
+          "type": "scheme",
+          "encryptedCardNumber": "test_4111111111111111",
+          "encryptedExpiryMonth": "test_03",
+          "encryptedExpiryYear": "test_2030",
+          "encryptedSecurityCode": "test_737",
+          "holderName": "John Smith"
+        },
+        "recurringProcessingModel": "Subscription",
+        "shopperEmail": "s.hopper@test.com",
+        "shopperIP": "192.0.2.1"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Card details stored
+    description: Example for a successful response to store encrypted card details
+    request:
+      url: "{{baseUrl}}/storedPaymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737",
+              "holderName": "John Smith"
+            },
+            "recurringProcessingModel": "Subscription",
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1"
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "expiryMonth": "03",
+            "expiryYear": "2030",
+            "holderName": "John Smith",
+            "id": "KHQC5N7G84BLNK43",
+            "lastFour": "1111",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "type": "scheme"
+          }
+  - name: Card details stored
+    description: Example for a successful response to store unencrypted card details
+    request:
+      url: "{{baseUrl}}/storedPaymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "cvc": "737",
+              "holderName": "John Smith"
+            },
+            "recurringProcessingModel": "Subscription",
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1"
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "expiryMonth": "03",
+            "expiryYear": "2030",
+            "holderName": "John Smith",
+            "id": "KHQC5N7G84BLNK43",
+            "lastFour": "1111",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "type": "scheme"
+          }
+
+docs: Creates a token to store the shopper's payment details. This token can be used for the shopper's future payments.

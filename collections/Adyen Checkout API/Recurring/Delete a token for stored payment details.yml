@@ -1,0 +1,66 @@
+info:
+  name: Delete a token for stored payment details
+  type: http
+  seq: 4
+  tags:
+    - Recurring
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/storedPaymentMethods/:storedPaymentMethodId"
+  params:
+    - name: storedPaymentMethodId
+      value: ""
+      type: path
+      description: The unique identifier of the token.
+    - name: shopperReference
+      value: ""
+      type: query
+      description: |-
+        Your reference to uniquely identify this shopper, for example user ID or account ID. Minimum length: 3 characters.
+        > Your reference must not include personally identifiable information (PII), for example name or email address.
+    - name: merchantAccount
+      value: ""
+      type: query
+      description: Your merchant account.
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 204 Response
+    description: "No Content - look at the actual response code for the status of the request. "
+    request:
+      url: "{{baseUrl}}/storedPaymentMethods/:storedPaymentMethodId"
+      method: DELETE
+      params:
+        - name: storedPaymentMethodId
+          value: ""
+          type: path
+          description: The unique identifier of the token.
+        - name: shopperReference
+          value: ""
+          type: query
+          description: |-
+            Your reference to uniquely identify this shopper, for example user ID or account ID. Minimum length: 3 characters.
+            > Your reference must not include personally identifiable information (PII), for example name or email address.
+        - name: merchantAccount
+          value: ""
+          type: query
+          description: Your merchant account.
+    response:
+      status: 204
+      statusText: No Content
+      body:
+        type: text
+        data: ""
+
+docs: Deletes the token identified in the path. The token can no longer be used with payment requests.

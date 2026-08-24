@@ -1,0 +1,238 @@
+info:
+  name: Cancel an order
+  type: http
+  seq: 2
+  tags:
+    - Orders
+
+http:
+  method: POST
+  url: "{{baseUrl}}/orders/cancel"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "order": {
+          "pspReference": "8815517812932012",
+          "orderData": "823fh892f8f18f4...148f13f9f3f"
+        },
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Order cancelled
+    request:
+      url: "{{baseUrl}}/orders/cancel"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "order": {
+              "pspReference": "8815517812932012",
+              "orderData": "823fh892f8f18f4...148f13f9f3f"
+            },
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "8816178914079738",
+            "resultCode": "Received"
+          }
+  - name: Response code 400. Bad request. (Cancel an order)
+    request:
+      url: "{{baseUrl}}/orders/cancel"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "order": {
+              "pspReference": "8815517812932012",
+              "orderData": "823fh892f8f18f4...148f13f9f3f"
+            },
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Cancel an order)
+    request:
+      url: "{{baseUrl}}/orders/cancel"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "order": {
+              "pspReference": "8815517812932012",
+              "orderData": "823fh892f8f18f4...148f13f9f3f"
+            },
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Cancel an order)
+    request:
+      url: "{{baseUrl}}/orders/cancel"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "order": {
+              "pspReference": "8815517812932012",
+              "orderData": "823fh892f8f18f4...148f13f9f3f"
+            },
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Cancel an order)
+    request:
+      url: "{{baseUrl}}/orders/cancel"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "order": {
+              "pspReference": "8815517812932012",
+              "orderData": "823fh892f8f18f4...148f13f9f3f"
+            },
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Cancel an order)
+    request:
+      url: "{{baseUrl}}/orders/cancel"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "order": {
+              "pspReference": "8815517812932012",
+              "orderData": "823fh892f8f18f4...148f13f9f3f"
+            },
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: Cancels an order. Cancellation of an order results in an automatic rollback of all payments made in the order, either by canceling or refunding the payment, depending on the type of payment method.

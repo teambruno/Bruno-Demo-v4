@@ -1,0 +1,61 @@
+info:
+  name: Get the result of a payment session
+  type: http
+  seq: 6
+  tags:
+    - Payments
+
+http:
+  method: GET
+  url: "{{baseUrl}}/sessions/:sessionId"
+  params:
+    - name: sessionId
+      value: ""
+      type: path
+      description: A unique identifier of the session.
+    - name: sessionResult
+      value: ""
+      type: query
+      description: The `sessionResult` value from the Drop-in or Component.
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: "Response code: 200 - Success"
+    description: The status of the session with the specified ID.
+    request:
+      url: "{{baseUrl}}/sessions/:sessionId"
+      method: GET
+      params:
+        - name: sessionId
+          value: ""
+          type: path
+          description: A unique identifier of the session.
+        - name: sessionResult
+          value: ""
+          type: query
+          description: The `sessionResult` value from the Drop-in or Component.
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "id": "CS12345678",
+            "status": "completed"
+          }
+
+docs: Returns the status of the payment session with the `sessionId` and `sessionResult` specified in the path.

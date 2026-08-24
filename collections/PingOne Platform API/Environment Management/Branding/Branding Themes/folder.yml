@@ -1,0 +1,11 @@
+info:
+  name: Branding Themes
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Branding Themes](https://developer.pingidentity.com/pingone-api/platform/branding/branding-themes.html).
+  type: text/markdown

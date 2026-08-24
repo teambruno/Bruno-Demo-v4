@@ -1,0 +1,1146 @@
+info:
+  name: Updates the order for PayPal Express Checkout
+  type: http
+  seq: 3
+  tags:
+    - Utility
+
+http:
+  method: POST
+  url: "{{baseUrl}}/paypal/updateOrder"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "pspReference": "DZ4DPSHB4WD2WN82",
+        "paymentData": "po7XZ...",
+        "amount": {
+          "currency": "EUR",
+          "value": 12000
+        },
+        "deliveryMethods": [
+          {
+            "reference": "1",
+            "description": "Express Shipping",
+            "type": "Shipping",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "selected": true
+          },
+          {
+            "reference": "2",
+            "description": "Standard Ground",
+            "type": "Shipping",
+            "amount": {
+              "currency": "EUR",
+              "value": 500
+            },
+            "selected": false
+          }
+        ]
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Order updated with delivery methods in an Advanced flow integration
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "DZ4DPSHB4WD2WN82",
+            "paymentData": "po7XZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "paymentData": "po7XZ...",
+            "status": "success"
+          }
+  - name: Order updated with delivery methods in an Advanced flow integration
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "HWL5D5BDLSGLNK82",
+            "paymentData": "kly45P...",
+            "amount": {
+              "currency": "EUR",
+              "value": 1200
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "paymentData": "kly45P...",
+            "status": "success"
+          }
+  - name: Order updated with delivery methods in a Sessions flow integration
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "ey4YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "paymentData": "ey4YZ...",
+            "status": "success"
+          }
+  - name: Order updated in a Sessions flow integration
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "em9YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 8700
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "paymentData": "em9YZ...",
+            "status": "success"
+          }
+  - name: Response code 400. Bad request. (Update a PayPal order with delivery methods in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "DZ4DPSHB4WD2WN82",
+            "paymentData": "po7XZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Update a PayPal order in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "HWL5D5BDLSGLNK82",
+            "paymentData": "kly45P...",
+            "amount": {
+              "currency": "EUR",
+              "value": 1200
+            }
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Update a PayPal order with delivery methods in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "ey4YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Update a PayPal order in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "em9YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 8700
+            }
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Update a PayPal order with delivery methods in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "DZ4DPSHB4WD2WN82",
+            "paymentData": "po7XZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Update a PayPal order in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "HWL5D5BDLSGLNK82",
+            "paymentData": "kly45P...",
+            "amount": {
+              "currency": "EUR",
+              "value": 1200
+            }
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Update a PayPal order with delivery methods in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "ey4YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Update a PayPal order in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "em9YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 8700
+            }
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Update a PayPal order with delivery methods in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "DZ4DPSHB4WD2WN82",
+            "paymentData": "po7XZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Update a PayPal order in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "HWL5D5BDLSGLNK82",
+            "paymentData": "kly45P...",
+            "amount": {
+              "currency": "EUR",
+              "value": 1200
+            }
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Update a PayPal order with delivery methods in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "ey4YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Update a PayPal order in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "em9YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 8700
+            }
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Update a PayPal order with delivery methods in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "DZ4DPSHB4WD2WN82",
+            "paymentData": "po7XZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Update a PayPal order in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "HWL5D5BDLSGLNK82",
+            "paymentData": "kly45P...",
+            "amount": {
+              "currency": "EUR",
+              "value": 1200
+            }
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Update a PayPal order with delivery methods in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "ey4YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Update a PayPal order in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "em9YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 8700
+            }
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Update a PayPal order with delivery methods in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "DZ4DPSHB4WD2WN82",
+            "paymentData": "po7XZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Update a PayPal order in an Advanced flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "pspReference": "HWL5D5BDLSGLNK82",
+            "paymentData": "kly45P...",
+            "amount": {
+              "currency": "EUR",
+              "value": 1200
+            }
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Update a PayPal order with delivery methods in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "ey4YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 12000
+            },
+            "deliveryMethods": [
+              {
+                "reference": "1",
+                "description": "Express Shipping",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 1000
+                },
+                "selected": true
+              },
+              {
+                "reference": "2",
+                "description": "Standard Ground",
+                "type": "Shipping",
+                "amount": {
+                  "currency": "EUR",
+                  "value": 500
+                },
+                "selected": false
+              }
+            ]
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Update a PayPal order in a Sessions flow integration)
+    request:
+      url: "{{baseUrl}}/paypal/updateOrder"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "sessionId": "CS12345679",
+            "paymentData": "em9YZ...",
+            "amount": {
+              "currency": "EUR",
+              "value": 8700
+            }
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: Updates the order for PayPal Express Checkout. This can be used to update the PayPal lightbox with an updated amount and delivery methods based on the delivery address.

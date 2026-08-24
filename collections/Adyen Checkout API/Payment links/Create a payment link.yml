@@ -1,0 +1,417 @@
+info:
+  name: Create a payment link
+  type: http
+  seq: 1
+  tags:
+    - Payment links
+
+http:
+  method: POST
+  url: "{{baseUrl}}/paymentLinks"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "reference": "YOUR_ORDER_NUMBER",
+        "amount": {
+          "value": 1250,
+          "currency": "BRL"
+        },
+        "countryCode": "BR",
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+        "shopperReference": "YOUR_SHOPPER_REFERENCE",
+        "shopperEmail": "test@email.com",
+        "shopperLocale": "pt-BR",
+        "billingAddress": {
+          "street": "Roque Petroni Jr",
+          "postalCode": "59000060",
+          "city": "São Paulo",
+          "houseNumberOrName": "999",
+          "country": "BR",
+          "stateOrProvince": "SP"
+        },
+        "deliveryAddress": {
+          "street": "Roque Petroni Jr",
+          "postalCode": "59000060",
+          "city": "São Paulo",
+          "houseNumberOrName": "999",
+          "country": "BR",
+          "stateOrProvince": "SP"
+        }
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Payment link created
+    request:
+      url: "{{baseUrl}}/paymentLinks"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "reference": "YOUR_ORDER_NUMBER",
+            "amount": {
+              "value": 1250,
+              "currency": "BRL"
+            },
+            "countryCode": "BR",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "shopperEmail": "test@email.com",
+            "shopperLocale": "pt-BR",
+            "billingAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            },
+            "deliveryAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            }
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "BRL",
+              "value": 1250
+            },
+            "billingAddress": {
+              "city": "São Paulo",
+              "country": "BR",
+              "houseNumberOrName": "999",
+              "postalCode": "59000060",
+              "stateOrProvince": "SP",
+              "street": "Roque Petroni Jr"
+            },
+            "countryCode": "BR",
+            "deliveryAddress": {
+              "city": "São Paulo",
+              "country": "BR",
+              "houseNumberOrName": "999",
+              "postalCode": "59000060",
+              "stateOrProvince": "SP",
+              "street": "Roque Petroni Jr"
+            },
+            "expiresAt": "2022-10-28T09:16:22Z",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_NUMBER",
+            "reusable": false,
+            "shopperEmail": "test@email.com",
+            "shopperLocale": "pt-BR",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "id": "PLE83C39B0A0DE0C1E",
+            "status": "active",
+            "url": "https://test.adyen.link/PLE83C39B0A0DE0C1E"
+          }
+  - name: Response code 400. Bad request. (Create a payment link)
+    request:
+      url: "{{baseUrl}}/paymentLinks"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "reference": "YOUR_ORDER_NUMBER",
+            "amount": {
+              "value": 1250,
+              "currency": "BRL"
+            },
+            "countryCode": "BR",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "shopperEmail": "test@email.com",
+            "shopperLocale": "pt-BR",
+            "billingAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            },
+            "deliveryAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            }
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Create a payment link)
+    request:
+      url: "{{baseUrl}}/paymentLinks"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "reference": "YOUR_ORDER_NUMBER",
+            "amount": {
+              "value": 1250,
+              "currency": "BRL"
+            },
+            "countryCode": "BR",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "shopperEmail": "test@email.com",
+            "shopperLocale": "pt-BR",
+            "billingAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            },
+            "deliveryAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            }
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Create a payment link)
+    request:
+      url: "{{baseUrl}}/paymentLinks"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "reference": "YOUR_ORDER_NUMBER",
+            "amount": {
+              "value": 1250,
+              "currency": "BRL"
+            },
+            "countryCode": "BR",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "shopperEmail": "test@email.com",
+            "shopperLocale": "pt-BR",
+            "billingAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            },
+            "deliveryAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            }
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Create a payment link)
+    request:
+      url: "{{baseUrl}}/paymentLinks"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "reference": "YOUR_ORDER_NUMBER",
+            "amount": {
+              "value": 1250,
+              "currency": "BRL"
+            },
+            "countryCode": "BR",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "shopperEmail": "test@email.com",
+            "shopperLocale": "pt-BR",
+            "billingAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            },
+            "deliveryAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            }
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Create a payment link)
+    request:
+      url: "{{baseUrl}}/paymentLinks"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "reference": "YOUR_ORDER_NUMBER",
+            "amount": {
+              "value": 1250,
+              "currency": "BRL"
+            },
+            "countryCode": "BR",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "shopperEmail": "test@email.com",
+            "shopperLocale": "pt-BR",
+            "billingAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            },
+            "deliveryAddress": {
+              "street": "Roque Petroni Jr",
+              "postalCode": "59000060",
+              "city": "São Paulo",
+              "houseNumberOrName": "999",
+              "country": "BR",
+              "stateOrProvince": "SP"
+            }
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: |-
+  Creates a payment link to a [Pay by Link](https://docs.adyen.com/unified-commerce/pay-by-link/) page where the shopper can pay. The list of payment methods presented to the shopper depends on the `currency` and `country` parameters sent in the request.
+
+  For more information, refer to [Pay by Link documentation](https://docs.adyen.com/online-payments/pay-by-link#create-payment-links-through-api).

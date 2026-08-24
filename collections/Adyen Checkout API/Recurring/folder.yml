@@ -1,0 +1,6 @@
+info:
+  name: Recurring
+  type: folder
+
+request:
+  auth: inherit

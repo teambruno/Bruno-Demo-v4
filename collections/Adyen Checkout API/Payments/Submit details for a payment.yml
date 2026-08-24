@@ -1,0 +1,390 @@
+info:
+  name: Submit details for a payment
+  type: http
+  seq: 4
+  tags:
+    - Payments
+
+http:
+  method: POST
+  url: "{{baseUrl}}/payments/details"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "details": {
+          "redirectResult": "X6XtfGC3!Y..."
+        }
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Payment authorised
+    description: Example response when submitting the redirect result
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "redirectResult": "X6XtfGC3!Y..."
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "resultCode": "Authorised",
+            "pspReference": "V4HZ4RBFJGXXGN82"
+          }
+  - name: Response code 400. Bad request. (Submit the redirect result)
+    description: Example request when submitting a redirect result
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "redirectResult": "X6XtfGC3!Y..."
+            }
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Submit 3D Secure 2 authentication result)
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "threeDSResult": "eyJ0cmFuc1N0YXR1cyI6IlkifQ=="
+            }
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Submit the redirect result)
+    description: Example request when submitting a redirect result
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "redirectResult": "X6XtfGC3!Y..."
+            }
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Submit 3D Secure 2 authentication result)
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "threeDSResult": "eyJ0cmFuc1N0YXR1cyI6IlkifQ=="
+            }
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Submit the redirect result)
+    description: Example request when submitting a redirect result
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "redirectResult": "X6XtfGC3!Y..."
+            }
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Submit 3D Secure 2 authentication result)
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "threeDSResult": "eyJ0cmFuc1N0YXR1cyI6IlkifQ=="
+            }
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Submit the redirect result)
+    description: Example request when submitting a redirect result
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "redirectResult": "X6XtfGC3!Y..."
+            }
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Submit 3D Secure 2 authentication result)
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "threeDSResult": "eyJ0cmFuc1N0YXR1cyI6IlkifQ=="
+            }
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Submit the redirect result)
+    description: Example request when submitting a redirect result
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "redirectResult": "X6XtfGC3!Y..."
+            }
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Submit 3D Secure 2 authentication result)
+    request:
+      url: "{{baseUrl}}/payments/details"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "details": {
+              "threeDSResult": "eyJ0cmFuc1N0YXR1cyI6IlkifQ=="
+            }
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: |+
+  Submits details for a payment created using `/payments`. This step is only needed when no final state has been reached on the `/payments` request, for example when the shopper was redirected to another page to complete the payment.
+

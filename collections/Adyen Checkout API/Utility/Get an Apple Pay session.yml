@@ -1,0 +1,68 @@
+info:
+  name: Get an Apple Pay session
+  type: http
+  seq: 1
+  tags:
+    - Utility
+
+http:
+  method: POST
+  url: "{{baseUrl}}/applePay/sessions"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "displayName": "YOUR_MERCHANT_NAME",
+        "domainName": "YOUR_DOMAIN_NAME",
+        "merchantIdentifier": "YOUR_MERCHANT_ID"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Payment session data for Apple Pay
+    request:
+      url: "{{baseUrl}}/applePay/sessions"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "displayName": "YOUR_MERCHANT_NAME",
+            "domainName": "YOUR_DOMAIN_NAME",
+            "merchantIdentifier": "YOUR_MERCHANT_ID"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "data": "eyJ2Z..."
+          }
+
+docs: |-
+  You need to use this endpoint if you have an API-only integration with Apple Pay which uses Adyen's Apple Pay certificate.
+
+  The endpoint returns the Apple Pay session data which you need to complete the [Apple Pay session validation](https://docs.adyen.com/payment-methods/apple-pay/api-only?tab=adyen-certificate-validation_1#complete-apple-pay-session-validation).

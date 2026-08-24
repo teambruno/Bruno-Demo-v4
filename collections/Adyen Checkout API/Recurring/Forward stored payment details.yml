@@ -1,0 +1,93 @@
+info:
+  name: Forward stored payment details
+  type: http
+  seq: 1
+  tags:
+    - Recurring
+
+http:
+  method: POST
+  url: "{{baseUrl}}/forward"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+        "shopperReference": "YOUR_SHOPPER_REFERENCE",
+        "storedPaymentMethodId": "M5N7TQ4TG5PFWR50",
+        "baseUrl": "http://thirdparty.example.com",
+        "request": {
+          "httpMethod": "post",
+          "urlSuffix": "/payments",
+          "credentials": "YOUR_CREDENTIALS_FOR_THE_THIRD_PARTY",
+          "headers": {
+            "Authorization": "Basic {{credentials}}"
+          },
+          "body": "{\"amount\":{\"value\":100,\"currency\":\"USD\"},\"paymentMethod\":{\"creditCard\":{\"holderName\":\"{{holderName}}\",\"number\":\"{{number}}\",\"expiryMonth\":\"{{expiryMonth}}\",\"expiryYear\":\"{{expiryYear}}\"}}}"
+        }
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Outcome of the forward request
+    request:
+      url: "{{baseUrl}}/forward"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storedPaymentMethodId": "M5N7TQ4TG5PFWR50",
+            "baseUrl": "http://thirdparty.example.com",
+            "request": {
+              "httpMethod": "post",
+              "urlSuffix": "/payments",
+              "credentials": "YOUR_CREDENTIALS_FOR_THE_THIRD_PARTY",
+              "headers": {
+                "Authorization": "Basic {{credentials}}"
+              },
+              "body": "{\"amount\":{\"value\":100,\"currency\":\"USD\"},\"paymentMethod\":{\"creditCard\":{\"holderName\":\"{{holderName}}\",\"number\":\"{{number}}\",\"expiryMonth\":\"{{expiryMonth}}\",\"expiryYear\":\"{{expiryYear}}\"}}}"
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "storedPaymentMethodId": "M5N7TQ4TG5PFWR50",
+            "pspReference": "XB7XNCQ8HXSKGK82",
+            "response": {
+              "status": 200,
+              "headers": {
+                "thirdparty-version": "2023-10-16"
+              },
+              "body": "{\"success\": \"ok\",\"data\": {\"tokenizeCreditCard\": {\"paymentMethod\": {\"id\": \"PAYMENT_METHOD_ID\"}}}}"
+            }
+          }
+
+docs: Forwards the payment details you stored with Adyen to a third-party that you specify and returns the response from the third-party. Supports forwarding stored card details or [network tokens](https://docs.adyen.com/online-payments/network-tokenization). For more information, see [Forward stored payment details](https://docs.adyen.com/online-payments/tokenization/forward-payment-details).

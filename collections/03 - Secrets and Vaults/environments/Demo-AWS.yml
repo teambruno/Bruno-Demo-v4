@@ -14,4 +14,4 @@ externalSecrets:
   type: aws-secrets-manager
   variables:
     - name: secretStore
-      secretName: james_ha/bruno-demo-sm
+      secretName: "{{secretpath-mine}}"

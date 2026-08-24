@@ -1,0 +1,302 @@
+info:
+  name: Refund a captured payment
+  type: http
+  seq: 5
+  tags:
+    - Modifications
+
+http:
+  method: POST
+  url: "{{baseUrl}}/payments/:paymentPspReference/refunds"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  params:
+    - name: paymentPspReference
+      value: ""
+      type: path
+      description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment that you want to refund.
+  body:
+    type: json
+    data: |-
+      {
+        "amount": {
+          "currency": "EUR",
+          "value": 2500
+        },
+        "reference": "YOUR_UNIQUE_REFERENCE",
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Refund requested
+    description: Example response when a refund was requested
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/refunds"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment that you want to refund.
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "paymentPspReference": "993617894903480A",
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "pspReference": "993617894906488A",
+            "status": "received",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            }
+          }
+  - name: Response code 400. Bad request. (Refund a payment)
+    description: Example refund request
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/refunds"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment that you want to refund.
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Refund a payment)
+    description: Example refund request
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/refunds"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment that you want to refund.
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Refund a payment)
+    description: Example refund request
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/refunds"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment that you want to refund.
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Refund a payment)
+    description: Example refund request
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/refunds"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment that you want to refund.
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Refund a payment)
+    description: Example refund request
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/refunds"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment that you want to refund.
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: |-
+  Refunds a payment that has been [captured](https://docs.adyen.com/api-explorer/#/CheckoutService/latest/post/payments/{paymentPspReference}/captures), and returns a unique reference for this request. You get the outcome of the request asynchronously, in a [**REFUND** webhook](https://docs.adyen.com/online-payments/refund#refund-webhook).
+
+  You can refund either the full captured amount or a part of the captured amount. You can also perform multiple partial refunds, as long as their sum doesn't exceed the captured amount.
+
+  > Some payment methods do not support partial refunds. To learn if a payment method supports partial refunds, refer to the payment method page such as [cards](https://docs.adyen.com/payment-methods/cards#supported-cards), [iDEAL](https://docs.adyen.com/payment-methods/ideal), or [Klarna](https://docs.adyen.com/payment-methods/klarna). 
+
+  If you want to refund a payment but are not sure whether it has been captured, use the [`/payments/{paymentPspReference}/reversals`](https://docs.adyen.com/api-explorer/#/CheckoutService/latest/post/payments/{paymentPspReference}/reversals) endpoint instead.
+
+  For more information, refer to [Refund](https://docs.adyen.com/online-payments/refund).

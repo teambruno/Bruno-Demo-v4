@@ -1,0 +1,6 @@
+info:
+  name: Utility
+  type: folder
+
+request:
+  auth: inherit

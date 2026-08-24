@@ -1,0 +1,382 @@
+info:
+  name: Create a payment session
+  type: http
+  seq: 5
+  tags:
+    - Payments
+
+http:
+  method: POST
+  url: "{{baseUrl}}/sessions"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+        "amount": {
+          "value": 100,
+          "currency": "EUR"
+        },
+        "returnUrl": "https://your-company.example.com/checkout?shopperOrder=12xy..",
+        "reference": "YOUR_PAYMENT_REFERENCE",
+        "countryCode": "NL"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Payment session created Success.
+    description: Example response for creating a payment session
+    request:
+      url: "{{baseUrl}}/sessions"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "amount": {
+              "value": 100,
+              "currency": "EUR"
+            },
+            "returnUrl": "https://your-company.example.com/checkout?shopperOrder=12xy..",
+            "reference": "YOUR_PAYMENT_REFERENCE",
+            "countryCode": "NL"
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 100
+            },
+            "countryCode": "NL",
+            "expiresAt": "2022-01-11T13:53:18+01:00",
+            "id": "CS451F2AB1ED897A94",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_PAYMENT_REFERENCE",
+            "returnUrl": "https://your-company.example.com/checkout?shopperOrder=12xy..",
+            "sessionData": "Ab02b4c0!BQABAgBfYI29..."
+          }
+  - name: Payment session created for a Klarna payment  Success.
+    description: "Example "
+    request:
+      url: "{{baseUrl}}/sessions"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_REFERENCE",
+            "amount": {
+              "currency": "SEK",
+              "value": 1000
+            },
+            "shopperLocale": "en_US",
+            "countryCode": "SE",
+            "telephoneNumber": "+46 840 839 298",
+            "shopperEmail": "youremail@email.com",
+            "shopperName": {
+              "firstName": "Testperson-se",
+              "lastName": "Approved"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "billingAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "deliveryAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "dateOfBirth": "1996-09-04",
+            "socialSecurityNumber": "0108",
+            "returnUrl": "https://example.org",
+            "lineItems": [
+              {
+                "quantity": 1,
+                "amountExcludingTax": 331,
+                "taxPercentage": 2100,
+                "description": "Shoes",
+                "id": "Item #1",
+                "taxAmount": 69,
+                "amountIncludingTax": 400,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              },
+              {
+                "quantity": 2,
+                "amountExcludingTax": 248,
+                "taxPercentage": 2100,
+                "description": "Socks",
+                "id": "Item #2",
+                "taxAmount": 52,
+                "amountIncludingTax": 300,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              }
+            ]
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "SEK",
+              "value": 1000
+            },
+            "billingAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "countryCode": "SE",
+            "dateOfBirth": "1996-09-04T02:00:00+02:00",
+            "deliveryAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "expiresAt": "2022-01-11T13:57:52+01:00",
+            "id": "CSC52E9932D39ADAF3",
+            "lineItems": [
+              {
+                "amountExcludingTax": 331,
+                "amountIncludingTax": 400,
+                "description": "Shoes",
+                "id": "Item #1",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM",
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "quantity": 1,
+                "taxAmount": 69,
+                "taxPercentage": 2100
+              },
+              {
+                "amountExcludingTax": 248,
+                "amountIncludingTax": 300,
+                "description": "Socks",
+                "id": "Item #2",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM",
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "quantity": 2,
+                "taxAmount": 52,
+                "taxPercentage": 2100
+              }
+            ],
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_REFERENCE",
+            "returnUrl": "https://example.org",
+            "shopperEmail": "youremail@email.com",
+            "shopperLocale": "en_US",
+            "shopperName": {
+              "firstName": "Testperson-se",
+              "lastName": "Approved"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "socialSecurityNumber": "0108",
+            "telephoneNumber": "+46 840 839 298",
+            "sessionData": "Ab02b4c0!BQABAgBfYI29..."
+          }
+  - name: Shopper's payment details tokenized
+    description: Example response for tokenizing the shopper's payment details
+    request:
+      url: "{{baseUrl}}/sessions"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "TestMerchantCheckout",
+            "amount": {
+              "value": 100,
+              "currency": "EUR"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "returnUrl": "https://your-company.example.com/checkout?shopperOrder=12xy..",
+            "reference": "YOUR_PAYMENT_REFERENCE",
+            "countryCode": "NL",
+            "storePaymentMethodMode": "enabled",
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "CardOnFile"
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 100
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "countryCode": "NL",
+            "expiresAt": "2022-01-11T13:56:05+01:00",
+            "id": "FJM726V375BV9D82",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "recurringProcessingModel": "CardOnFile",
+            "reference": "YOUR_PAYMENT_REFERENCE",
+            "returnUrl": "https://your-company.example.com/checkout?shopperOrder=12xy..",
+            "shopperInteraction": "Ecommerce",
+            "storePaymentMethod": true,
+            "sessionData": "Ab02b4c0!BQABAgBfYI29..."
+          }
+  - name: Payment split between balance accounts
+    request:
+      url: "{{baseUrl}}/sessions"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "value": 40000,
+              "currency": "USD"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 39200
+                },
+                "type": "BalanceAccount",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the sale amount",
+                "description": "Your description for the sale amount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "type": "Commission",
+                "reference": "Your reference for the commission",
+                "description": "Your description for the commission"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the fees",
+                "description": "Your description for the fees",
+                "type": "PaymentFee"
+              }
+            ]
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 40000
+            },
+            "expiresAt": "2023-06-26T11:01:55+02:00",
+            "id": "CSFCBC80570618EF2C",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_NUMBER",
+            "returnUrl": "https://your-company.example.com/...",
+            "shopperLocale": "en-US",
+            "splits": [
+              {
+                "account": "BA00000000000000000000001",
+                "amount": {
+                  "value": 39200
+                },
+                "description": "Your description for the sale amount",
+                "reference": "Your reference for the sale amount",
+                "type": "BalanceAccount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "description": "Your description for the commission",
+                "reference": "Your reference for the commission",
+                "type": "Commission"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "account": "BA00000000000000000000001",
+                "description": "Your description for the fees",
+                "reference": "Your reference for the fees",
+                "type": "PaymentFee"
+              }
+            ],
+            "mode": "embedded",
+            "sessionData": "Ab02b4c0!BQABAgCjTErwAztqXSFTiZtxZMjRLYkoGbPkmvCvDX1"
+          }
+
+docs: |-
+  Creates a payment session for [Drop-in](https://docs.adyen.com/online-payments/build-your-integration/sessions-flow/?platform=Web&integration=Drop-in), [Components](https://docs.adyen.com/online-payments/build-your-integration/sessions-flow/?platform=Web&integration=Components), and [Hosted Checkout](https://docs.adyen.com/online-payments/build-your-integration/sessions-flow/?platform=Web&integration=Hosted+Checkout) integrations.
+
+  The response contains encrypted payment session data. The front end then uses the session data to make any required server-side calls for the payment flow.
+
+  You get the payment outcome asynchronously, in an [AUTHORISATION](https://docs.adyen.com/api-explorer/#/Webhooks/latest/post/AUTHORISATION) webhook.

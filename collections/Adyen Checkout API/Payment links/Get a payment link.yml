@@ -1,0 +1,186 @@
+info:
+  name: Get a payment link
+  type: http
+  seq: 2
+  tags:
+    - Payment links
+
+http:
+  method: GET
+  url: "{{baseUrl}}/paymentLinks/:linkId"
+  params:
+    - name: linkId
+      value: ""
+      type: path
+      description: Unique identifier of the payment link.
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Payment link details
+    request:
+      url: "{{baseUrl}}/paymentLinks/:linkId"
+      method: GET
+      params:
+        - name: linkId
+          value: ""
+          type: path
+          description: Unique identifier of the payment link.
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 8700
+            },
+            "countryCode": "NL",
+            "expiresAt": "2021-04-08T14:06:39Z",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "shopper-reference-ekvL83",
+            "shopperLocale": "hu-HU",
+            "shopperReference": "shopper-reference-LZfdWZ",
+            "status": "active",
+            "url": "https://test.adyen.link/PL61C53A8B97E6915A",
+            "id": "PL61C53A8B97E6915A"
+          }
+  - name: Response code 400. Bad request.
+    request:
+      url: "{{baseUrl}}/paymentLinks/:linkId"
+      method: GET
+      params:
+        - name: linkId
+          value: ""
+          type: path
+          description: Unique identifier of the payment link.
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized.
+    request:
+      url: "{{baseUrl}}/paymentLinks/:linkId"
+      method: GET
+      params:
+        - name: linkId
+          value: ""
+          type: path
+          description: Unique identifier of the payment link.
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden.
+    request:
+      url: "{{baseUrl}}/paymentLinks/:linkId"
+      method: GET
+      params:
+        - name: linkId
+          value: ""
+          type: path
+          description: Unique identifier of the payment link.
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity.
+    request:
+      url: "{{baseUrl}}/paymentLinks/:linkId"
+      method: GET
+      params:
+        - name: linkId
+          value: ""
+          type: path
+          description: Unique identifier of the payment link.
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error.
+    request:
+      url: "{{baseUrl}}/paymentLinks/:linkId"
+      method: GET
+      params:
+        - name: linkId
+          value: ""
+          type: path
+          description: Unique identifier of the payment link.
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: Retrieves the payment link details using the payment link `id`.

@@ -1,0 +1,90 @@
+info:
+  name: Get tokens for stored payment details
+  type: http
+  seq: 2
+  tags:
+    - Recurring
+
+http:
+  method: GET
+  url: "{{baseUrl}}/storedPaymentMethods"
+  params:
+    - name: shopperReference
+      value: ""
+      type: query
+      description: |-
+        Your reference to uniquely identify this shopper, for example user ID or account ID. Minimum length: 3 characters.
+        > Your reference must not include personally identifiable information (PII), for example name or email address.
+      disabled: true
+    - name: merchantAccount
+      value: ""
+      type: query
+      description: Your merchant account.
+      disabled: true
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: List of stored payment methods for specified shopper
+    request:
+      url: "{{baseUrl}}/storedPaymentMethods"
+      method: GET
+      params:
+        - name: shopperReference
+          value: ""
+          type: query
+          description: |-
+            Your reference to uniquely identify this shopper, for example user ID or account ID. Minimum length: 3 characters.
+            > Your reference must not include personally identifiable information (PII), for example name or email address.
+          disabled: true
+        - name: merchantAccount
+          value: ""
+          type: query
+          description: Your merchant account.
+          disabled: true
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storedPaymentMethods": [
+              {
+                "brand": "visa",
+                "expiryMonth": "10",
+                "expiryYear": "30",
+                "holderName": "John Smith",
+                "id": "7219687191761347",
+                "issuerName": "ISSUER_NAME",
+                "lastFour": "1111",
+                "name": "VISA",
+                "shopperEmail": "john.smith@example.com",
+                "shopperReference": "YOUR_SHOPPER_REFERENCE",
+                "supportedRecurringProcessingModels": [
+                  "CardOnFile",
+                  "Subscription",
+                  "UnscheduledCardOnFile"
+                ],
+                "type": "scheme"
+              }
+            ]
+          }
+
+docs: |+
+  Lists the tokens for stored payment details for the shopper identified in the path, if there are any available. The token ID can be used with payment requests for the shopper's payment. A summary of the stored details is included.
+

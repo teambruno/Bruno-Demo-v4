@@ -1,0 +1,6 @@
+info:
+  name: Donations
+  type: folder
+
+request:
+  auth: inherit

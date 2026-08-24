@@ -1,0 +1,2378 @@
+info:
+  name: Get a list of available payment methods
+  type: http
+  seq: 2
+  tags:
+    - Payments
+
+http:
+  method: POST
+  url: "{{baseUrl}}/paymentMethods"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: List of available payment methods
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethods": [
+              {
+                "name": "ACH Direct Debit",
+                "type": "ach"
+              },
+              {
+                "name": "Adyen Voucher",
+                "type": "adyen_test_voucher"
+              },
+              {
+                "name": "AfterPay Invoice",
+                "type": "afterpay_default"
+              },
+              {
+                "name": "AfterPay DirectDebit",
+                "type": "afterpay_directdebit"
+              },
+              {
+                "name": "Afterpay",
+                "type": "afterpaytouch"
+              },
+              {
+                "name": "Cards",
+                "type": "scheme"
+              },
+              {
+                "name": "AliPay",
+                "type": "alipay"
+              },
+              {
+                "name": "AliPay HK",
+                "type": "alipay_hk"
+              },
+              {
+                "name": "AliPay",
+                "type": "alipay_wap"
+              },
+              {
+                "name": "Android Pay",
+                "type": "androidpay"
+              },
+              {
+                "name": "Apple Pay",
+                "type": "applepay"
+              },
+              {
+                "name": "Credit Card via AsiaPay",
+                "type": "asiapay"
+              },
+              {
+                "name": "China UnionPay",
+                "type": "asiapay_unionpay"
+              },
+              {
+                "name": "Baby Gift Card",
+                "type": "babygiftcard"
+              },
+              {
+                "name": "Baloto",
+                "type": "baloto"
+              },
+              {
+                "name": "BancNet",
+                "type": "bancnet"
+              },
+              {
+                "name": "Bank Transfer (BG)",
+                "type": "bankTransfer_BG"
+              },
+              {
+                "name": "Bank Transfer (CH)",
+                "type": "bankTransfer_CH"
+              },
+              {
+                "name": "Bank Transfer (DE)",
+                "type": "bankTransfer_DE"
+              },
+              {
+                "name": "Bank Transfer (FI)",
+                "type": "bankTransfer_FI"
+              },
+              {
+                "name": "Bank Transfer (GB)",
+                "type": "bankTransfer_GB"
+              },
+              {
+                "name": "Bank Transfer (HU)",
+                "type": "bankTransfer_HU"
+              },
+              {
+                "name": "SEPA Bank Transfer",
+                "type": "bankTransfer_IBAN"
+              },
+              {
+                "name": "Bank Transfer (IE)",
+                "type": "bankTransfer_IE"
+              },
+              {
+                "name": "Electronic Bank Transfer (MX)",
+                "type": "bankTransfer_MX_linked"
+              },
+              {
+                "name": "Bank Transfer (MX)",
+                "type": "bankTransfer_MX_offline"
+              },
+              {
+                "name": "Bank Transfer (NL)",
+                "type": "bankTransfer_NL"
+              },
+              {
+                "name": "Bank Transfer (PL)",
+                "type": "bankTransfer_PL"
+              },
+              {
+                "name": "Bank Transfer (SE)",
+                "type": "bankTransfer_SE"
+              },
+              {
+                "name": "Bank Transfer (US)",
+                "type": "bankTransfer_US"
+              },
+              {
+                "name": "Payconiq by Bancontact",
+                "type": "bcmc_mobile"
+              },
+              {
+                "name": "Bijenkorf Cadeaucard",
+                "type": "bijcadeaucard"
+              },
+              {
+                "name": "99Bill",
+                "type": "bill99"
+              },
+              {
+                "name": "Online Banking India",
+                "type": "billdesk_online"
+              },
+              {
+                "name": "UPI",
+                "type": "billdesk_upi"
+              },
+              {
+                "name": "Wallets India",
+                "type": "billdesk_wallet"
+              },
+              {
+                "name": "Blik",
+                "type": "blik"
+              },
+              {
+                "name": "Bloemen Giftcard",
+                "type": "bloemengiftcard"
+              },
+              {
+                "name": "Boekenbon Giftcard",
+                "type": "boekenbon"
+              },
+              {
+                "name": "Boleto",
+                "type": "boleto"
+              },
+              {
+                "name": "Boleto Bancario",
+                "type": "boletobancario_santander"
+              },
+              {
+                "name": "Bradesco",
+                "type": "bradesco"
+              },
+              {
+                "name": "Cash-Ticket",
+                "type": "cashticket"
+              },
+              {
+                "name": "CashU",
+                "type": "cashu"
+              },
+              {
+                "name": "CCAvenue",
+                "type": "ccavenue"
+              },
+              {
+                "name": "Mula Checkout",
+                "type": "cellulant"
+              },
+              {
+                "name": "Chasin Giftcard",
+                "type": "chasingiftcard"
+              },
+              {
+                "name": "Clearpay",
+                "type": "clearpay"
+              },
+              {
+                "name": "ClickandBuy",
+                "type": "clickandbuy"
+              },
+              {
+                "name": "Paiement en 3 fois par Cartes Bancaires",
+                "type": "cofinoga_3xcb"
+              },
+              {
+                "name": "Costes Giftcard",
+                "type": "costesgiftcard"
+              },
+              {
+                "name": "custom_settlement",
+                "type": "custom_settlement"
+              },
+              {
+                "name": "DANA",
+                "type": "dana"
+              },
+              {
+                "name": "DineroMail",
+                "type": "dineromail"
+              },
+              {
+                "name": "Online bank transfer.",
+                "type": "directEbanking"
+              },
+              {
+                "name": "Direct Debit Brazil - Banco do Brazil",
+                "type": "directdebit_BR_bancodobrasil"
+              },
+              {
+                "name": "Direct Debit Brazil - Bradesco",
+                "type": "directdebit_BR_bradesco"
+              },
+              {
+                "name": "Direct Debit Brazil - Caixa Economica Federal",
+                "type": "directdebit_BR_caixa"
+              },
+              {
+                "name": "Direct Debit Brazil - HSBC",
+                "type": "directdebit_BR_hsbc"
+              },
+              {
+                "name": "Direct Debit Brazil - Itau",
+                "type": "directdebit_BR_itau"
+              },
+              {
+                "name": "Direct Debit Brazil - Santander",
+                "type": "directdebit_BR_santander"
+              },
+              {
+                "name": "BACS Direct Debit",
+                "type": "directdebit_GB"
+              },
+              {
+                "name": "Alfamart",
+                "type": "doku_alfamart"
+              },
+              {
+                "name": "BCA Bank Transfer",
+                "type": "doku_bca_va"
+              },
+              {
+                "name": "BNI VA",
+                "type": "doku_bni_va"
+              },
+              {
+                "name": "BRI VA",
+                "type": "doku_bri_va"
+              },
+              {
+                "name": "CIMB VA",
+                "type": "doku_cimb_va"
+              },
+              {
+                "name": "Danamon VA",
+                "type": "doku_danamon_va"
+              },
+              {
+                "name": "Indomaret",
+                "type": "doku_indomaret"
+              },
+              {
+                "name": "Mandiri VA",
+                "type": "doku_mandiri_va"
+              },
+              {
+                "name": "OVO",
+                "type": "doku_ovo"
+              },
+              {
+                "name": "Bank Transfer",
+                "type": "doku_permata_lite_atm"
+              },
+              {
+                "name": "DOKU wallet",
+                "type": "doku_wallet"
+              },
+              {
+                "name": "Dragonpay Prepaid Credits",
+                "type": "dragonpay_credits"
+              },
+              {
+                "name": "Online Banking",
+                "type": "dragonpay_ebanking"
+              },
+              {
+                "name": "GCash",
+                "type": "dragonpay_gcash"
+              },
+              {
+                "name": "Over The Counter Banks",
+                "type": "dragonpay_otc_banking"
+              },
+              {
+                "name": "OTC non-Bank via Dragonpay",
+                "type": "dragonpay_otc_non_banking"
+              },
+              {
+                "name": "Convenience Stores",
+                "type": "dragonpay_otc_philippines"
+              },
+              {
+                "name": "7/11",
+                "type": "dragonpay_seveneleven"
+              },
+              {
+                "name": "eagleeye_voucher",
+                "type": "eagleeye_voucher"
+              },
+              {
+                "name": "Finnish E-Banking",
+                "type": "ebanking_FI"
+              },
+              {
+                "name": "Pay-easy ATM",
+                "type": "econtext_atm"
+              },
+              {
+                "name": "Online Banking",
+                "type": "econtext_online"
+              },
+              {
+                "name": "7-Eleven",
+                "type": "econtext_seven_eleven"
+              },
+              {
+                "name": "Convenience Stores",
+                "type": "econtext_stores"
+              },
+              {
+                "name": "eft_directdebit_CA",
+                "type": "eft_directdebit_CA"
+              },
+              {
+                "name": "Lastschrift (ELV)",
+                "type": "elv"
+              },
+              {
+                "name": "Bank Payment",
+                "type": "entercash"
+              },
+              {
+                "name": "Nationale Entertainment Card",
+                "type": "entertainmentcard"
+              },
+              {
+                "name": "EPS",
+                "type": "eps"
+              },
+              {
+                "name": "Expert Cadeaukaart",
+                "type": "expertgiftcard"
+              },
+              {
+                "name": "3x Oney",
+                "type": "facilypay_3x"
+              },
+              {
+                "name": "4x Oney",
+                "type": "facilypay_4x"
+              },
+              {
+                "name": "Fashioncheque",
+                "type": "fashioncheque"
+              },
+              {
+                "name": "Fawry",
+                "type": "fawry"
+              },
+              {
+                "name": "FijnCadeau",
+                "type": "fijncadeau"
+              },
+              {
+                "name": "Fleurop Bloemenbon",
+                "type": "fleuropbloemenbon"
+              },
+              {
+                "name": "Fonq Giftcard",
+                "type": "fonqgiftcard"
+              },
+              {
+                "name": "Gall & Gall",
+                "type": "gallgall"
+              },
+              {
+                "name": "GCash",
+                "type": "gcash"
+              },
+              {
+                "name": "Generic GiftCard",
+                "type": "genericgiftcard"
+              },
+              {
+                "name": "GiftFor2",
+                "type": "giftfor2card"
+              },
+              {
+                "name": "Givex",
+                "type": "givex"
+              },
+              {
+                "name": "Globe GCash",
+                "type": "globegcash"
+              },
+              {
+                "name": "Goldsmiths Card",
+                "type": "goldsmithscard"
+              },
+              {
+                "name": "GoPay Wallet",
+                "type": "gopay_wallet"
+              },
+              {
+                "name": "OVO",
+                "type": "grabpay_ID"
+              },
+              {
+                "name": "GrabPay",
+                "type": "grabpay_PH"
+              },
+              {
+                "name": "GrabPay",
+                "type": "grabpay_SG"
+              },
+              {
+                "name": "Hallmark Card",
+                "type": "hallmarkcard"
+              },
+              {
+                "name": "HDFC",
+                "type": "hdfc"
+              },
+              {
+                "name": "Hunkemoller Member Card",
+                "type": "hmclub"
+              },
+              {
+                "name": "Hunkemoller Lingerie Card",
+                "type": "hmlingerie"
+              },
+              {
+                "name": "iDEAL",
+                "type": "ideal"
+              },
+              {
+                "name": "igive",
+                "type": "igive"
+              },
+              {
+                "name": "Korean Account Transfer (IniPay)",
+                "type": "inicisIniPay_accounttransfer"
+              },
+              {
+                "name": "Korean Credit Cards (IniPay)",
+                "type": "inicisIniPay_creditcard"
+              },
+              {
+                "name": "Korean Mobile Phone (IniPay)",
+                "type": "inicisIniPay_mobilephone"
+              },
+              {
+                "name": "Korean Virtual Account (IniPay)",
+                "type": "inicisIniPay_virtualaccount"
+              },
+              {
+                "name": "Korean Account Transfer (Mobile)",
+                "type": "inicisMobile_accounttransfer"
+              },
+              {
+                "name": "Korean Credit Cards (Mobile)",
+                "type": "inicisMobile_creditcard"
+              },
+              {
+                "name": "Korean Mobile Phone (Mobile)",
+                "type": "inicisMobile_mobilephone"
+              },
+              {
+                "name": "Korean Virtual Account (Mobile)",
+                "type": "inicisMobile_virtualaccount"
+              },
+              {
+                "name": "Korean Credit Cards",
+                "type": "inicis_creditcard"
+              },
+              {
+                "name": "Interac® Online",
+                "type": "interac"
+              },
+              {
+                "name": "Instant EFT",
+                "type": "ipay"
+              },
+              {
+                "name": "iPay88",
+                "type": "ipay88"
+              },
+              {
+                "name": "isracard",
+                "type": "isracard"
+              },
+              {
+                "name": "Phone Payment",
+                "type": "ivr"
+              },
+              {
+                "name": "Landline phone",
+                "type": "ivrLandline"
+              },
+              {
+                "name": "Mobile phone",
+                "type": "ivrMobile"
+              },
+              {
+                "name": "Kado Wereld",
+                "type": "kadowereld"
+              },
+              {
+                "name": "KakaoPay",
+                "type": "kakaopay"
+              },
+              {
+                "name": "Karen Millen Card",
+                "type": "karenmillen"
+              },
+              {
+                "name": "Karen Millen GiftCard",
+                "type": "karenmillengiftcard"
+              },
+              {
+                "name": "Bank Transfer",
+                "type": "kcp_banktransfer"
+              },
+              {
+                "name": "Korea–issued cards",
+                "type": "kcp_creditcard"
+              },
+              {
+                "name": "PayCo",
+                "type": "kcp_payco"
+              },
+              {
+                "name": "Naver Pay",
+                "type": "kcp_naverpay"
+              },
+              {
+                "name": "Virtual Account via KCP",
+                "type": "kcp_va"
+              },
+              {
+                "name": "Pay later with Klarna.",
+                "type": "klarna"
+              },
+              {
+                "name": "Pay over time with Klarna.",
+                "type": "klarna_account"
+              },
+              {
+                "name": "Buy Now, Pay Later with Billie",
+                "type": "klarna_b2b"
+              },
+              {
+                "name": "Pay now with Klarna.",
+                "type": "klarna_paynow"
+              },
+              {
+                "name": "Leisure Card",
+                "type": "leisurecard"
+              },
+              {
+                "name": "China Credit Card",
+                "type": "lianlianpay_creditcard"
+              },
+              {
+                "name": "China Debit Card",
+                "type": "lianlianpay_debitcard"
+              },
+              {
+                "name": "China Online Banking - Credit Card",
+                "type": "lianlianpay_ebanking_credit"
+              },
+              {
+                "name": "China Online Banking - Debit Card",
+                "type": "lianlianpay_ebanking_debit"
+              },
+              {
+                "name": "China Online Banking - Enterprise",
+                "type": "lianlianpay_ebanking_enterprise"
+              },
+              {
+                "name": "Loods5 Cadeaukaart",
+                "type": "loods5giftcard"
+              },
+              {
+                "name": "Loods5 Tegoedbon",
+                "type": "loods5prepaidcard"
+              },
+              {
+                "name": "Love2Shop GiftCard",
+                "type": "love2shop"
+              },
+              {
+                "name": "mada",
+                "type": "mada"
+              },
+              {
+                "name": "Mappin & Webb Card",
+                "type": "mappinwebbcard"
+              },
+              {
+                "name": "MB WAY",
+                "type": "mbway"
+              },
+              {
+                "name": "Amazon Pay",
+                "type": "amazonpay"
+              },
+              {
+                "name": "Mercado Pago",
+                "type": "mercadopago"
+              },
+              {
+                "name": "MobilePay",
+                "type": "mobilepay"
+              },
+              {
+                "name": "AliPay via Razer Merchant Services",
+                "type": "molpay_alipay"
+              },
+              {
+                "name": "7-Eleven",
+                "type": "molpay_cash"
+              },
+              {
+                "name": "CIMB Virtual Account",
+                "type": "molpay_cimb_va"
+              },
+              {
+                "name": "Malaysia E-Banking via Razer Merchant Services",
+                "type": "molpay_ebanking_MY"
+              },
+              {
+                "name": "Vietnam E-Banking",
+                "type": "molpay_ebanking_VN"
+              },
+              {
+                "name": "Malaysia E-Banking",
+                "type": "molpay_ebanking_fpx_MY"
+              },
+              {
+                "name": "eNETS Debit",
+                "type": "molpay_enetsd"
+              },
+              {
+                "name": "epay",
+                "type": "molpay_epay"
+              },
+              {
+                "name": "Esapay",
+                "type": "molpay_esapay"
+              },
+              {
+                "name": "MyClear FPX",
+                "type": "molpay_fpx"
+              },
+              {
+                "name": "Maybank2u",
+                "type": "molpay_maybank2u"
+              },
+              {
+                "name": "Nganluong",
+                "type": "molpay_nganluong"
+              },
+              {
+                "name": "Convenience Stores Thailand",
+                "type": "molpay_paysbuy"
+              },
+              {
+                "name": "MOLPoints",
+                "type": "molpay_points"
+              },
+              {
+                "name": "RHB Now",
+                "type": "molpay_rhb"
+              },
+              {
+                "name": "SAM by SingPost",
+                "type": "molpay_singpost"
+              },
+              {
+                "name": "MOLWallet",
+                "type": "molpay_wallet"
+              },
+              {
+                "name": "MoMo ATM",
+                "type": "momo_atm"
+              },
+              {
+                "name": "Momo Wallet",
+                "type": "momo_wallet"
+              },
+              {
+                "name": "Moneybookers",
+                "type": "moneybookers"
+              },
+              {
+                "name": "Multibanco",
+                "type": "multibanco"
+              },
+              {
+                "name": "De Nationale Musicalcard",
+                "type": "musicalcard"
+              },
+              {
+                "name": "Nationale Bioscoopbon",
+                "type": "nationalebioscoopbon"
+              },
+              {
+                "name": "Nationale Tuinbon",
+                "type": "nationaletuinbon"
+              },
+              {
+                "name": "Nationale Verwen Cadeaubon",
+                "type": "nationaleverwencadeaubon"
+              },
+              {
+                "name": "BankAxess",
+                "type": "netaxept_bankaxess"
+              },
+              {
+                "name": "NETELLER",
+                "type": "neteller"
+              },
+              {
+                "name": "Onebip",
+                "type": "onebip"
+              },
+              {
+                "name": "One Two Three",
+                "type": "onetwothree"
+              },
+              {
+                "name": "Online Banking PL",
+                "type": "onlineBanking_PL"
+              },
+              {
+                "name": "Online banking",
+                "type": "openbanking_UK"
+              },
+              {
+                "name": "Oxxo",
+                "type": "oxxo"
+              },
+              {
+                "name": "Pathe Giftcard",
+                "type": "pathegiftcard"
+              },
+              {
+                "name": "PayBright",
+                "type": "paybright"
+              },
+              {
+                "name": "Maya Wallet",
+                "type": "paymaya_wallet"
+              },
+              {
+                "name": "PayPal",
+                "type": "paypal"
+              },
+              {
+                "name": "Paysafecard",
+                "type": "paysafecard"
+              },
+              {
+                "name": "Payshop",
+                "type": "payshop"
+              },
+              {
+                "name": "PayD AMT via Paythru",
+                "type": "paythru_amt"
+              },
+              {
+                "name": "EFT via Paythru",
+                "type": "paythru_eft"
+              },
+              {
+                "name": "PayTM",
+                "type": "paytm"
+              },
+              {
+                "name": "PayU UPI",
+                "type": "payu_IN_upi"
+              },
+              {
+                "name": "EFT Pro via PayU",
+                "type": "payu_ZA_eftpro"
+              },
+              {
+                "name": "Google Pay",
+                "type": "paywithgoogle"
+              },
+              {
+                "name": "pix",
+                "type": "pix"
+              },
+              {
+                "name": "Plastix",
+                "type": "plastix"
+              },
+              {
+                "name": "Pluim",
+                "type": "pluimgiftcard"
+              },
+              {
+                "name": "Podium Card",
+                "type": "podiumcard"
+              },
+              {
+                "name": "POLi",
+                "type": "poli"
+              },
+              {
+                "name": "PPS",
+                "type": "pps"
+              },
+              {
+                "name": "Primera Cadeaukaart",
+                "type": "primeracadeaucard"
+              },
+              {
+                "name": "Illicado Gift Card",
+                "type": "prosodie_illicado"
+              },
+              {
+                "name": "PSE",
+                "type": "pse"
+              },
+              {
+                "name": "Qiwi Wallet",
+                "type": "qiwiwallet"
+              },
+              {
+                "name": "RatePay Invoice",
+                "type": "ratepay"
+              },
+              {
+                "name": "RatePay Direct Debit",
+                "type": "ratepay_directdebit"
+              },
+              {
+                "name": "Rituals Giftcard",
+                "type": "rituals"
+              },
+              {
+                "name": "Rob Peetoom Giftcard",
+                "type": "robpeetoomgiftcard"
+              },
+              {
+                "name": "SafetyPay",
+                "type": "safetypay"
+              },
+              {
+                "name": "SafetyPay Cash",
+                "type": "safetypay_cash"
+              },
+              {
+                "name": "Shoes&Accessories Cadeau",
+                "type": "sagiftcard"
+              },
+              {
+                "name": "Score Giftcard",
+                "type": "scoregiftcard"
+              },
+              {
+                "name": "SEB Direktbetalning",
+                "type": "sebdirectpayment"
+              },
+              {
+                "name": "SEPA Direct Debit",
+                "type": "sepadirectdebit"
+              },
+              {
+                "name": "7-Eleven",
+                "type": "seveneleven"
+              },
+              {
+                "name": "Premium SMS",
+                "type": "sms"
+              },
+              {
+                "name": "SVS",
+                "type": "svs"
+              },
+              {
+                "name": "Swish",
+                "type": "swish"
+              },
+              {
+                "name": "TCS Test GiftCard",
+                "type": "tcstestgiftcard"
+              },
+              {
+                "name": "TenPay",
+                "type": "tenpay"
+              },
+              {
+                "name": "The Sting Giftcard",
+                "type": "thestinggiftcard"
+              },
+              {
+                "name": "TrueMoney",
+                "type": "truemoney"
+              },
+              {
+                "name": "Trustly",
+                "type": "trustly"
+              },
+              {
+                "name": "Online Banking by Trustpay",
+                "type": "trustpay"
+              },
+              {
+                "name": "TWINT",
+                "type": "twint"
+              },
+              {
+                "name": "Ukash",
+                "type": "ukash"
+              },
+              {
+                "name": "UnionPay",
+                "type": "unionpay"
+              },
+              {
+                "name": "UPI Collect",
+                "type": "upi_collect"
+              },
+              {
+                "name": "Valuelink",
+                "type": "valuelink"
+              },
+              {
+                "name": "V&D Cadeaukaart",
+                "type": "vdcadeaucard"
+              },
+              {
+                "name": "Vipps",
+                "type": "vipps"
+              },
+              {
+                "name": "Visa Checkout",
+                "type": "visacheckout"
+              },
+              {
+                "name": "VVV Cadeaubon",
+                "type": "vvvcadeaubon"
+              },
+              {
+                "name": "VVV Giftcard",
+                "type": "vvvgiftcard"
+              },
+              {
+                "name": "Webshop Giftcard",
+                "type": "webshopgiftcard"
+              },
+              {
+                "name": "WeChat Pay",
+                "type": "wechatpayMiniProgram"
+              },
+              {
+                "name": "WeChat Pay",
+                "type": "wechatpayQR"
+              },
+              {
+                "name": "WeChat Pay",
+                "type": "wechatpayWeb"
+              },
+              {
+                "name": "WE Fashion Giftcard",
+                "type": "wefashiongiftcard"
+              },
+              {
+                "name": "Western Union",
+                "type": "westernunion"
+              },
+              {
+                "name": "Winkel Cheque",
+                "type": "winkelcheque"
+              },
+              {
+                "name": "WOS Card",
+                "type": "woscard"
+              },
+              {
+                "name": "Alfa-Click",
+                "type": "yandex_alfaclick"
+              },
+              {
+                "name": "Pay using bank card",
+                "type": "yandex_bank_card"
+              },
+              {
+                "name": "Cash terminals",
+                "type": "yandex_cash"
+              },
+              {
+                "name": "Pay using installments",
+                "type": "yandex_installments"
+              },
+              {
+                "name": "YooMoney",
+                "type": "yandex_money"
+              },
+              {
+                "name": "Promsvyazbank",
+                "type": "yandex_promsvyazbank"
+              },
+              {
+                "name": "SberPay",
+                "type": "yandex_sberbank"
+              },
+              {
+                "name": "WebMoney",
+                "type": "yandex_webmoney"
+              },
+              {
+                "name": "Your Gift",
+                "type": "yourgift"
+              },
+              {
+                "name": "Zip",
+                "type": "zip"
+              }
+            ]
+          }
+  - name: List of available payment methods, based on the specified country and amount
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "shopperLocale": "nl-NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            }
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethods": [
+              {
+                "name": "iDEAL",
+                "type": "ideal"
+              },
+              {
+                "name": "Hitelkártya",
+                "type": "scheme"
+              },
+              {
+                "name": "PayPal",
+                "type": "paypal"
+              },
+              {
+                "name": "AfterPay Invoice",
+                "type": "afterpay_default"
+              },
+              {
+                "name": "Pay later with Klarna.",
+                "type": "klarna"
+              },
+              {
+                "name": "SEPA Direct Debit",
+                "type": "sepadirectdebit"
+              },
+              {
+                "name": "Paysafecard",
+                "type": "paysafecard"
+              },
+              {
+                "name": "Bijenkorf Cadeaucard",
+                "type": "bijcadeaucard"
+              },
+              {
+                "name": "Fonq Giftcard",
+                "type": "fonqgiftcard"
+              },
+              {
+                "name": "Bank Transfer (NL)",
+                "type": "bankTransfer_NL"
+              },
+              {
+                "name": "Pathe Giftcard",
+                "type": "pathegiftcard"
+              },
+              {
+                "name": "VVV Giftcard",
+                "type": "vvvgiftcard"
+              },
+              {
+                "name": "Podium Card",
+                "type": "podiumcard"
+              },
+              {
+                "name": "RatePay Direct Debit",
+                "type": "ratepay_directdebit"
+              },
+              {
+                "name": "Rituals Giftcard",
+                "type": "rituals"
+              },
+              {
+                "name": "Hunkemoller Lingerie Card",
+                "type": "hmlingerie"
+              },
+              {
+                "name": "Primera Cadeaukaart",
+                "type": "primeracadeaucard"
+              },
+              {
+                "name": "Fashioncheque",
+                "type": "fashioncheque"
+              },
+              {
+                "name": "NETELLER",
+                "type": "neteller"
+              },
+              {
+                "name": "Adyen Voucher",
+                "type": "adyen_test_voucher"
+              },
+              {
+                "name": "AfterPay B2B",
+                "type": "afterpay_b2b"
+              },
+              {
+                "name": "AfterPay DirectDebit",
+                "type": "afterpay_directdebit"
+              },
+              {
+                "name": "AliPay",
+                "type": "alipay"
+              },
+              {
+                "name": "AliPay",
+                "type": "alipay_wap"
+              },
+              {
+                "name": "Android Pay",
+                "type": "androidpay"
+              },
+              {
+                "name": "Apple Pay",
+                "type": "applepay"
+              },
+              {
+                "name": "Baby Gift Card",
+                "type": "babygiftcard"
+              },
+              {
+                "name": "SEPA Bank Transfer",
+                "type": "bankTransfer_IBAN"
+              },
+              {
+                "name": "Bloemen Giftcard",
+                "type": "bloemengiftcard"
+              },
+              {
+                "name": "Boekenbon Giftcard",
+                "type": "boekenbon"
+              },
+              {
+                "name": "Cash-Ticket",
+                "type": "cashticket"
+              },
+              {
+                "name": "Chasin Giftcard",
+                "type": "chasingiftcard"
+              },
+              {
+                "name": "ClickandBuy",
+                "type": "clickandbuy"
+              },
+              {
+                "name": "Costes Giftcard",
+                "type": "costesgiftcard"
+              },
+              {
+                "name": "custom_settlement",
+                "type": "custom_settlement"
+              },
+              {
+                "name": "eft_directdebit_CA",
+                "type": "eft_directdebit_CA"
+              },
+              {
+                "name": "Nationale Entertainment Card",
+                "type": "entertainmentcard"
+              },
+              {
+                "name": "Expert Cadeaukaart",
+                "type": "expertgiftcard"
+              },
+              {
+                "name": "FijnCadeau",
+                "type": "fijncadeau"
+              },
+              {
+                "name": "Fleurop Bloemenbon",
+                "type": "fleuropbloemenbon"
+              },
+              {
+                "name": "Gall & Gall",
+                "type": "gallgall"
+              },
+              {
+                "name": "Generic GiftCard",
+                "type": "genericgiftcard"
+              },
+              {
+                "name": "GiftFor2",
+                "type": "giftfor2card"
+              },
+              {
+                "name": "Givex",
+                "type": "givex"
+              },
+              {
+                "name": "Goldsmiths Card",
+                "type": "goldsmithscard"
+              },
+              {
+                "name": "Hunkemoller Member Card",
+                "type": "hmclub"
+              },
+              {
+                "name": "Phone Payment",
+                "type": "ivr"
+              },
+              {
+                "name": "Landline phone",
+                "type": "ivrLandline"
+              },
+              {
+                "name": "Mobile phone",
+                "type": "ivrMobile"
+              },
+              {
+                "name": "Kado Wereld",
+                "type": "kadowereld"
+              },
+              {
+                "name": "Karen Millen GiftCard",
+                "type": "karenmillengiftcard"
+              },
+              {
+                "name": "Leisure Card",
+                "type": "leisurecard"
+              },
+              {
+                "name": "Loods5 Cadeaukaart",
+                "type": "loods5giftcard"
+              },
+              {
+                "name": "Loods5 Tegoedbon",
+                "type": "loods5prepaidcard"
+              },
+              {
+                "name": "Amazon Pay",
+                "type": "amazonpay"
+              },
+              {
+                "name": "MOLPoints",
+                "type": "molpay_points"
+              },
+              {
+                "name": "Moneybookers",
+                "type": "moneybookers"
+              },
+              {
+                "name": "De Nationale Musicalcard",
+                "type": "musicalcard"
+              },
+              {
+                "name": "Nationale Bioscoopbon",
+                "type": "nationalebioscoopbon"
+              },
+              {
+                "name": "Nationale Tuinbon",
+                "type": "nationaletuinbon"
+              },
+              {
+                "name": "Nationale Verwen Cadeaubon",
+                "type": "nationaleverwencadeaubon"
+              },
+              {
+                "name": "Onebip",
+                "type": "onebip"
+              },
+              {
+                "name": "Google Pay",
+                "type": "paywithgoogle"
+              },
+              {
+                "name": "Plastix",
+                "type": "plastix"
+              },
+              {
+                "name": "Pluim",
+                "type": "pluimgiftcard"
+              },
+              {
+                "name": "Illicado Gift Card",
+                "type": "prosodie_illicado"
+              },
+              {
+                "name": "RatePay Invoice",
+                "type": "ratepay"
+              },
+              {
+                "name": "Rob Peetoom Giftcard",
+                "type": "robpeetoomgiftcard"
+              },
+              {
+                "name": "Shoes&Accessories Cadeau",
+                "type": "sagiftcard"
+              },
+              {
+                "name": "Score Giftcard",
+                "type": "scoregiftcard"
+              },
+              {
+                "name": "Premium SMS",
+                "type": "sms"
+              },
+              {
+                "name": "SVS",
+                "type": "svs"
+              },
+              {
+                "name": "TCS Test GiftCard",
+                "type": "tcstestgiftcard"
+              },
+              {
+                "name": "The Sting Giftcard",
+                "type": "thestinggiftcard"
+              },
+              {
+                "name": "Ukash",
+                "type": "ukash"
+              },
+              {
+                "name": "UnionPay",
+                "type": "unionpay"
+              },
+              {
+                "name": "Valuelink",
+                "type": "valuelink"
+              },
+              {
+                "name": "V&D Cadeaukaart",
+                "type": "vdcadeaucard"
+              },
+              {
+                "name": "Visa Checkout",
+                "type": "visacheckout"
+              },
+              {
+                "name": "VVV Cadeaubon",
+                "type": "vvvcadeaubon"
+              },
+              {
+                "name": "Webshop Giftcard",
+                "type": "webshopgiftcard"
+              },
+              {
+                "name": "WE Fashion Giftcard",
+                "type": "wefashiongiftcard"
+              },
+              {
+                "name": "Western Union",
+                "type": "westernunion"
+              },
+              {
+                "name": "Winkel Cheque",
+                "type": "winkelcheque"
+              },
+              {
+                "name": "Your Gift",
+                "type": "yourgift"
+              }
+            ]
+          }
+  - name: Example response that includes stored payment methods
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethods": [
+              {
+                "name": "iDEAL",
+                "type": "ideal"
+              },
+              {
+                "name": "Cards",
+                "type": "scheme"
+              },
+              {
+                "name": "PayPal",
+                "type": "paypal"
+              },
+              {
+                "name": "AfterPay Invoice",
+                "type": "afterpay_default"
+              },
+              {
+                "name": "Pay later with Klarna.",
+                "type": "klarna"
+              },
+              {
+                "name": "SEPA Direct Debit",
+                "type": "sepadirectdebit"
+              },
+              {
+                "name": "Paysafecard",
+                "type": "paysafecard"
+              },
+              {
+                "name": "Bijenkorf Cadeaucard",
+                "type": "bijcadeaucard"
+              },
+              {
+                "name": "Fonq Giftcard",
+                "type": "fonqgiftcard"
+              },
+              {
+                "name": "Bank Transfer (NL)",
+                "type": "bankTransfer_NL"
+              },
+              {
+                "name": "Pathe Giftcard",
+                "type": "pathegiftcard"
+              },
+              {
+                "name": "VVV Giftcard",
+                "type": "vvvgiftcard"
+              },
+              {
+                "name": "Podium Card",
+                "type": "podiumcard"
+              },
+              {
+                "name": "RatePay Direct Debit",
+                "type": "ratepay_directdebit"
+              },
+              {
+                "name": "Rituals Giftcard",
+                "type": "rituals"
+              },
+              {
+                "name": "Hunkemoller Lingerie Card",
+                "type": "hmlingerie"
+              },
+              {
+                "name": "Primera Cadeaukaart",
+                "type": "primeracadeaucard"
+              },
+              {
+                "name": "Fashioncheque",
+                "type": "fashioncheque"
+              },
+              {
+                "name": "NETELLER",
+                "type": "neteller"
+              },
+              {
+                "name": "Adyen Voucher",
+                "type": "adyen_test_voucher"
+              },
+              {
+                "name": "AfterPay B2B",
+                "type": "afterpay_b2b"
+              },
+              {
+                "name": "AfterPay DirectDebit",
+                "type": "afterpay_directdebit"
+              },
+              {
+                "name": "AliPay",
+                "type": "alipay"
+              },
+              {
+                "name": "AliPay",
+                "type": "alipay_wap"
+              },
+              {
+                "name": "Android Pay",
+                "type": "androidpay"
+              },
+              {
+                "name": "Apple Pay",
+                "type": "applepay"
+              },
+              {
+                "name": "Baby Gift Card",
+                "type": "babygiftcard"
+              },
+              {
+                "name": "SEPA Bank Transfer",
+                "type": "bankTransfer_IBAN"
+              },
+              {
+                "name": "Bloemen Giftcard",
+                "type": "bloemengiftcard"
+              },
+              {
+                "name": "Boekenbon Giftcard",
+                "type": "boekenbon"
+              },
+              {
+                "name": "Cash-Ticket",
+                "type": "cashticket"
+              },
+              {
+                "name": "Chasin Giftcard",
+                "type": "chasingiftcard"
+              },
+              {
+                "name": "ClickandBuy",
+                "type": "clickandbuy"
+              },
+              {
+                "name": "Costes Giftcard",
+                "type": "costesgiftcard"
+              },
+              {
+                "name": "custom_settlement",
+                "type": "custom_settlement"
+              },
+              {
+                "name": "eft_directdebit_CA",
+                "type": "eft_directdebit_CA"
+              },
+              {
+                "name": "Nationale Entertainment Card",
+                "type": "entertainmentcard"
+              },
+              {
+                "name": "Expert Cadeaukaart",
+                "type": "expertgiftcard"
+              },
+              {
+                "name": "FijnCadeau",
+                "type": "fijncadeau"
+              },
+              {
+                "name": "Fleurop Bloemenbon",
+                "type": "fleuropbloemenbon"
+              },
+              {
+                "name": "Gall & Gall",
+                "type": "gallgall"
+              },
+              {
+                "name": "Generic GiftCard",
+                "type": "genericgiftcard"
+              },
+              {
+                "name": "GiftFor2",
+                "type": "giftfor2card"
+              },
+              {
+                "name": "Givex",
+                "type": "givex"
+              },
+              {
+                "name": "Goldsmiths Card",
+                "type": "goldsmithscard"
+              },
+              {
+                "name": "Hunkemoller Member Card",
+                "type": "hmclub"
+              },
+              {
+                "name": "Phone Payment",
+                "type": "ivr"
+              },
+              {
+                "name": "Landline phone",
+                "type": "ivrLandline"
+              },
+              {
+                "name": "Mobile phone",
+                "type": "ivrMobile"
+              },
+              {
+                "name": "Kado Wereld",
+                "type": "kadowereld"
+              },
+              {
+                "name": "Karen Millen GiftCard",
+                "type": "karenmillengiftcard"
+              },
+              {
+                "name": "Leisure Card",
+                "type": "leisurecard"
+              },
+              {
+                "name": "Loods5 Cadeaukaart",
+                "type": "loods5giftcard"
+              },
+              {
+                "name": "Loods5 Tegoedbon",
+                "type": "loods5prepaidcard"
+              },
+              {
+                "name": "Amazon Pay",
+                "type": "amazonpay"
+              },
+              {
+                "name": "MOLPoints",
+                "type": "molpay_points"
+              },
+              {
+                "name": "Moneybookers",
+                "type": "moneybookers"
+              },
+              {
+                "name": "De Nationale Musicalcard",
+                "type": "musicalcard"
+              },
+              {
+                "name": "Nationale Bioscoopbon",
+                "type": "nationalebioscoopbon"
+              },
+              {
+                "name": "Nationale Tuinbon",
+                "type": "nationaletuinbon"
+              },
+              {
+                "name": "Nationale Verwen Cadeaubon",
+                "type": "nationaleverwencadeaubon"
+              },
+              {
+                "name": "Onebip",
+                "type": "onebip"
+              },
+              {
+                "name": "Google Pay",
+                "type": "paywithgoogle"
+              },
+              {
+                "name": "Plastix",
+                "type": "plastix"
+              },
+              {
+                "name": "Pluim",
+                "type": "pluimgiftcard"
+              },
+              {
+                "name": "Illicado Gift Card",
+                "type": "prosodie_illicado"
+              },
+              {
+                "name": "RatePay Invoice",
+                "type": "ratepay"
+              },
+              {
+                "name": "Rob Peetoom Giftcard",
+                "type": "robpeetoomgiftcard"
+              },
+              {
+                "name": "Shoes&Accessories Cadeau",
+                "type": "sagiftcard"
+              },
+              {
+                "name": "Score Giftcard",
+                "type": "scoregiftcard"
+              },
+              {
+                "name": "Premium SMS",
+                "type": "sms"
+              },
+              {
+                "name": "SVS",
+                "type": "svs"
+              },
+              {
+                "name": "TCS Test GiftCard",
+                "type": "tcstestgiftcard"
+              },
+              {
+                "name": "The Sting Giftcard",
+                "type": "thestinggiftcard"
+              },
+              {
+                "name": "Ukash",
+                "type": "ukash"
+              },
+              {
+                "name": "UnionPay",
+                "type": "unionpay"
+              },
+              {
+                "name": "Valuelink",
+                "type": "valuelink"
+              },
+              {
+                "name": "V&D Cadeaukaart",
+                "type": "vdcadeaucard"
+              },
+              {
+                "name": "Visa Checkout",
+                "type": "visacheckout"
+              },
+              {
+                "name": "VVV Cadeaubon",
+                "type": "vvvcadeaubon"
+              },
+              {
+                "name": "Webshop Giftcard",
+                "type": "webshopgiftcard"
+              },
+              {
+                "name": "WE Fashion Giftcard",
+                "type": "wefashiongiftcard"
+              },
+              {
+                "name": "Western Union",
+                "type": "westernunion"
+              },
+              {
+                "name": "Winkel Cheque",
+                "type": "winkelcheque"
+              },
+              {
+                "name": "Your Gift",
+                "type": "yourgift"
+              }
+            ],
+            "storedPaymentMethods": [
+              {
+                "brand": "visa",
+                "expiryMonth": "10",
+                "expiryYear": "30",
+                "holderName": "John Smith",
+                "id": "7219687191761347",
+                "lastFour": "1111",
+                "name": "VISA",
+                "shopperEmail": "john.smith@example.com",
+                "supportedRecurringProcessingModels": [
+                  "CardOnFile",
+                  "Subscription",
+                  "UnscheduledCardOnFile"
+                ],
+                "type": "scheme"
+              }
+            ]
+          }
+  - name: Response code 400. Bad request. (Get available payment methods)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Get payment methods based on the country and amount)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "shopperLocale": "nl-NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            }
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Get payment methods including stored card details)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Get available payment methods)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Get payment methods based on the country and amount)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "shopperLocale": "nl-NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            }
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Get payment methods including stored card details)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Get available payment methods)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Get payment methods based on the country and amount)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "shopperLocale": "nl-NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            }
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Get payment methods including stored card details)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Get available payment methods)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Get payment methods based on the country and amount)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "shopperLocale": "nl-NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            }
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Get payment methods including stored card details)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Get available payment methods)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Get payment methods based on the country and amount)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "shopperLocale": "nl-NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            }
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Get payment methods including stored card details)
+    request:
+      url: "{{baseUrl}}/paymentMethods"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "countryCode": "NL",
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: Retrieves the list of available payment methods for the transaction, based on the transaction information like amount, country, and currency.

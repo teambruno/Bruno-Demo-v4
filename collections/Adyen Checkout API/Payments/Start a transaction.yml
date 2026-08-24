@@ -1,0 +1,4938 @@
+info:
+  name: Start a transaction
+  type: http
+  seq: 3
+  tags:
+    - Payments
+
+http:
+  method: POST
+  url: "{{baseUrl}}/payments"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  body:
+    type: json
+    data: |-
+      {
+        "amount": {
+          "currency": "USD",
+          "value": 1000
+        },
+        "reference": "Your order number",
+        "paymentMethod": {
+          "type": "applepay",
+          "applePayToken": "VNRWtuNlNEWkRCSm1xWndjMDFFbktkQU..."
+        },
+        "returnUrl": "https://your-company.example.com/...",
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Successful payment with 3D Secure 2 native authentication, using encrypted card details
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4035501428146300",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737",
+              "holderName": "John Smith"
+            },
+            "authenticationData": {
+              "threeDSRequestData": {
+                "nativeThreeDS": "preferred"
+              }
+            },
+            "billingAddress": {
+              "country": "US",
+              "city": "New York",
+              "street": "Redwood Block",
+              "houseNumberOrName": "37C",
+              "stateOrProvince": "NY",
+              "postalCode": "10039"
+            },
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1",
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+              "language": "nl-NL",
+              "colorDepth": 24,
+              "screenHeight": 723,
+              "screenWidth": 1536,
+              "timeZoneOffset": 0,
+              "javaEnabled": true
+            },
+            "channel": "Web",
+            "origin": "https://your-company.example.com",
+            "returnUrl": "https://your-company.example.com/checkout/",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "resultCode": "IdentifyShopper",
+            "action": {
+              "paymentData": "Ab02b4c0!BQABAgCuZFJrQOjSsl\\/zt+...",
+              "paymentMethodType": "scheme",
+              "authorisationToken": "Ab02b4c0!BQABAgAvrX03p...",
+              "subtype": "fingerprint",
+              "token": "eyJ0aHJlZURTTWV0aG9kTm90aWZpY...",
+              "type": "threeDS2"
+            }
+          }
+  - name: Successful payment with 3D Secure redirect authentication
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4212345678901237",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "javaEnabled": true,
+              "colorDepth": 10,
+              "screenHeight": 2000,
+              "screenWidth": 3000,
+              "timeZoneOffset": 5,
+              "language": "en"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "cardSummary": "5454",
+              "threeds2.threeDS2ResponseData.messageVersion": "2.1.0",
+              "threeds2.threeDS2Token": "R5CZ2NWPJTGV9D82...",
+              "threeds2.threeDSServerTransID": "8835538461311270...",
+              "cardBin": "545454",
+              "threeds2.cardEnrolled": "true",
+              "paymentMethod": "mc",
+              "cardPaymentMethod": "mc",
+              "fundingSource": "CREDIT",
+              "merchantReference": "Your order number",
+              "issuerBin": "54545454",
+              "threeds2.threeDSMethodURL": "https://pal-test.adyen.com/threeds2simulator/acs/startMethod.shtml",
+              "cardIssuingCountry": "PL"
+            },
+            "pspReference": "JLCMPCQ8HXSKGK82",
+            "resultCode": "RedirectShopper",
+            "action": {
+              "paymentMethodType": "scheme",
+              "url": "https://checkoutshopper-test.adyen.com/checkoutshopper/threeDS/redirect...",
+              "method": "GET",
+              "type": "redirect"
+            }
+          }
+  - name: Successful card payment with unencrypted card details
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "cvcResult": "1 Matches",
+              "authCode": "044925",
+              "avsResult": "4 AVS not supported for this card type",
+              "avsResultRaw": "4",
+              "cvcResultRaw": "M",
+              "refusalReasonRaw": "AUTHORISED",
+              "acquirerCode": "TestPmmAcquirer",
+              "acquirerReference": "8PQMP9VEP3H"
+            },
+            "pspReference": "993617895204576J",
+            "resultCode": "Authorised",
+            "merchantReference": "string"
+          }
+  - name: Successful card payment
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "cvcResult": "1 Matches",
+              "authCode": "065696",
+              "avsResult": "4 AVS not supported for this card type",
+              "avsResultRaw": "4",
+              "cvcResultRaw": "M",
+              "refusalReasonRaw": "AUTHORISED",
+              "acquirerCode": "TestPmmAcquirer",
+              "acquirerReference": "8PQMP9VIE9N"
+            },
+            "pspReference": "993617895215577D",
+            "resultCode": "Authorised",
+            "merchantReference": "string"
+          }
+  - name: Card details tokenized for one-click payments
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "CardOnFile",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "cvcResult": "1 Matches",
+              "authCode": "082338",
+              "avsResult": "4 AVS not supported for this card type",
+              "avsResultRaw": "4",
+              "cvcResultRaw": "M",
+              "refusalReasonRaw": "AUTHORISED",
+              "acquirerCode": "TestPmmAcquirer",
+              "acquirerReference": "8PQMP9VC172",
+              "tokenization.shopperReference": "YOUR_SHOPPER_REFERENCE",
+              "tokenization.storedPaymentMethodId": "M5N7TQ4TG5PFWR50",
+              "tokenization.store.operationType": "created"
+            },
+            "pspReference": "993617895195570C",
+            "resultCode": "Authorised",
+            "merchantReference": "string"
+          }
+  - name: Successful iDEAL payment
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "ideal"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "resultCode": "RedirectShopper",
+            "action": {
+              "paymentMethodType": "ideal",
+              "url": "https://test.adyen.com/hpp/checkout.shtml?u=redirectIdeal&p=eJxtUl1zmzAQ-DXwZgaB*XrQg0Nwg2s3DTVtJy8ZRbqAYlsikmCMf30FddNMpzOak2bvZm-3Ts*KCJZLBpgzIEeX9kqBoOMMFXXlcq17UCXDCAXIPYGiLRFmRanshcF70GZ3xd6TpTDQKGK4FJ4ZO8D5XZF-vq-3T5*KL0VV5v*tHEBpe*Pob5cKXmBSA1gbxUXzIWF6JW6JITjLUIySNItQliVxsH6v*cYbnNSHZsMfcydYr8SrE9yY7HRjavMAlyyIjhuK*tzszj9ew-uHrN854a3bkfEE1uBp9od833cV6Lra4taYzglXlsueo6Tk2EptLJL6qW8h2gI9yN7oVnYdKItoUAOnoO3z62-aUlB5sk4qYFwBNTYzoD9015odmFYyJ1z-M2yr7uO4nSBW8xisNpua1NlG0SQwmiTaMMpeLWzDjojRs-cMep7natDTrL*TI2fcjDjwA7Twlws-3aPYOkKZDVH26F69THtShE57woUlmpSBqw9czP*k65*9IfCuq0jiJElQGi69Szn8DPebmKXDWATt6vxEWduea7*sLy-Lt*1bcbctGhgZk78A5S7dyQ",
+              "method": "GET",
+              "type": "redirect"
+            }
+          }
+  - name: Successful top-up to your balance account from your transfer instrument
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "sepadirectdebit",
+              "transferInstrumentId": "SE00000000000000000000001",
+              "iban": "IBAN_OF_TRANSFER_INSTRUMENT",
+              "ownerName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "sepadirectdebit.dateOfSignature": "2024-05-02",
+              "sepadirectdebit.mandateId": "FJM726V375BV9D82",
+              "sepadirectdebit.sequenceType": "Recurring"
+            },
+            "pspReference": "QFQTPCQ8HXSKGK82",
+            "resultCode": "Authorised"
+          }
+  - name: Successful top-up to your balance account using a Visa credit card
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "cvc": "737",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "cardBin": "411111",
+              "cardHolderName": "John Smith",
+              "cardIssuingCountry": "NL",
+              "cardIssuingCurrency": "EUR",
+              "cardPaymentMethod": "visa",
+              "cardProductId": "A",
+              "cardSummary": "1111",
+              "issuerBin": "41111111"
+            },
+            "pspReference": "WNV97K8PPLC52VT5",
+            "resultCode": "Authorised"
+          }
+  - name: Payment split between balance accounts
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 40000,
+              "currency": "USD"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "platformChargebackLogic": {
+              "behavior": "deductFromOneBalanceAccount",
+              "targetAccount": "BA00000000000000000000001",
+              "costAllocationAccount": "BA00000000000000000000001"
+            },
+            "splits": [
+              {
+                "amount": {
+                  "value": 39600
+                },
+                "type": "BalanceAccount",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the sale amount",
+                "description": "Your description for the sale amount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "type": "Commission",
+                "reference": "Your reference for the commission",
+                "description": "Your description for the commission"
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the fees",
+                "description": "Your description for the fees"
+              }
+            ]
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "refusalReasonRaw": "AUTHORISED",
+              "eci": "N/A",
+              "acquirerAccountCode": "YOUR_ACQUIRER_ACCOUNT",
+              "xid": "N/A",
+              "threeDAuthenticated": "false",
+              "paymentMethodVariant": "visa",
+              "issuerBin": "41111111",
+              "payoutEligible": "Y",
+              "fraudManualReview": "false",
+              "threeDOffered": "false",
+              "threeDOfferedResponse": "N/A",
+              "authorisationMid": "50",
+              "fundsAvailability": "I",
+              "authorisedAmountCurrency": "USD",
+              "threeDAuthenticatedResponse": "N/A",
+              "avsResultRaw": "5",
+              "retry.attempt1.rawResponse": "AUTHORISED",
+              "paymentMethod": "visa",
+              "avsResult": "5 No AVS data provided",
+              "cardSummary": "1111",
+              "retry.attempt1.avsResultRaw": "5",
+              "networkTxReference": "777718270854480",
+              "expiryDate": "3/2030",
+              "cavvAlgorithm": "N/A",
+              "cardBin": "411111",
+              "alias": "8915844059375211",
+              "cvcResultRaw": "M",
+              "merchantReference": "YOUR_ORDER_NUMBER",
+              "acquirerReference": "YOUR_ACQUIRER_REFERENCE",
+              "cardIssuingCountry": "NL",
+              "liabilityShift": "false",
+              "fraudResultType": "GREEN",
+              "authCode": "035450",
+              "cardHolderName": "John Smith",
+              "isCardCommercial": "unknown",
+              "PaymentAccountReference": "6006491286999921374...",
+              "retry.attempt1.acquirerAccount": "YOUR_ACQUIRER_ACCOUNT",
+              "cardIssuingBank": "ISSUING_BANK_CUSTOMER",
+              "retry.attempt1.acquirer": "YOUR_ACQUIRER_CODE",
+              "authorisedAmountValue": "40000",
+              "issuerCountry": "NL",
+              "cvcResult": "1 Matches",
+              "retry.attempt1.responseCode": "Approved",
+              "aliasType": "Default",
+              "retry.attempt1.shopperInteraction": "Ecommerce",
+              "cardPaymentMethod": "visa",
+              "acquirerCode": "YOUR_ACQUIRER_CODE"
+            },
+            "pspReference": "PPKFQ89R6QRXGN82",
+            "resultCode": "Authorised",
+            "amount": {
+              "currency": "USD",
+              "value": 40000
+            },
+            "donationToken": "81234567890123456...",
+            "merchantReference": "YOUR_ORDER_NUMBER"
+          }
+  - name: Card details tokenized for a subscription
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "Subscription",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "additionalData": {
+              "cvcResult": "1 Matches",
+              "authCode": "098871",
+              "avsResult": "4 AVS not supported for this card type",
+              "avsResultRaw": "4",
+              "cvcResultRaw": "M",
+              "refusalReasonRaw": "AUTHORISED",
+              "acquirerCode": "TestPmmAcquirer",
+              "acquirerReference": "8PQMP9VD896",
+              "tokenization.shopperReference": "YOUR_SHOPPER_REFERENCE",
+              "tokenization.storedPaymentMethodId": "M5N7TQ4TG5PFWR50",
+              "tokenization.store.operationType": "created"
+            },
+            "pspReference": "993617895199574A",
+            "resultCode": "Authorised",
+            "merchantReference": "string"
+          }
+  - name: Response code 400. Bad request. (Make an Apple Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "applepay",
+              "applePayToken": "VNRWtuNlNEWkRCSm1xWndjMDFFbktkQU..."
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a card payment with 3D Secure 2 native authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4035501428146300",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737",
+              "holderName": "John Smith"
+            },
+            "authenticationData": {
+              "threeDSRequestData": {
+                "nativeThreeDS": "preferred"
+              }
+            },
+            "billingAddress": {
+              "country": "US",
+              "city": "New York",
+              "street": "Redwood Block",
+              "houseNumberOrName": "37C",
+              "stateOrProvince": "NY",
+              "postalCode": "10039"
+            },
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1",
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+              "language": "nl-NL",
+              "colorDepth": 24,
+              "screenHeight": 723,
+              "screenWidth": 1536,
+              "timeZoneOffset": 0,
+              "javaEnabled": true
+            },
+            "channel": "Web",
+            "origin": "https://your-company.example.com",
+            "returnUrl": "https://your-company.example.com/checkout/",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a card payment with 3D Secure redirect authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4212345678901237",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "javaEnabled": true,
+              "colorDepth": 10,
+              "screenHeight": 2000,
+              "screenWidth": 3000,
+              "timeZoneOffset": 5,
+              "language": "en"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a card payment with unencrypted card details)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a card payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Tokenize card details for one-click payments)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "CardOnFile",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a Google Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "paywithgoogle",
+              "googlePayToken": "==Payload as retrieved from Google Pay response=="
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YourMerchantAccount"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make an iDEAL payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "ideal"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a Klarna payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_REFERENCE",
+            "paymentMethod": {
+              "type": "klarna"
+            },
+            "amount": {
+              "currency": "SEK",
+              "value": 1000
+            },
+            "shopperLocale": "en_US",
+            "countryCode": "SE",
+            "telephoneNumber": "+46 840 839 298",
+            "shopperEmail": "youremail@email.com",
+            "shopperName": {
+              "firstName": "Testperson-se",
+              "lastName": "Approved"
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_IOfW3k9G2PvXFu2j",
+            "billingAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "deliveryAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "returnUrl": "https://www.your-company.example.com/...",
+            "lineItems": [
+              {
+                "quantity": 1,
+                "amountExcludingTax": 331,
+                "taxPercentage": 2100,
+                "description": "Shoes",
+                "id": "Item #1",
+                "taxAmount": 69,
+                "amountIncludingTax": 400,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              },
+              {
+                "quantity": 2,
+                "amountExcludingTax": 248,
+                "taxPercentage": 2100,
+                "description": "Socks",
+                "id": "Item #2",
+                "taxAmount": 52,
+                "amountIncludingTax": 300,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              }
+            ]
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Top up your balance account on-demand from your transfer instrument)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "sepadirectdebit",
+              "transferInstrumentId": "SE00000000000000000000001",
+              "iban": "IBAN_OF_TRANSFER_INSTRUMENT",
+              "ownerName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Top up your balance account on-demand using a Visa credit card)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "cvc": "737",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a one-click payment with a token and CVV)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "8416038790273850",
+              "encryptedSecurityCode": "adyenjs_0_1_18$MT6ppy0FAMVMLH..."
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_6738oneoff",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "CardOnFile"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Split a payment between balance accounts)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 40000,
+              "currency": "USD"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "platformChargebackLogic": {
+              "behavior": "deductFromOneBalanceAccount",
+              "targetAccount": "BA00000000000000000000001",
+              "costAllocationAccount": "BA00000000000000000000001"
+            },
+            "splits": [
+              {
+                "amount": {
+                  "value": 39600
+                },
+                "type": "BalanceAccount",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the sale amount",
+                "description": "Your description for the sale amount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "type": "Commission",
+                "reference": "Your reference for the commission",
+                "description": "Your description for the commission"
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the fees",
+                "description": "Your description for the fees"
+              }
+            ]
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Split a payment in a Classic Platforms integration)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 6200,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 6000
+                },
+                "type": "MarketPlace",
+                "account": "151272963",
+                "reference": "6124145",
+                "description": "Porcelain Doll: Eliza (20cm)"
+              },
+              {
+                "amount": {
+                  "value": 200
+                },
+                "type": "Commission",
+                "reference": "6124146"
+              }
+            ]
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Tokenize card details for a subscription)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "Subscription",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 400. Bad request. (Make a subscription payment with a token)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "M5N7TQ4TG5PFWR50"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "Subscription"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Make an Apple Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "applepay",
+              "applePayToken": "VNRWtuNlNEWkRCSm1xWndjMDFFbktkQU..."
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a card payment with 3D Secure 2 native authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4035501428146300",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737",
+              "holderName": "John Smith"
+            },
+            "authenticationData": {
+              "threeDSRequestData": {
+                "nativeThreeDS": "preferred"
+              }
+            },
+            "billingAddress": {
+              "country": "US",
+              "city": "New York",
+              "street": "Redwood Block",
+              "houseNumberOrName": "37C",
+              "stateOrProvince": "NY",
+              "postalCode": "10039"
+            },
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1",
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+              "language": "nl-NL",
+              "colorDepth": 24,
+              "screenHeight": 723,
+              "screenWidth": 1536,
+              "timeZoneOffset": 0,
+              "javaEnabled": true
+            },
+            "channel": "Web",
+            "origin": "https://your-company.example.com",
+            "returnUrl": "https://your-company.example.com/checkout/",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a card payment with 3D Secure redirect authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4212345678901237",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "javaEnabled": true,
+              "colorDepth": 10,
+              "screenHeight": 2000,
+              "screenWidth": 3000,
+              "timeZoneOffset": 5,
+              "language": "en"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a card payment with unencrypted card details)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a card payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Tokenize card details for one-click payments)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "CardOnFile",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a Google Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "paywithgoogle",
+              "googlePayToken": "==Payload as retrieved from Google Pay response=="
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YourMerchantAccount"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make an iDEAL payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "ideal"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a Klarna payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_REFERENCE",
+            "paymentMethod": {
+              "type": "klarna"
+            },
+            "amount": {
+              "currency": "SEK",
+              "value": 1000
+            },
+            "shopperLocale": "en_US",
+            "countryCode": "SE",
+            "telephoneNumber": "+46 840 839 298",
+            "shopperEmail": "youremail@email.com",
+            "shopperName": {
+              "firstName": "Testperson-se",
+              "lastName": "Approved"
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_IOfW3k9G2PvXFu2j",
+            "billingAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "deliveryAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "returnUrl": "https://www.your-company.example.com/...",
+            "lineItems": [
+              {
+                "quantity": 1,
+                "amountExcludingTax": 331,
+                "taxPercentage": 2100,
+                "description": "Shoes",
+                "id": "Item #1",
+                "taxAmount": 69,
+                "amountIncludingTax": 400,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              },
+              {
+                "quantity": 2,
+                "amountExcludingTax": 248,
+                "taxPercentage": 2100,
+                "description": "Socks",
+                "id": "Item #2",
+                "taxAmount": 52,
+                "amountIncludingTax": 300,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              }
+            ]
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Top up your balance account on-demand from your transfer instrument)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "sepadirectdebit",
+              "transferInstrumentId": "SE00000000000000000000001",
+              "iban": "IBAN_OF_TRANSFER_INSTRUMENT",
+              "ownerName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Top up your balance account on-demand using a Visa credit card)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "cvc": "737",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a one-click payment with a token and CVV)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "8416038790273850",
+              "encryptedSecurityCode": "adyenjs_0_1_18$MT6ppy0FAMVMLH..."
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_6738oneoff",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "CardOnFile"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Split a payment between balance accounts)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 40000,
+              "currency": "USD"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "platformChargebackLogic": {
+              "behavior": "deductFromOneBalanceAccount",
+              "targetAccount": "BA00000000000000000000001",
+              "costAllocationAccount": "BA00000000000000000000001"
+            },
+            "splits": [
+              {
+                "amount": {
+                  "value": 39600
+                },
+                "type": "BalanceAccount",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the sale amount",
+                "description": "Your description for the sale amount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "type": "Commission",
+                "reference": "Your reference for the commission",
+                "description": "Your description for the commission"
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the fees",
+                "description": "Your description for the fees"
+              }
+            ]
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Split a payment in a Classic Platforms integration)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 6200,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 6000
+                },
+                "type": "MarketPlace",
+                "account": "151272963",
+                "reference": "6124145",
+                "description": "Porcelain Doll: Eliza (20cm)"
+              },
+              {
+                "amount": {
+                  "value": 200
+                },
+                "type": "Commission",
+                "reference": "6124146"
+              }
+            ]
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Tokenize card details for a subscription)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "Subscription",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 401. Unauthorized. (Make a subscription payment with a token)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "M5N7TQ4TG5PFWR50"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "Subscription"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Make an Apple Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "applepay",
+              "applePayToken": "VNRWtuNlNEWkRCSm1xWndjMDFFbktkQU..."
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a card payment with 3D Secure 2 native authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4035501428146300",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737",
+              "holderName": "John Smith"
+            },
+            "authenticationData": {
+              "threeDSRequestData": {
+                "nativeThreeDS": "preferred"
+              }
+            },
+            "billingAddress": {
+              "country": "US",
+              "city": "New York",
+              "street": "Redwood Block",
+              "houseNumberOrName": "37C",
+              "stateOrProvince": "NY",
+              "postalCode": "10039"
+            },
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1",
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+              "language": "nl-NL",
+              "colorDepth": 24,
+              "screenHeight": 723,
+              "screenWidth": 1536,
+              "timeZoneOffset": 0,
+              "javaEnabled": true
+            },
+            "channel": "Web",
+            "origin": "https://your-company.example.com",
+            "returnUrl": "https://your-company.example.com/checkout/",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a card payment with 3D Secure redirect authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4212345678901237",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "javaEnabled": true,
+              "colorDepth": 10,
+              "screenHeight": 2000,
+              "screenWidth": 3000,
+              "timeZoneOffset": 5,
+              "language": "en"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a card payment with unencrypted card details)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a card payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Tokenize card details for one-click payments)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "CardOnFile",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a Google Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "paywithgoogle",
+              "googlePayToken": "==Payload as retrieved from Google Pay response=="
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YourMerchantAccount"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make an iDEAL payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "ideal"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a Klarna payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_REFERENCE",
+            "paymentMethod": {
+              "type": "klarna"
+            },
+            "amount": {
+              "currency": "SEK",
+              "value": 1000
+            },
+            "shopperLocale": "en_US",
+            "countryCode": "SE",
+            "telephoneNumber": "+46 840 839 298",
+            "shopperEmail": "youremail@email.com",
+            "shopperName": {
+              "firstName": "Testperson-se",
+              "lastName": "Approved"
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_IOfW3k9G2PvXFu2j",
+            "billingAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "deliveryAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "returnUrl": "https://www.your-company.example.com/...",
+            "lineItems": [
+              {
+                "quantity": 1,
+                "amountExcludingTax": 331,
+                "taxPercentage": 2100,
+                "description": "Shoes",
+                "id": "Item #1",
+                "taxAmount": 69,
+                "amountIncludingTax": 400,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              },
+              {
+                "quantity": 2,
+                "amountExcludingTax": 248,
+                "taxPercentage": 2100,
+                "description": "Socks",
+                "id": "Item #2",
+                "taxAmount": 52,
+                "amountIncludingTax": 300,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              }
+            ]
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Top up your balance account on-demand from your transfer instrument)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "sepadirectdebit",
+              "transferInstrumentId": "SE00000000000000000000001",
+              "iban": "IBAN_OF_TRANSFER_INSTRUMENT",
+              "ownerName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Top up your balance account on-demand using a Visa credit card)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "cvc": "737",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a one-click payment with a token and CVV)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "8416038790273850",
+              "encryptedSecurityCode": "adyenjs_0_1_18$MT6ppy0FAMVMLH..."
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_6738oneoff",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "CardOnFile"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Split a payment between balance accounts)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 40000,
+              "currency": "USD"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "platformChargebackLogic": {
+              "behavior": "deductFromOneBalanceAccount",
+              "targetAccount": "BA00000000000000000000001",
+              "costAllocationAccount": "BA00000000000000000000001"
+            },
+            "splits": [
+              {
+                "amount": {
+                  "value": 39600
+                },
+                "type": "BalanceAccount",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the sale amount",
+                "description": "Your description for the sale amount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "type": "Commission",
+                "reference": "Your reference for the commission",
+                "description": "Your description for the commission"
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the fees",
+                "description": "Your description for the fees"
+              }
+            ]
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Split a payment in a Classic Platforms integration)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 6200,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 6000
+                },
+                "type": "MarketPlace",
+                "account": "151272963",
+                "reference": "6124145",
+                "description": "Porcelain Doll: Eliza (20cm)"
+              },
+              {
+                "amount": {
+                  "value": 200
+                },
+                "type": "Commission",
+                "reference": "6124146"
+              }
+            ]
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Tokenize card details for a subscription)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "Subscription",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 403. Forbidden. (Make a subscription payment with a token)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "M5N7TQ4TG5PFWR50"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "Subscription"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Make an Apple Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "applepay",
+              "applePayToken": "VNRWtuNlNEWkRCSm1xWndjMDFFbktkQU..."
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a card payment with 3D Secure 2 native authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4035501428146300",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737",
+              "holderName": "John Smith"
+            },
+            "authenticationData": {
+              "threeDSRequestData": {
+                "nativeThreeDS": "preferred"
+              }
+            },
+            "billingAddress": {
+              "country": "US",
+              "city": "New York",
+              "street": "Redwood Block",
+              "houseNumberOrName": "37C",
+              "stateOrProvince": "NY",
+              "postalCode": "10039"
+            },
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1",
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+              "language": "nl-NL",
+              "colorDepth": 24,
+              "screenHeight": 723,
+              "screenWidth": 1536,
+              "timeZoneOffset": 0,
+              "javaEnabled": true
+            },
+            "channel": "Web",
+            "origin": "https://your-company.example.com",
+            "returnUrl": "https://your-company.example.com/checkout/",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a card payment with 3D Secure redirect authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4212345678901237",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "javaEnabled": true,
+              "colorDepth": 10,
+              "screenHeight": 2000,
+              "screenWidth": 3000,
+              "timeZoneOffset": 5,
+              "language": "en"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a card payment with unencrypted card details)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a card payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Tokenize card details for one-click payments)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "CardOnFile",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a Google Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "paywithgoogle",
+              "googlePayToken": "==Payload as retrieved from Google Pay response=="
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YourMerchantAccount"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make an iDEAL payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "ideal"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a Klarna payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_REFERENCE",
+            "paymentMethod": {
+              "type": "klarna"
+            },
+            "amount": {
+              "currency": "SEK",
+              "value": 1000
+            },
+            "shopperLocale": "en_US",
+            "countryCode": "SE",
+            "telephoneNumber": "+46 840 839 298",
+            "shopperEmail": "youremail@email.com",
+            "shopperName": {
+              "firstName": "Testperson-se",
+              "lastName": "Approved"
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_IOfW3k9G2PvXFu2j",
+            "billingAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "deliveryAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "returnUrl": "https://www.your-company.example.com/...",
+            "lineItems": [
+              {
+                "quantity": 1,
+                "amountExcludingTax": 331,
+                "taxPercentage": 2100,
+                "description": "Shoes",
+                "id": "Item #1",
+                "taxAmount": 69,
+                "amountIncludingTax": 400,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              },
+              {
+                "quantity": 2,
+                "amountExcludingTax": 248,
+                "taxPercentage": 2100,
+                "description": "Socks",
+                "id": "Item #2",
+                "taxAmount": 52,
+                "amountIncludingTax": 300,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              }
+            ]
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Top up your balance account on-demand from your transfer instrument)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "sepadirectdebit",
+              "transferInstrumentId": "SE00000000000000000000001",
+              "iban": "IBAN_OF_TRANSFER_INSTRUMENT",
+              "ownerName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Top up your balance account on-demand using a Visa credit card)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "cvc": "737",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a one-click payment with a token and CVV)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "8416038790273850",
+              "encryptedSecurityCode": "adyenjs_0_1_18$MT6ppy0FAMVMLH..."
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_6738oneoff",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "CardOnFile"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Split a payment between balance accounts)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 40000,
+              "currency": "USD"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "platformChargebackLogic": {
+              "behavior": "deductFromOneBalanceAccount",
+              "targetAccount": "BA00000000000000000000001",
+              "costAllocationAccount": "BA00000000000000000000001"
+            },
+            "splits": [
+              {
+                "amount": {
+                  "value": 39600
+                },
+                "type": "BalanceAccount",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the sale amount",
+                "description": "Your description for the sale amount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "type": "Commission",
+                "reference": "Your reference for the commission",
+                "description": "Your description for the commission"
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the fees",
+                "description": "Your description for the fees"
+              }
+            ]
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Split a payment in a Classic Platforms integration)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 6200,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 6000
+                },
+                "type": "MarketPlace",
+                "account": "151272963",
+                "reference": "6124145",
+                "description": "Porcelain Doll: Eliza (20cm)"
+              },
+              {
+                "amount": {
+                  "value": 200
+                },
+                "type": "Commission",
+                "reference": "6124146"
+              }
+            ]
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Tokenize card details for a subscription)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "Subscription",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 422. Unprocessable entity. (Make a subscription payment with a token)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "M5N7TQ4TG5PFWR50"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "Subscription"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Make an Apple Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "applepay",
+              "applePayToken": "VNRWtuNlNEWkRCSm1xWndjMDFFbktkQU..."
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a card payment with 3D Secure 2 native authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4035501428146300",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737",
+              "holderName": "John Smith"
+            },
+            "authenticationData": {
+              "threeDSRequestData": {
+                "nativeThreeDS": "preferred"
+              }
+            },
+            "billingAddress": {
+              "country": "US",
+              "city": "New York",
+              "street": "Redwood Block",
+              "houseNumberOrName": "37C",
+              "stateOrProvince": "NY",
+              "postalCode": "10039"
+            },
+            "shopperEmail": "s.hopper@test.com",
+            "shopperIP": "192.0.2.1",
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+              "language": "nl-NL",
+              "colorDepth": 24,
+              "screenHeight": 723,
+              "screenWidth": 1536,
+              "timeZoneOffset": 0,
+              "javaEnabled": true
+            },
+            "channel": "Web",
+            "origin": "https://your-company.example.com",
+            "returnUrl": "https://your-company.example.com/checkout/",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a card payment with 3D Secure redirect authentication)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4212345678901237",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "browserInfo": {
+              "userAgent": "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9) Gecko/2008052912 Firefox/3.0",
+              "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "javaEnabled": true,
+              "colorDepth": 10,
+              "screenHeight": 2000,
+              "screenWidth": 3000,
+              "timeZoneOffset": 5,
+              "language": "en"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a card payment with unencrypted card details)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith",
+              "cvc": "737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a card payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Tokenize card details for one-click payments)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "CardOnFile",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a Google Pay payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "paywithgoogle",
+              "googlePayToken": "==Payload as retrieved from Google Pay response=="
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YourMerchantAccount"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make an iDEAL payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "EUR",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "ideal"
+            },
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a Klarna payment)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "reference": "YOUR_ORDER_REFERENCE",
+            "paymentMethod": {
+              "type": "klarna"
+            },
+            "amount": {
+              "currency": "SEK",
+              "value": 1000
+            },
+            "shopperLocale": "en_US",
+            "countryCode": "SE",
+            "telephoneNumber": "+46 840 839 298",
+            "shopperEmail": "youremail@email.com",
+            "shopperName": {
+              "firstName": "Testperson-se",
+              "lastName": "Approved"
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_IOfW3k9G2PvXFu2j",
+            "billingAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "deliveryAddress": {
+              "city": "Ankeborg",
+              "country": "SE",
+              "houseNumberOrName": "1",
+              "postalCode": "12345",
+              "street": "Stargatan"
+            },
+            "returnUrl": "https://www.your-company.example.com/...",
+            "lineItems": [
+              {
+                "quantity": 1,
+                "amountExcludingTax": 331,
+                "taxPercentage": 2100,
+                "description": "Shoes",
+                "id": "Item #1",
+                "taxAmount": 69,
+                "amountIncludingTax": 400,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              },
+              {
+                "quantity": 2,
+                "amountExcludingTax": 248,
+                "taxPercentage": 2100,
+                "description": "Socks",
+                "id": "Item #2",
+                "taxAmount": 52,
+                "amountIncludingTax": 300,
+                "productUrl": "URL_TO_PURCHASED_ITEM",
+                "imageUrl": "URL_TO_PICTURE_OF_PURCHASED_ITEM"
+              }
+            ]
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Top up your balance account on-demand from your transfer instrument)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "sepadirectdebit",
+              "transferInstrumentId": "SE00000000000000000000001",
+              "iban": "IBAN_OF_TRANSFER_INSTRUMENT",
+              "ownerName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Top up your balance account on-demand using a Visa credit card)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "number": "4111111111111111",
+              "cvc": "737",
+              "expiryMonth": "03",
+              "expiryYear": "2030",
+              "holderName": "John Smith"
+            },
+            "amount": {
+              "value": 10000,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 10000
+                },
+                "type": "TopUp",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the top-up.",
+                "description": "Your description for the top-up."
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the transaction fees.",
+                "description": "Your description for the transaction fees."
+              }
+            ]
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a one-click payment with a token and CVV)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "8416038790273850",
+              "encryptedSecurityCode": "adyenjs_0_1_18$MT6ppy0FAMVMLH..."
+            },
+            "shopperReference": "YOUR_UNIQUE_SHOPPER_ID_6738oneoff",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "CardOnFile"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Split a payment between balance accounts)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 40000,
+              "currency": "USD"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "platformChargebackLogic": {
+              "behavior": "deductFromOneBalanceAccount",
+              "targetAccount": "BA00000000000000000000001",
+              "costAllocationAccount": "BA00000000000000000000001"
+            },
+            "splits": [
+              {
+                "amount": {
+                  "value": 39600
+                },
+                "type": "BalanceAccount",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the sale amount",
+                "description": "Your description for the sale amount"
+              },
+              {
+                "amount": {
+                  "value": 400
+                },
+                "type": "Commission",
+                "reference": "Your reference for the commission",
+                "description": "Your description for the commission"
+              },
+              {
+                "type": "PaymentFee",
+                "account": "BA00000000000000000000001",
+                "reference": "Your reference for the fees",
+                "description": "Your description for the fees"
+              }
+            ]
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Split a payment in a Classic Platforms integration)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "amount": {
+              "value": 6200,
+              "currency": "EUR"
+            },
+            "reference": "YOUR_ORDER_NUMBER",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "returnUrl": "https://your-company.example.com/...",
+            "splits": [
+              {
+                "amount": {
+                  "value": 6000
+                },
+                "type": "MarketPlace",
+                "account": "151272963",
+                "reference": "6124145",
+                "description": "Porcelain Doll: Eliza (20cm)"
+              },
+              {
+                "amount": {
+                  "value": 200
+                },
+                "type": "Commission",
+                "reference": "6124146"
+              }
+            ]
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Tokenize card details for a subscription)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "encryptedCardNumber": "test_4111111111111111",
+              "encryptedExpiryMonth": "test_03",
+              "encryptedExpiryYear": "test_2030",
+              "encryptedSecurityCode": "test_737"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "storePaymentMethod": true,
+            "shopperInteraction": "Ecommerce",
+            "recurringProcessingModel": "Subscription",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+  - name: Response code 500. Internal server error. (Make a subscription payment with a token)
+    request:
+      url: "{{baseUrl}}/payments"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      body:
+        type: json
+        data: |-
+          {
+            "amount": {
+              "currency": "USD",
+              "value": 1000
+            },
+            "reference": "Your order number",
+            "paymentMethod": {
+              "type": "scheme",
+              "storedPaymentMethodId": "M5N7TQ4TG5PFWR50"
+            },
+            "shopperReference": "YOUR_SHOPPER_REFERENCE",
+            "returnUrl": "https://your-company.example.com/...",
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "shopperInteraction": "ContAuth",
+            "recurringProcessingModel": "Subscription"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: |-
+  Sends payment parameters (like amount, country, and currency) together with other required input details collected from the shopper. To know more about required parameters for specific payment methods, refer to our [payment method guides](https://docs.adyen.com/payment-methods). 
+  The response depends on the [payment flow](https://docs.adyen.com/payment-methods#payment-flow):
+  * For a direct flow, the response includes a `pspReference` and a `resultCode` with the payment result, for example **Authorised** or **Refused**. 
+  * For a redirect or additional action, the response contains an `action` object. 

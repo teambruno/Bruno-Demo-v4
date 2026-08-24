@@ -1,0 +1,300 @@
+info:
+  name: Update an authorised amount
+  type: http
+  seq: 2
+  tags:
+    - Modifications
+
+http:
+  method: POST
+  url: "{{baseUrl}}/payments/:paymentPspReference/amountUpdates"
+  headers:
+    - name: Idempotency-Key
+      value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+      description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+  params:
+    - name: paymentPspReference
+      value: ""
+      type: path
+      description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment.
+  body:
+    type: json
+    data: |-
+      {
+        "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+        "amount": {
+          "currency": "EUR",
+          "value": 2500
+        },
+        "reference": "YOUR_UNIQUE_REFERENCE"
+      }
+  auth:
+    type: basic
+    username: "{{username}}"
+    password: "{{password}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: Amount update requested
+    description: Example response when an amount update was requested
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/amountUpdates"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment.
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE"
+          }
+    response:
+      status: 201
+      statusText: Created
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "paymentPspReference": "993617894903480A",
+            "reference": "YOUR_UNIQUE_REFERENCE",
+            "pspReference": "993617894906488A",
+            "status": "received",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            }
+          }
+  - name: Response code 400. Bad request. (Update the amount of an authorized payment)
+    description: Example request to update the amount of a payment
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/amountUpdates"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment.
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE"
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 400,
+            "errorCode": "702",
+            "message": "Unexpected input: \", expected: }",
+            "errorType": "validation"
+          }
+  - name: Response code 401. Unauthorized. (Update the amount of an authorized payment)
+    description: Example request to update the amount of a payment
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/amountUpdates"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment.
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE"
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 401,
+            "errorCode": "000",
+            "message": "HTTP Status Response - Unauthorized",
+            "errorType": "security"
+          }
+  - name: Response code 403. Forbidden. (Update the amount of an authorized payment)
+    description: Example request to update the amount of a payment
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/amountUpdates"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment.
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE"
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 403,
+            "errorCode": "901",
+            "message": "Invalid Merchant Account",
+            "errorType": "security",
+            "pspReference": "881611827877203B"
+          }
+  - name: Response code 422. Unprocessable entity. (Update the amount of an authorized payment)
+    description: Example request to update the amount of a payment
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/amountUpdates"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment.
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE"
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 422,
+            "errorCode": "14_030",
+            "message": "Return URL is missing.",
+            "errorType": "validation",
+            "pspReference": "8816118280275544"
+          }
+  - name: Response code 500. Internal server error. (Update the amount of an authorized payment)
+    description: Example request to update the amount of a payment
+    request:
+      url: "{{baseUrl}}/payments/:paymentPspReference/amountUpdates"
+      method: POST
+      headers:
+        - name: Idempotency-Key
+          value: 37ca9c97-d1d1-4c62-89e8-706891a563ed
+          description: A unique identifier for the message with a maximum of 64 characters (we recommend a UUID).
+      params:
+        - name: paymentPspReference
+          value: ""
+          type: path
+          description: The [`pspReference`](https://docs.adyen.com/api-explorer/Checkout/latest/post/payments#responses-200-pspReference) of the payment.
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+            "amount": {
+              "currency": "EUR",
+              "value": 2500
+            },
+            "reference": "YOUR_UNIQUE_REFERENCE"
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "status": 500,
+            "errorCode": "905",
+            "message": "Payment details are not supported",
+            "errorType": "configuration",
+            "pspReference": "8516091485743033"
+          }
+
+docs: |-
+  Increases or decreases the authorised payment amount and returns a unique reference for this request. You get the outcome of the request asynchronously, in an [**AUTHORISATION_ADJUSTMENT** webhook](https://docs.adyen.com/development-resources/webhooks/webhook-types/#event-codes).
+
+  You can only update authorised amounts that have not yet been [captured](https://docs.adyen.com/api-explorer/#/CheckoutService/latest/post/payments/{paymentPspReference}/captures).
+
+  The amount you specify in the request is the updated amount, which is larger or smaller than the initial authorised amount.
+
+  For more information, refer to [Authorisation adjustment](https://docs.adyen.com/online-payments/adjust-authorisation#use-cases).

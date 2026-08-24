@@ -14,8 +14,8 @@ variables:
     value: "{{process.env.WEBHOOK_SIGNING_SECRET}}"
     description: from .env - real value on the wire, masked in CLI reports
   - name: dotenvStripeKey
-    value: "{{process.env.STRIPE_TEST_KEY}}"
+    value: "{{process.env.envApiKey}}"
     description: from .env - never committed, only .env.example is
   - secret: true
     name: appOnlySecret
-    description: ""
+    description: add your own

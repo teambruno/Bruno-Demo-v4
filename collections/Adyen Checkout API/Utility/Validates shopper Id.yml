@@ -1,0 +1,230 @@
+info:
+  name: Validates shopper Id
+  type: http
+  seq: 4
+  tags:
+    - Utility
+
+http:
+  method: POST
+  url: "{{baseUrl}}/validateShopperId"
+  body:
+    type: json
+    data: |-
+      {
+        "merchantAccount": "",
+        "paymentMethod": {
+          "type": ""
+        },
+        "shopperEmail": "",
+        "shopperIP": "",
+        "shopperReference": ""
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: OK - the request has succeeded.
+    request:
+      url: "{{baseUrl}}/validateShopperId"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "",
+            "paymentMethod": {
+              "type": ""
+            },
+            "shopperEmail": "",
+            "shopperIP": "",
+            "shopperReference": ""
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "reason": "",
+            "result": "VALID"
+          }
+  - name: 400 Response
+    description: Bad Request - a problem reading or understanding the request.
+    request:
+      url: "{{baseUrl}}/validateShopperId"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "",
+            "paymentMethod": {
+              "type": ""
+            },
+            "shopperEmail": "",
+            "shopperIP": "",
+            "shopperReference": ""
+          }
+    response:
+      status: 400
+      statusText: Bad Request
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "errorCode": "",
+            "errorType": "",
+            "message": "",
+            "pspReference": "",
+            "status": 0
+          }
+  - name: 401 Response
+    description: Unauthorized - authentication required.
+    request:
+      url: "{{baseUrl}}/validateShopperId"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "",
+            "paymentMethod": {
+              "type": ""
+            },
+            "shopperEmail": "",
+            "shopperIP": "",
+            "shopperReference": ""
+          }
+    response:
+      status: 401
+      statusText: Unauthorized
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "errorCode": "",
+            "errorType": "",
+            "message": "",
+            "pspReference": "",
+            "status": 0
+          }
+  - name: 403 Response
+    description: Forbidden - insufficient permissions to process the request.
+    request:
+      url: "{{baseUrl}}/validateShopperId"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "",
+            "paymentMethod": {
+              "type": ""
+            },
+            "shopperEmail": "",
+            "shopperIP": "",
+            "shopperReference": ""
+          }
+    response:
+      status: 403
+      statusText: Forbidden
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "errorCode": "",
+            "errorType": "",
+            "message": "",
+            "pspReference": "",
+            "status": 0
+          }
+  - name: 422 Response
+    description: Unprocessable Entity - a request validation error.
+    request:
+      url: "{{baseUrl}}/validateShopperId"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "",
+            "paymentMethod": {
+              "type": ""
+            },
+            "shopperEmail": "",
+            "shopperIP": "",
+            "shopperReference": ""
+          }
+    response:
+      status: 422
+      statusText: Unprocessable Entity
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "errorCode": "",
+            "errorType": "",
+            "message": "",
+            "pspReference": "",
+            "status": 0
+          }
+  - name: 500 Response
+    description: Internal Server Error - the server could not process the request.
+    request:
+      url: "{{baseUrl}}/validateShopperId"
+      method: POST
+      body:
+        type: json
+        data: |-
+          {
+            "merchantAccount": "",
+            "paymentMethod": {
+              "type": ""
+            },
+            "shopperEmail": "",
+            "shopperIP": "",
+            "shopperReference": ""
+          }
+    response:
+      status: 500
+      statusText: Internal Server Error
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "errorCode": "",
+            "errorType": "",
+            "message": "",
+            "pspReference": "",
+            "status": 0
+          }
+
+docs: |
+  Validates the shopperId.
