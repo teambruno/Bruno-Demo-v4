@@ -56,6 +56,12 @@ default:
     - bru --version
     - mkdir -p "$CI_PROJECT_DIR/$REPORT_DIR"
     - cd "$CI_PROJECT_DIR/collections/$COLLECTION"
+    # A collection can declare its own npm dependencies - see
+    # 06-Reusable-Scripts/03-NPM Module, which does require('zod'). Bruno
+    # resolves that from the collection's OWN node_modules, and node_modules is
+    # gitignored, so a fresh clone has none. Same one-off install a developer
+    # runs; collections that declare nothing skip it.
+    - if [ -f package.json ]; then npm ci --omit=dev; fi
   script:
     # ${BRU_TARGET:+"..."} keeps folder names with spaces quoted, and disappears
     # entirely when a job runs the whole collection.

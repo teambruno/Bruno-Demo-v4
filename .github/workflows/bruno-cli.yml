@@ -211,6 +211,27 @@ jobs:
             args: "-r"
     steps:
       - uses: actions/checkout@v7
+
+      # A collection can declare its own npm dependencies - see
+      # 06-Reusable-Scripts/03-NPM Module, which does require('zod'). Bruno
+      # resolves that from the collection's OWN node_modules, and node_modules
+      # is gitignored, so a fresh checkout has none and the request fails with
+      # "Cannot find module 'zod'". This is the same one-off install the
+      # request's docs tell a developer to run after cloning. Installed on the
+      # runner; the container sees it through the workspace mount, which is
+      # safe because these are pure-JS packages.
+      - name: Install collection npm dependencies
+        env:
+          BRU_COLLECTION: ${{ matrix.collection }}
+        run: |
+          set -euo pipefail
+          dir="collections/$BRU_COLLECTION"
+          if [[ -f "$dir/package.json" ]]; then
+            npm ci --prefix "$dir" --omit=dev
+          else
+            echo "$dir declares no npm dependencies - nothing to install"
+          fi
+
       - name: bru run
         env:
           BRUNO_GLOBAL_API_KEY: ${{ secrets.BRUNO_GLOBAL_API_KEY }}
