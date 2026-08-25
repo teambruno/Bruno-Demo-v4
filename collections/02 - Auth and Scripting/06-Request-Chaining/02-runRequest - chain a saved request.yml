@@ -1,0 +1,111 @@
+info:
+  name: runRequest - chain a saved request
+  type: http
+  seq: 2
+  tags:
+    - chaining
+
+http:
+  method: GET
+  url: https://dummyjson.com/auth/me
+  headers:
+    - name: Authorization
+      value: Bearer {{chainAccessToken}}
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // bru.runRequest() takes a FILE PATH from the collection root, without
+        // the extension - Bruno appends .yml for this collection format.
+        // Not the request name, not a folder-relative path.
+        const login = await bru.runRequest("06-Request-Chaining/01-Login");
+
+        // The parsed payload sits on a different key in the app and the CLI:
+        // the app exposes `.body`, the CLI `.data`. Reading both means this
+        // request works on a Send *and* under `bru run` unchanged.
+        const payload = login.body ?? login.data;
+
+        console.log(`runRequest -> ${login.status} in ${login.responseTime}ms`);
+
+        if (login.status !== 200) {
+          console.error("Login step failed - downstream call will 401");
+          return;
+        }
+
+        // Two ways to get the token, and both are worth showing:
+        //   a) straight off the response runRequest handed back
+        //   b) from the runtime var 01's own after-response script set
+        // (b) only works because runRequest runs the target's scripts too.
+        bru.setVar("chainAccessToken", payload.accessToken);
+
+        console.log(
+          `token from response: ...${payload.accessToken.slice(-8)}`
+        );
+        console.log(
+          `token from 01's script: ...${(bru.getVar("chainAccessToken") || "").slice(-8)}`
+        );
+    - type: tests
+      code: |-
+        const me = res.getBody();
+
+        test("the chained token authenticated us", () => {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("we are the user 01 logged in as", () => {
+          expect(me.username).to.equal("emilys");
+          expect(me.email).to.equal("emily.johnson@x.dummyjson.com");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## bru.runRequest()
+
+  ```js
+  const login = await bru.runRequest("06-Request-Chaining/01-Login");
+  ```
+
+  Runs another request **from this collection** and resolves to its response.
+  This request then calls `/auth/me` with the token that came back, so the
+  whole login-then-use-it flow happens without the runner needing to be
+  involved at all - it works on a single Send.
+
+  ### The argument is a file path
+
+  `"06-Request-Chaining/01-Login"` is the path from the collection root with
+  the extension dropped; Bruno appends `.yml` here, or `.bru` in a v1
+  collection. Get it wrong and you get
+  `bru.runRequest: invalid request path - ...`. Contrast with
+  `setNextRequest` in 05, which wants the request *name*.
+
+  ### The target's scripts run
+
+  01's `after-response` script sets `chainAccessToken`, so that variable is
+  already populated when this script resumes. Both routes to the token are
+  logged so you can see they match. `sendRequest` (03/04) gives you no such
+  thing - it runs no scripts, no auth, no tests.
+
+  ### Response shape
+
+  `{ status, statusText, headers, responseTime, ... }` plus the parsed payload -
+  on `.body` in the app, on `.data` in the CLI. The script reads
+  `login.body ?? login.data` so it behaves the same in both.
+
+  ### It does not show up as an extra request
+
+  In a folder run you will see 01's console output and tests twice - once in
+  file order, once triggered from here - but the summary still reports 7
+  requests, not 8. A `runRequest` call is not counted as a run item, so it never
+  skews your pass/fail totals or your JUnit report.
+
+  ### Don't do this at collection level
+
+  A collection-level script runs for *every* request, including the one
+  `runRequest` triggers - so calling it there recurses. Keep it in
+  request- or folder-level scripts.

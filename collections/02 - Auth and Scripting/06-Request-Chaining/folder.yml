@@ -1,0 +1,62 @@
+info:
+  name: 06-Request-Chaining
+  type: folder
+  seq: 6
+
+docs:
+  content: |-
+    ## 06 - Request Chaining
+
+    The three chaining APIs from
+    https://docs.usebruno.com/testing/script/request-chaining, one per request,
+    in the order you would demo them.
+
+    | # | API | What it does |
+    |---|-----|--------------|
+    | 01 | *(target)* | The login request that 02 calls. Runs standalone too. |
+    | 02 | `bru.runRequest()` | Runs another request **in this collection** and hands you its response. |
+    | 03 | `bru.sendRequest()` | Fires an ad-hoc HTTP call - callback style. |
+    | 04 | `bru.sendRequest()` | Same API, `await`ed instead of a callback. |
+    | 05 | `bru.runner.setNextRequest()` | Branches the run on response data. |
+    | 06 | *(branch A)* | Taken when the todo is completed. |
+    | 07 | *(branch B)* | Taken when the todo is still open. |
+    | 08 | `bru.runner.setNextRequest(null)` | Halts the run early. |
+    | 09 | *(never runs)* | Proof the halt in 08 worked. |
+
+    ### The one gotcha worth calling out
+
+    The two APIs take **different kinds of string**:
+
+    - `bru.runRequest("06-Request-Chaining/01-Login")` - a **file path** from the
+      collection root, no extension. Bruno appends `.yml` for this collection
+      format (`.bru` for a v1 collection).
+    - `bru.runner.setNextRequest("Process completed todo")` - a **request name**,
+      exactly as it appears in `info.name`. No path, no folder prefix, even for
+      a request nested in a folder.
+
+    Mix them up and you get a silent no-op or an `invalid request path` error.
+
+    ### runRequest vs sendRequest
+
+    `runRequest` reuses a request you already maintain - its auth, headers,
+    scripts and tests all run. `sendRequest` is a raw HTTP call you assemble in
+    the script; nothing from the collection applies to it. Reach for
+    `runRequest` inside the collection, `sendRequest` for anything else.
+
+    ### Runner vs Send
+
+    `setNextRequest` only means something during a **collection/folder run** -
+    on a single Send there is no "next request" to point at, so it is ignored.
+    `runRequest` and `sendRequest` work in both.
+
+    ```bash
+    # Whole chain, including the branch and the halt
+    bru run "06-Request-Chaining" -r --env Demo-Env
+
+    # Flip the branch: 1 = open todo (07), 4 = completed todo (06)
+    bru run "06-Request-Chaining" -r --env Demo-Env --env-var chainTodoId=4
+    ```
+
+    Never call `bru.runRequest()` from a **collection-level** script - the
+    collection script runs for the request it triggers too, which recurses.
+  type: text/markdown

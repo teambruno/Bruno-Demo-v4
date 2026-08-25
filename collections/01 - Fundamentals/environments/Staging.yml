@@ -45,6 +45,12 @@ variables:
           "maxBatchSize": 50
         }
     description: object - read nested keys, e.g. bru.getEnvVar("featureFlags").betaSearch
+  - name: tokenVar
+    value: stagingToken
+    description: ""
+  - name: header-content-language
+    value: staging-en
+    description: ""
 externalSecrets:
   type: azure-key-vault
   variables:

@@ -39,6 +39,15 @@ docs:
     Scripting demos here use both flavours of JS file: `02-Scripting/contractTests.js`
     (collection-local) and `/shared-scripts/*.js` (shared across all three
     collections via `additionalContextRoots`).
+
+    `06-Request-Chaining` is the dedicated tour of the three chaining APIs -
+    `bru.runRequest`, `bru.sendRequest` and `bru.runner.setNextRequest` - with a
+    branch and a deliberate early halt. Runs green end to end:
+
+    ```bash
+    bru run "06-Request-Chaining" -r --env Demo-Env \
+      --global-env Globals --workspace-path ../..
+    ```
   type: text/markdown
 bundled: false
 extensions:

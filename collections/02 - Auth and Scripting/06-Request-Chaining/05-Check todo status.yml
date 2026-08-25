@@ -1,0 +1,100 @@
+info:
+  name: Check todo status
+  type: http
+  seq: 5
+  tags:
+    - chaining
+
+http:
+  method: GET
+  url: "{{baseUrl}}/todos/{{chainTodoId}}"
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Env var with a fallback, so the folder runs on any environment and
+        // `--env-var chainTodoId=4` still steers it from the CLI.
+        // Deliberately NOT a runtime.variables entry - request-level vars
+        // outrank env vars, which would make --env-var silently do nothing.
+        bru.setVar("chainTodoId", bru.getEnvVar("chainTodoId") ?? 1);
+    - type: after-response
+      code: |-
+        const todo = res.getBody();
+
+        bru.setVar("chainTodoUserId", todo.userId);
+        bru.setVar("chainTodoTitle", todo.title);
+
+        // setNextRequest takes the request NAME from info.name - exactly, and
+        // with no folder prefix even though these live in a folder. Compare
+        // with runRequest in 02, which takes a file path.
+        if (todo.completed) {
+          console.log(`Todo ${todo.id} is done -> branch A`);
+          bru.runner.setNextRequest("Process completed todo");
+        } else {
+          console.log(`Todo ${todo.id} is still open -> branch B`);
+          bru.runner.setNextRequest("Handle open todo");
+        }
+    - type: tests
+      code: |-
+        test("todo fetched", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody()).to.have.property("completed").that.is.a("boolean");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## bru.runner.setNextRequest() - the fork
+
+  ```js
+  if (todo.completed) {
+    bru.runner.setNextRequest("Process completed todo");
+  } else {
+    bru.runner.setNextRequest("Handle open todo");
+  }
+  ```
+
+  The response decides where the run goes next, so one folder covers both paths
+  without duplicating requests. Whichever branch is not chosen is jumped over -
+  you do not need to guard it.
+
+  ### Driving the branch on a call
+
+  `chainTodoId` picks the todo, and `jsonplaceholder` gives us a stable one of
+  each:
+
+  | `chainTodoId` | `completed` | branch taken |
+  |---|---|---|
+  | `1` (default) | `false` | 07 - Handle open todo |
+  | `4` | `true` | 06 - Process completed todo |
+
+  ```bash
+  bru run "06-Request-Chaining" -r --env Demo-Env --env-var chainTodoId=4
+  ```
+
+  Or edit `chainTodoId` in Demo-Env and re-run the folder in the app.
+
+  ### Name, not path
+
+  The string is `info.name` verbatim - `"Process completed todo"`, never
+  `"06-Request-Chaining/06-Process completed todo"`. Folder-nested requests
+  still go by bare name. A typo here is a **silent no-op**: the run simply
+  carries on in file order, which is the thing to watch for when a branch
+  "isn't firing".
+
+  ### Runner only
+
+  On a single Send there is no next request, so this is ignored - the request
+  just returns its todo. Run the folder to see the routing.
+
+  ### Also available
+
+  `bru.setNextRequest(...)` is the older equivalent and still works (see
+  `02-Scripting/03-Conditional Flow Control`). `bru.runner.stopExecution()`
+  halts the whole run, and `bru.runner.skipRequest()` drops the current request
+  without failing it - see `04-Product-Update-Flow` for that one.

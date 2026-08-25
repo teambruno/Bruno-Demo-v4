@@ -1,0 +1,139 @@
+info:
+  name: sendRequest - POST with await
+  type: http
+  seq: 4
+  tags:
+    - chaining
+
+http:
+  method: POST
+  url: https://www.httpfaker.org/api/echo
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "postId": "{{chainPostId}}",
+        "brewery": "{{chainBrewery}}",
+        "note": "assembled from two scripted calls"
+      }
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Same API as 03, no callback: sendRequest resolves to the response,
+        // so you can await it and keep the code flat.
+        const created = await bru.sendRequest({
+          method: "POST",
+          url: "https://jsonplaceholder.typicode.com/posts",
+          headers: { "content-type": "application/json" },
+          data: {
+            title: `Brewery report: ${bru.getVar("chainBrewery") ?? "unknown"}`,
+            body: `Recorded at ${bru.getVar("chainLat")}, ${bru.getVar("chainLon")}`,
+            userId: 1
+          },
+          timeout: 10000
+        });
+
+        console.log(`POST -> ${created.status}`);
+        bru.setVar("chainPostId", created.data.id);
+
+        // Without a callback a non-2xx THROWS, so guard it yourself. Try/catch
+        // is the await-style equivalent of 03's `if (err)`.
+        try {
+          await bru.sendRequest({
+            method: "GET",
+            url: "https://dummyjson.com/http/404",
+            timeout: 10000
+          });
+          console.log("expected a 404 and did not get one");
+        } catch (err) {
+          // Read err.status, NOT err.response.status. The default "safe"
+          // (QuickJS) sandbox strips the axios response off the error, so
+          // err.response is null there and the docs' err.response.status
+          // silently yields undefined. err.status is normalised and works in
+          // both safe and developer sandboxes.
+          console.log(`404 branch threw as expected: ${err.status}`);
+          console.log(`err.response present? ${Boolean(err.response)}`);
+          bru.setVar("chainErrorStatus", err.status ?? "no-status");
+        }
+
+        // A bare URL string is accepted too - handy for a quick GET
+        const ping = await bru.sendRequest("https://dummyjson.com/test");
+        console.log(`string-form GET -> ${ping.status}`);
+    - type: tests
+      code: |-
+        const echo = res.getBody();
+        const sent = JSON.parse(echo.body);
+
+        test("the id from the scripted POST reached the body", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(sent.postId).to.equal(String(bru.getVar("chainPostId")));
+        });
+
+        test("the brewery from 03 is still in scope", () => {
+          expect(sent.brewery).to.equal(bru.getVar("chainBrewery"));
+        });
+
+        test("the awaited 404 threw instead of returning", () => {
+          expect(bru.getVar("chainErrorStatus")).to.equal(404);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## bru.sendRequest() - awaited
+
+  ```js
+  const created = await bru.sendRequest({ method: "POST", url, headers, data });
+  console.log(created.status, created.data);
+  ```
+
+  Identical API to 03, minus the callback. With no callback `sendRequest`
+  resolves to the response, which keeps multi-step scripts flat instead of
+  nested. This one makes three scripted calls before the visible request even
+  goes out, then echoes the results back through `httpfaker.org/api/echo` so
+  the tests can assert on exactly what was sent.
+
+  ### Callback vs await - the difference that bites
+
+  | | non-2xx behaviour |
+  |---|---|
+  | with a callback (03) | handed to `err`, script continues |
+  | awaited (04) | **throws** - wrap it in `try/catch` |
+
+  The second scripted call here deliberately hits a 404 to show the throw.
+
+  ### Read `err.status`, not `err.response.status`
+
+  Worth a minute on a technical call, because it is a silent failure. The
+  default sandbox is `safe` (QuickJS), and it strips the axios response off the
+  thrown error:
+
+  | | `err.status` | `err.response` |
+  |---|---|---|
+  | `--sandbox safe` (default) | `404` | **`null`** |
+  | `--sandbox developer` | `404` | present |
+
+  So the `err.response.status` idiom evaluates to `undefined` under the default
+  sandbox - no error, no warning, just a wrong value in your test. `err.status`
+  is normalised by Bruno and holds in both. The script logs
+  `err.response present?` so you can show the difference live by re-running with
+  `--sandbox developer`.
+
+  ### Shorthand
+
+  `await bru.sendRequest("https://dummyjson.com/test")` - a bare URL string is
+  treated as a GET. Fine for a quick probe.
+
+  ### `data` takes an object
+
+  Pass a plain object and Bruno serialises it. No `JSON.stringify` needed,
+  though a pre-serialised string works too.

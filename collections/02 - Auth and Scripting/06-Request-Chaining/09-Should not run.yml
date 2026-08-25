@@ -1,0 +1,49 @@
+info:
+  name: Should not run
+  type: http
+  seq: 9
+  tags:
+    - chaining
+
+http:
+  method: GET
+  url: "{{baseUrl}}/todos/1"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // Only 05-08 set chainBranchTaken, so its presence means we got here
+        // as part of the chain - which 08's setNextRequest(null) should have
+        // made impossible. On a standalone Send the var is unset and this
+        // behaves like any other request.
+        const ranAsPartOfChain = Boolean(bru.getVar("chainBranchTaken"));
+
+        test("unreachable once the chain has halted", () => {
+          if (ranAsPartOfChain) {
+            expect.fail(
+              "08 called setNextRequest(null), so 09 must never execute"
+            );
+          }
+          expect(res.getStatus()).to.equal(200);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## The request that proves the halt
+
+  Last in file order, and it should **never** appear in a folder run - 08 calls
+  `bru.runner.setNextRequest(null)` first.
+
+  Its test fails hard *if it detects it ran as part of the chain*, so a
+  regression in the halt turns the run red instead of quietly doing the wrong
+  thing. A skipped request is easy to miss in a report; a failing one is not.
+
+  The detection is just `bru.getVar("chainBranchTaken")` - only 05-08 set it. So
+  sending this request on its own still passes as a normal 200, which keeps it
+  from being a landmine when someone clicks it in the sidebar.

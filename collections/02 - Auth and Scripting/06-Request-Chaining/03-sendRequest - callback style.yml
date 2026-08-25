@@ -1,0 +1,99 @@
+info:
+  name: sendRequest - callback style
+  type: http
+  seq: 3
+  tags:
+    - chaining
+
+http:
+  method: GET
+  url: "{{weatherUrl}}/forecast?latitude={{chainLat}}&longitude={{chainLon}}&current=temperature_2m"
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // sendRequest is a raw HTTP call assembled in the script. It is NOT a
+        // request in the collection - no auth, no headers, no scripts, no
+        // tests of its own. Use it for anything outside the collection.
+        const breweryUrl = bru.getEnvVar("breweryUrl");
+
+        await bru.sendRequest(
+          {
+            method: "GET",
+            url: `${breweryUrl}/breweries?by_country=ireland&per_page=3`,
+            headers: { accept: "application/json" },
+            timeout: 10000
+          },
+          function (err, res) {
+            // Callback style: a 4xx/5xx arrives here as `err`, it does not throw.
+            if (err) {
+              console.error("brewery lookup failed:", err.message);
+              return;
+            }
+
+            // Axios response - the payload is on res.data
+            const first = res.data[0];
+
+            bru.setVar("chainBrewery", first.name);
+            bru.setVar("chainLat", first.latitude);
+            bru.setVar("chainLon", first.longitude);
+
+            console.log(
+              `Picked ${first.name} in ${first.city} (${first.latitude}, ${first.longitude})`
+            );
+          }
+        );
+    - type: tests
+      code: |-
+        const forecast = res.getBody();
+
+        test("coordinates from the scripted call reached the URL", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(forecast.latitude).to.be.a("number");
+          expect(forecast.longitude).to.be.a("number");
+        });
+
+        test("we got a current temperature back", () => {
+          expect(forecast.current.temperature_2m).to.be.a("number");
+        });
+
+        test("the brewery name was captured for the report", () => {
+          expect(bru.getVar("chainBrewery")).to.be.a("string").and.not.empty;
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## bru.sendRequest() - callback style
+
+  ```js
+  await bru.sendRequest({ method, url, headers, data, timeout }, (err, res) => { ... });
+  ```
+
+  A one-off HTTP call made from a script. Here it looks up a brewery, pulls its
+  latitude/longitude out of the response, and stores them as runtime variables -
+  which the request URL above then interpolates to fetch that location's
+  weather. Two different APIs, chained, one visible request.
+
+  ### Errors go to `err`, not to a throw
+
+  With a callback, a 4xx/5xx is handed to `err` and the script carries on. That
+  is the opposite of the `await` form in 04, where a non-2xx **throws**. Worth
+  showing both - it is the single most common surprise with this API.
+
+  ### The response is an axios response
+
+  So the payload is `res.data`, not `res.body`. Inside a callback `res` shadows
+  the outer response object, which is fine here but is why 04 names it
+  something else.
+
+  ### Still `await` the call
+
+  `bru.sendRequest` is async even with a callback. Drop the `await` and the
+  request fires before the callback has set `chainLat`/`chainLon`, so the URL
+  interpolates empty strings. Nothing errors - you just get a wrong request.

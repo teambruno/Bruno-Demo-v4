@@ -51,7 +51,10 @@ variables:
     name: username
     description: ""
   - name: tokenVar
-    value: environmentToken
+    value: demoToken
+    description: ""
+  - name: header-content-language
+    value: demo-en
     description: ""
 externalSecrets:
   type: azure-key-vault

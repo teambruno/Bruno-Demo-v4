@@ -1,0 +1,54 @@
+info:
+  name: Handle open todo
+  type: http
+  seq: 7
+  tags:
+    - chaining
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/todos/{{chainTodoId}}"
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "completed": true
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const patched = res.getBody();
+
+        bru.setVar("chainBranchTaken", "B - open");
+
+        console.log(`Branch B: closed out "${patched.title}"`);
+
+        // Same convergence point as branch A.
+        bru.runner.setNextRequest("Halt the run");
+    - type: tests
+      code: |-
+        test("todo was closed out", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().completed).to.equal(true);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Branch B - the todo was still open
+
+  The default path, since `chainTodoId` defaults to `1` and that todo is not
+  completed. PATCHes it closed, then converges on `"Halt the run"` exactly as
+  branch A does.
+
+  `jsonplaceholder` fakes the write - it echoes the merged object back without
+  persisting - so this branch is repeatable all day on a demo call.

@@ -1,0 +1,64 @@
+info:
+  name: Login
+  type: http
+  seq: 1
+  tags:
+    - chaining
+
+http:
+  method: POST
+  url: https://dummyjson.com/auth/login
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "username": "emilys",
+        "password": "emilyspass",
+        "expiresInMins": 30
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Nothing chaining-specific here - this is just a normal login that
+        // parks its token in a runtime variable. Request 02 calls it via
+        // bru.runRequest(), which is what makes it a "chain target", but it
+        // stays perfectly usable on its own.
+        const body = res.getBody();
+
+        bru.setVar("chainAccessToken", body.accessToken);
+        console.log(`Logged in as ${body.username} (id ${body.id})`);
+    - type: tests
+      code: |-
+        test("login returns an access token", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().accessToken).to.be.a("string");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Login - the runRequest target
+
+  A plain login against `dummyjson.com/auth/login`. Request 02 runs *this*
+  request from inside a script with `bru.runRequest()`.
+
+  Two things to point out on a call:
+
+  1. Nothing here is special. There is no "I am a chain target" flag - any
+     request in the collection can be called by `runRequest`.
+  2. Its `after-response` script and its tests run when `runRequest` calls it,
+     so `chainAccessToken` is already set by the time 02's script continues.
+     That is the difference from `sendRequest`, which runs no scripts at all.
+
+  Because 02 calls it, you will see this login execute **twice** in a folder
+  run - once in file order, once from 02's script. That is expected, and it is
+  the clearest way to see `runRequest` actually firing.

@@ -1,6 +1,12 @@
 name: Demo-Env
 color: "#6dd0cb"
 variables:
+  - name: baseUrl
+    value: https://jsonplaceholder.typicode.com
+    description: Pinned here so the collection never inherits localhost from Globals-Local
+  - name: userId
+    value: "1"
+    description: Used by 02-Scripting/03-Conditional Flow Control - pinned here, not inherited
   - name: breweryUrl
     value: https://api.openbrewerydb.org/v1
     description: Open Brewery DB base URL - no auth required
@@ -39,6 +45,11 @@ variables:
           "audience": "https://api.usebruno.com"
         }
     description: object - one variable instead of three, e.g. oauthConfig.scope
+  - name: chainTodoId
+    value:
+      type: number
+      data: "1"
+    description: 06-Request-Chaining branch selector - 1 = open todo (07), 4 = completed todo (06)
 externalSecrets:
   type: azure-key-vault
   variables:

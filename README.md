@@ -8,8 +8,10 @@ so a live demo runs top-to-bottom in four collections.
 1. **01 - Fundamentals** - CRUD basics, variable precedence, chained
    requests.
 2. **02 - Auth and Scripting** - Basic/Bearer/OAuth2 auth, pre/post-request
-   scripting, contract testing, a product-update flow, and a data-driven run
-   iterating one request over a CSV or JSON file.
+   scripting, contract testing, a product-update flow, a data-driven run
+   iterating one request over a CSV or JSON file, and a request-chaining
+   folder covering `bru.runRequest`, `bru.sendRequest` and
+   `bru.runner.setNextRequest`.
 3. **03 - Secrets and Vaults** - external secret managers. The same requests
    run against Azure Key Vault, AWS Secrets Manager or HashiCorp Vault by
    switching the environment dropdown. Usually comes up late in a call, so

@@ -1,0 +1,87 @@
+info:
+  name: Halt the run
+  type: http
+  seq: 8
+  tags:
+    - chaining
+
+http:
+  method: POST
+  url: https://www.httpfaker.org/api/echo
+  headers:
+    - name: content-type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "branchTaken": "{{chainBranchTaken}}",
+        "todoId": "{{chainTodoId}}",
+        "todoTitle": "{{chainTodoTitle}}",
+        "brewery": "{{chainBrewery}}",
+        "scriptedPostId": "{{chainPostId}}"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const summary = JSON.parse(res.getBody().body);
+
+        console.log("=== chain summary ===");
+        for (const [key, value] of Object.entries(summary)) {
+          console.log(`  ${key}: ${value}`);
+        }
+
+        // null ends the run here. Request 09 is next in file order and will
+        // not execute - that absence is the proof this line worked.
+        console.log("Halting - 09 should not appear below");
+        bru.runner.setNextRequest(null);
+    - type: tests
+      code: |-
+        const summary = JSON.parse(res.getBody().body);
+
+        test("exactly one branch was taken", () => {
+          expect(summary.branchTaken).to.be.oneOf(["A - completed", "B - open"]);
+        });
+
+        test("state survived the whole chain", () => {
+          expect(summary.brewery).to.not.be.empty;
+          expect(summary.scriptedPostId).to.not.be.empty;
+          expect(summary.todoTitle).to.not.be.empty;
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## bru.runner.setNextRequest(null) - stop here
+
+  ```js
+  bru.runner.setNextRequest(null);
+  ```
+
+  `null` means "no next request" - the run ends after this one, even though 09
+  is still sitting there in file order. Request 09 never executing is the whole
+  demonstration.
+
+  Both branches converge here, so this is also the natural place to show that
+  variables set anywhere in the chain are still in scope: the body echoes back
+  the brewery from 03, the post id from 04's scripted POST, and which branch 05
+  chose. One request proves the entire chain held together.
+
+  ### Why halt deliberately
+
+  In CI this is how you fail fast - a smoke test at the top of the run that
+  stops everything rather than letting fifty downstream requests fail for the
+  same missing prerequisite. `02-Scripting/03-Conditional Flow Control` shows
+  that defensive shape.
+
+  ### `setNextRequest(null)` vs `stopExecution()`
+
+  `setNextRequest(null)` ends the current iteration; `bru.runner.stopExecution()`
+  halts the run outright. With a single iteration they look the same - the
+  difference shows up under `--iteration-count` or with a data file.

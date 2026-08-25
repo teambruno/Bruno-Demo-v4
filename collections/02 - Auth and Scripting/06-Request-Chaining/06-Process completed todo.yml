@@ -1,0 +1,52 @@
+info:
+  name: Process completed todo
+  type: http
+  seq: 6
+  tags:
+    - chaining
+
+http:
+  method: GET
+  url: "{{baseUrl}}/users/{{chainTodoUserId}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const owner = res.getBody();
+
+        bru.setVar("chainBranchTaken", "A - completed");
+        bru.setVar("chainOwnerEmail", owner.email);
+
+        console.log(`Branch A: notifying ${owner.name} <${owner.email}>`);
+
+        // Both branches converge on the same request, so the chain rejoins
+        // instead of running to the end of the folder.
+        bru.runner.setNextRequest("Halt the run");
+    - type: tests
+      code: |-
+        test("owner looked up", () => {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().email).to.match(/@/);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Branch A - the todo was completed
+
+  Reached only when `chainTodoId` points at a completed todo (`4`). Looks up the
+  todo's owner so there is something real to show, then hands control to
+  `"Halt the run"`.
+
+  The point to make on a call: **both branches call
+  `setNextRequest("Halt the run")`**, so the two paths rejoin. Chaining is not
+  just a straight line - you can fork and merge, and the run order stops being
+  file order entirely.
+
+  If this request does not appear in your run, `chainTodoId` is `1` and you took
+  branch B (07) instead.

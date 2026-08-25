@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: https://dummyjson.com/products/{{randomId}}
+  url: https://dummyjson.com/products/1000
   auth: inherit
 
 runtime:
@@ -13,13 +13,13 @@ runtime:
     - name: ""
       value: ""
   assertions:
-    - expression: res.body.title
+    - expression: res.status
       operator: eq
-      value: "'Bruno Toy'"
-      disabled: true
+      value: "200"
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
