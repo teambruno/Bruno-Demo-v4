@@ -154,16 +154,18 @@ data-driven:
     COLLECTION: "02 - Auth and Scripting"
     BRU_ENV: "Prod-Env"
     BRU_TARGET: "05-Data-Driven"
-    BRU_ARGS: "-r --csv-file-path 05-Data-Driven/req-users.csv"
-  # 3 CSV rows -> 3 iterations, each one a row in the report. Swap the flag for
-  # --json-file-path 05-Data-Driven/req-users.json to drive the same three
-  # iterations from JSON instead.
+    BRU_ARGS: "-r --csv-file-path $CI_PROJECT_DIR/data-files/req-users.csv"
+  # 9 CSV rows -> 9 iterations, each one a row in the report. Swap the flag for
+  # --json-file-path $CI_PROJECT_DIR/data-files/req-users.json to drive the same
+  # nine iterations from JSON instead. Both files live in data-files/ at the
+  # repo root and are shared with the Runner-DD-Users reporter demo; the
+  # absolute $CI_PROJECT_DIR form is used because .bru cd's into the collection.
   #
   # No allow_failure any more. The old version asserted with bru.getVar(),
   # which returns undefined for CSV row values on CLI 4.0.0 - 3 of its 4 tests
   # failed every iteration, so the job could never gate. The rewritten request
   # asserts against the echoed response instead, which does not depend on
-  # getVar. Verified green locally on bru 3.3.0 (3/3 iterations, 6/6 tests)
+  # getVar. Verified green locally on bru 4.0.0 (9/9 iterations, 18/18 tests)
   # for both --csv-file-path and --json-file-path.
 
 v4-features:

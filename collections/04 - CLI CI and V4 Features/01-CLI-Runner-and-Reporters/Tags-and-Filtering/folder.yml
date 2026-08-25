@@ -19,15 +19,15 @@ docs:
 
     ```bash
     # Run only smoke tests (fast CI gate)
-    bru run "06-Tags-and-Filtering" --env Production --tags smoke
+    bru run "01-CLI-Runner-and-Reporters/Tags-and-Filtering" --env Production --tags smoke
 
     # Run full regression suite
-    bru run "06-Tags-and-Filtering" --env Production --tags regression
+    bru run "01-CLI-Runner-and-Reporters/Tags-and-Filtering" --env Production --tags regression
 
     # Exclude slow tests
-    bru run "06-Tags-and-Filtering" --env Production --exclude-tags slow
+    bru run "01-CLI-Runner-and-Reporters/Tags-and-Filtering" --env Production --exclude-tags slow
 
     # Combine: regression but not slow
-    bru run "06-Tags-and-Filtering" --env Production --tags regression --exclude-tags slow
+    bru run "01-CLI-Runner-and-Reporters/Tags-and-Filtering" --env Production --tags regression --exclude-tags slow
     ```
   type: text/markdown

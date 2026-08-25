@@ -68,7 +68,7 @@ test('status is 200', () => {
 
 ## Where it's used in this workspace
 
-- `01 - Fundamentals/05-Shared-Scripts/01-Shared Asserts.yml`
+- `01 - Fundamentals/04-Shared-Scripts/01-Shared Asserts.yml`
 - `02 - Auth and Scripting/02-Scripting/11-Shared Scripts Across Collections.yml`
 - `04 - CLI CI and V4 Features/03-v4 Updates/05-Shared Scripts via additionalContextRoots.yml`
 

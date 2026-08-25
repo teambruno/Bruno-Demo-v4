@@ -14,5 +14,22 @@ docs:
   content: |-
     ### CLI Commands
 
-    `bru run Runner-User-Scenario --csv-file-path ../data-files/req-users.csv --reporter-json ../reports/report.json --reporter-html ../reports/report.html --reporter-junit ../reports/report.xml`
+    All three reporters off one data-driven run - nine iterations, each its own
+    row in the report. `Create Users` iterates over
+    every row of [`data-files/req-users.csv`](../../../../data-files/), the
+    repo-root copy shared with the `05-Data-Driven` folder in
+    "02 - Auth and Scripting", injecting `name` and `job` per iteration.
+
+    ```bash
+    bru run "01-CLI-Runner-and-Reporters/Runner-DD-Users" --env Production \
+      --csv-file-path "../../data-files/req-users.csv" \
+      --reporter-json ../../reports/report.json \
+      --reporter-html ../../reports/report.html \
+      --reporter-junit ../../reports/report.xml
+    ```
+
+    Run from the collection root (`collections/04 - CLI CI and V4 Features`) -
+    the folder target resolves inside the collection, while the data-file and
+    reporter paths resolve relative to the working directory, hence `../../`.
+    `../../reports/` is the workspace report dir that `.gitignore` covers.
   type: text/markdown

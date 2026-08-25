@@ -81,5 +81,5 @@ docs: |-
   into a failed test with the message.
 
   ```bash
-  bru run "05-Shared-Scripts" --env Production --sandbox=developer
+  bru run "04-Shared-Scripts" --env Production --sandbox=developer
   ```

@@ -57,7 +57,7 @@ docs:
     ### 🛠️ Shared scripts (requires developer sandbox)
     ```bash
     # Folders that require() workspace shared scripts need the developer sandbox
-    bru run "05-Shared-Scripts" --env Production --sandbox=developer
+    bru run "04-Shared-Scripts" --env Production --sandbox=developer
     ```
 
     ---

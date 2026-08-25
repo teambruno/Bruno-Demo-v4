@@ -44,11 +44,20 @@ runtime:
           expect(body.job, "job").to.be.a("string").and.not.include("{{");
         });
 
+        // Mirrors data-files/req-users.csv - the point is to prove the
+        // name/job PAIRING survived interpolation, not just that something
+        // non-empty landed. Add a row to the data file, add it here too.
         test("row is one of the seeded users", () => {
           const users = {
             "John Doe": "Software Engineer",
             "Jane Smith": "Product Manager",
-            "Mark Lee": "Data Scientist"
+            "Mark Lee": "Data Scientist",
+            "Priya Raman": "QA Engineer",
+            "Tomas Herrera": "DevOps Engineer",
+            "Aisha Bello": "Security Analyst",
+            "Wei Zhang": "Backend Developer",
+            "Lena Novak": "Technical Writer",
+            "Samuel Okafor": "Solutions Architect"
           };
           expect(Object.keys(users), "unexpected name").to.include(body.name);
           expect(body.job, `wrong job for ${body.name}`).to.equal(users[body.name]);
@@ -71,19 +80,21 @@ settings:
 docs: |-
   ## Data-driven - Create User
 
-  One request file, three runs. Each row of `req-users.csv` (or
-  `req-users.json`) injects its columns as variables for that iteration, so
+  One request file, nine runs. Each row of `data-files/req-users.csv` (or
+  `req-users.json`) - kept at the repo root and shared with the reporter demo
+  in "04 - CLI CI and V4 Features" - injects its columns as variables for
+  that iteration, so
   `{{name}}` and `{{job}}` in the body below resolve to a different user each
   time.
 
   ```bash
   # CSV
   bru run "05-Data-Driven" --env Demo-Env \
-    --csv-file-path "05-Data-Driven/req-users.csv"
+    --csv-file-path "../../data-files/req-users.csv"
 
-  # JSON - same three rows, same result
+  # JSON - same nine rows, same result
   bru run "05-Data-Driven" --env Demo-Env \
-    --json-file-path "05-Data-Driven/req-users.json"
+    --json-file-path "../../data-files/req-users.json"
   ```
 
   ### Why the tests read the response, not the row

@@ -12,6 +12,6 @@ docs:
     Step 2 uses that stored ID to fetch the full product detail.
 
     ```bash
-    bru run "02-Chained-Requests" --env Production
+    bru run "03-Chained-Requests" --env Production
     ```
   type: text/markdown

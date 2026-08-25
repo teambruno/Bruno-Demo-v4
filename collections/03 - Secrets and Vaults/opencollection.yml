@@ -24,11 +24,11 @@ docs:
 
     | Folder | Source | Environments |
     |--------|--------|--------------|
-    | `01-External-Secrets` | external secret managers | Demo-Azure, Demo-AWS, Demo-HashiCorp |
-    | `02-Local-Secrets` | `.env` file and Bruno secret vars | Demo-Local |
+    | `01-Local-Secrets` | `.env` file and Bruno secret vars | Demo-Local |
+    | `02-External-Secrets` | external secret managers | Demo-Azure, Demo-AWS, Demo-HashiCorp |
 
-    Most calls only need folder 02 - a `.env` file is where the prospect
-    already is. Folder 01 is the answer to "and when we outgrow that?".
+    Most calls only need folder 01 - a `.env` file is where the prospect
+    already is. Folder 02 is the answer to "and when we outgrow that?".
 
     ## Which source works where
 
@@ -42,7 +42,7 @@ docs:
     interchangeable: `{{secretStore.keyname}}` is `externalSecrets` binding syntax
     and only resolves when the environment declares a provider.
 
-    ## The point of folder 01
+    ## The point of folder 02
 
     All three environments bind their provider to the **same alias**, `secretStore`.
     So the requests never name a provider:
@@ -76,7 +76,7 @@ docs:
 
     | Key                      | Used by                                    |
     |--------------------------|--------------------------------------------|
-    | `basic-auth-password`    | 01-Resolve Secret Value, 03-Basic Auth |
+    | `basic-auth-password`    | 01-Resolve Secret Value, 03-Digest Auth Password |
     | `oauth-client-secret`    | 02-OAuth2 Client Secret                |
     | `dummyjson-password`     | 04-Login Password                      |
     | `webhook-signing-secret` | 05-Sign Webhook Payload - HMAC             |
@@ -121,7 +121,7 @@ docs:
       --scope "$(az keyvault show --name bruno-demo-kv --query id -o tsv)"
     ```
 
-    ## One-time setup for `02-Local-Secrets` under the CLI
+    ## One-time setup for `01-Local-Secrets` under the CLI
 
     The app reads `.env` from the workspace root, but `bru run` reads it from
     the collection root. Symlink once so both work:
@@ -137,15 +137,15 @@ docs:
 
     ## Not wired into CI
 
-    Folder 01 needs live vault credentials, so this collection is
+    Folder 02 needs live vault credentials, so this collection is
     deliberately absent from `bruno-cli.gitlab-ci.yml`. Run it from the app,
     or locally once `az login` has happened:
 
     ```bash
-    bru run "01-External-Secrets" --env Demo-Azure
+    bru run "02-External-Secrets" --env Demo-Azure
 
-    # Folder 02 needs no cloud credentials at all
-    bru run "02-Local-Secrets" --env Demo-Local
+    # Folder 01 needs no cloud credentials at all
+    bru run "01-Local-Secrets" --env Demo-Local
     ```
   type: text/markdown
 bundled: false

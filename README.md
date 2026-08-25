@@ -73,6 +73,27 @@ bru run --env Production --tags shared-scripts --sandbox=developer
 Details and the local-vs-shared comparison: [`shared-scripts/README.md`](shared-scripts/README.md).
 Docs: https://docs.usebruno.com/testing/script/js-file
 
+## Data files
+
+[`data-files/`](data-files/) holds the CSV and JSON inputs for the data-driven
+runs, in one place rather than duplicated beside each folder that uses them:
+
+| File | Used by |
+|---|---|
+| `req-users.csv` | `05-Data-Driven` (02) and `Runner-DD-Users` (04) |
+| `req-users.json` | same nine rows as the CSV, to show it is not CSV-only |
+
+The path resolves against the working directory, so demo commands run from a
+collection root use `../../data-files/`:
+
+```bash
+cd "collections/02 - Auth and Scripting"
+bru run "05-Data-Driven" --env Demo-Env \
+  --csv-file-path "../../data-files/req-users.csv"
+```
+
+Details: [`data-files/README.md`](data-files/README.md).
+
 ## What changed from the old workspace
 
 - `workspace.yml` used to reference four collections that didn't exist on

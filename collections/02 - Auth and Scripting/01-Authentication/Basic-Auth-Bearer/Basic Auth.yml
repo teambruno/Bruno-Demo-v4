@@ -53,7 +53,7 @@ docs: |-
   outage; httpfaker is Bruno's own but has no basic-auth endpoint. Checking
   the echoed header proves the same thing - that the credentials were encoded
   and sent correctly. For a live 200-vs-401 credential gate, see
-  `03 - Secrets and Vaults/01-External-Secrets/03-Digest Auth Password`.
+  `03 - Secrets and Vaults/02-External-Secrets/03-Digest Auth Password`.
 
   Note the old test asserted `accessToken` on the response, which
   httpbin's basic-auth endpoint never returned - it could not pass. Replaced

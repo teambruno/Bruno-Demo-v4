@@ -44,5 +44,5 @@ docs: |-
 
   **CLI tip:** Run _only_ tests (skips requests without a `tests` block):
   ```bash
-  bru run "04-Tests-and-Assertions" --env Production --tests-only
+  bru run "03-Tests-and-Assertions" --env Production --tests-only
   ```

@@ -220,14 +220,18 @@ jobs:
             env: Production
             args: "-r --tags shared-scripts --sandbox developer"
 
-          # -- data-driven: 3 CSV rows -> 3 iterations, each one a row in the
-          #    report. Swap the flag for --json-file-path 05-Data-Driven/req-users.json
-          #    to drive the same three iterations from JSON instead.
+          # -- data-driven: 9 CSV rows -> 9 iterations, each one a row in the
+          #    report. Swap the flag for --json-file-path /ws/data-files/req-users.json
+          #    to drive the same nine iterations from JSON instead. Both files
+          #    live in data-files/ at the repo root, shared with the
+          #    Runner-DD-Users reporter demo. The repo is mounted at /ws and the
+          #    workdir is the collection, so the data file needs the absolute
+          #    form - same as the reporter paths above.
           - slug: data-driven
             collection: "02 - Auth and Scripting"
             env: Prod-Env
             target: "05-Data-Driven"
-            args: "-r --csv-file-path 05-Data-Driven/req-users.csv"
+            args: "-r --csv-file-path /ws/data-files/req-users.csv"
 
           # -- v4-features: scoped to this folder on purpose.
           #    02-Additional-Request-Types holds WebSocket/gRPC/SSE requests,
@@ -322,7 +326,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
           # The JSON reporter emits an array of iterations, each with its own
-          # .summary - so a data-driven run with 3 CSV rows has 3 entries.
+          # .summary - so a data-driven run with 9 CSV rows has 9 entries.
           # Totals are summed across them.
           for f in reports/*.json; do
             [ -e "$f" ] || continue

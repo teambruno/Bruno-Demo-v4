@@ -60,5 +60,5 @@ docs: |-
 
   **CLI tip:** Use `--bail` so the suite stops immediately if latency spikes:
   ```bash
-  bru run "04-Tests-and-Assertions" --env Production --bail
+  bru run "03-Tests-and-Assertions" --env Production --bail
   ```

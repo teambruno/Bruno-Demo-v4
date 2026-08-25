@@ -13,13 +13,13 @@ docs:
 
     ```bash
     # Only run requests that have tests (skips pure smoke-check requests)
-    bru run "04-Tests-and-Assertions" --env Production --tests-only
+    bru run "03-Tests-and-Assertions" --env Production --tests-only
 
     # Stop the entire suite on the first failure
-    bru run "04-Tests-and-Assertions" --env Production --bail
+    bru run "03-Tests-and-Assertions" --env Production --bail
 
     # Generate all three report formats
-    bru run "04-Tests-and-Assertions" --env Production \
+    bru run "03-Tests-and-Assertions" --env Production \
       --reporter-json  reports/tests.json \
       --reporter-junit reports/tests.xml \
       --reporter-html  reports/tests.html

@@ -47,8 +47,8 @@ docs: |-
 
   ```bash
   # Include this request
-  bru run "06-Tags-and-Filtering" --env Production --tags regression
+  bru run "01-CLI-Runner-and-Reporters/Tags-and-Filtering" --env Production --tags regression
 
   # Exclude this request (skip slow tests)
-  bru run "06-Tags-and-Filtering" --env Production --exclude-tags slow
+  bru run "01-CLI-Runner-and-Reporters/Tags-and-Filtering" --env Production --exclude-tags slow
   ```
