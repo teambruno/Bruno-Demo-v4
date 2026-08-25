@@ -47,3 +47,81 @@ settings:
   timeout: 10000
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
+
+examples:
+  - name: Update Post (200)
+    request:
+      url: "{{baseUrl}}/posts/{{postId}}"
+      method: PUT
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "id": 1,
+            "title": "Bruno CLI – Updated Title",
+            "body": "Updated via a Bruno CLI collection run.",
+            "userId": 1
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Tue, 25 Aug 2026 16:39:36 GMT
+        - name: content-type
+          value: application/json; charset=utf-8
+        - name: transfer-encoding
+          value: chunked
+        - name: connection
+          value: keep-alive
+        - name: access-control-allow-credentials
+          value: "true"
+        - name: cache-control
+          value: no-cache
+        - name: etag
+          value: W/"7b-ev1Fmq1rCEmzcJzo4wxPhWVeyiI"
+        - name: expires
+          value: "-1"
+        - name: nel
+          value: '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
+        - name: pragma
+          value: no-cache
+        - name: report-to
+          value: '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=WDtpB09uhw1kAgqwsKg3wYs1IONPtxr8lUfhNGson3Q%3D\u0026sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d\u0026ts=1787675976"}],"max_age":3600}'
+        - name: reporting-endpoints
+          value: heroku-nel="https://nel.heroku.com/reports?s=WDtpB09uhw1kAgqwsKg3wYs1IONPtxr8lUfhNGson3Q%3D&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&ts=1787675976"
+        - name: server
+          value: cloudflare
+        - name: vary
+          value: Origin, Accept-Encoding
+        - name: via
+          value: 2.0 heroku-router
+        - name: x-content-type-options
+          value: nosniff
+        - name: x-powered-by
+          value: Express
+        - name: x-ratelimit-limit
+          value: "1000"
+        - name: x-ratelimit-remaining
+          value: "998"
+        - name: x-ratelimit-reset
+          value: "1787675977"
+        - name: cf-cache-status
+          value: DYNAMIC
+        - name: cf-ray
+          value: a30c08a49a51cea1-ATL
+        - name: alt-svc
+          value: h3=":443"; ma=86400
+      body:
+        type: json
+        data: |-
+          {
+            "id": 1,
+            "title": "Bruno CLI – Updated Title",
+            "body": "Updated via a Bruno CLI collection run.",
+            "userId": 1
+          }

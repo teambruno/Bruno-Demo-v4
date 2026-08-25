@@ -1,7 +1,7 @@
 info:
   name: Get News Articles
   type: http
-  seq: 4
+  seq: 2
   tags:
     - demo
 
@@ -59,3 +59,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

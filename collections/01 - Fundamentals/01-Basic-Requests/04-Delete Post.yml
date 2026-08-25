@@ -33,3 +33,63 @@ settings:
   timeout: 10000
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
+
+examples:
+  - name: Delete Post (200)
+    request:
+      url: "{{baseUrl}}/posts/{{postId}}"
+      method: DELETE
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Tue, 25 Aug 2026 16:39:55 GMT
+        - name: content-type
+          value: application/json; charset=utf-8
+        - name: content-length
+          value: "2"
+        - name: connection
+          value: keep-alive
+        - name: access-control-allow-credentials
+          value: "true"
+        - name: cache-control
+          value: no-cache
+        - name: etag
+          value: W/"2-vyGp6PvFo4RvsFtPoIWeCReyIC8"
+        - name: expires
+          value: "-1"
+        - name: nel
+          value: '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
+        - name: pragma
+          value: no-cache
+        - name: report-to
+          value: '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=TXsJbgMMKIxQfvGOQuuVR%2BYfbRuC9tt%2FjFUoFRYBTTo%3D\u0026sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d\u0026ts=1787675995"}],"max_age":3600}'
+        - name: reporting-endpoints
+          value: heroku-nel="https://nel.heroku.com/reports?s=TXsJbgMMKIxQfvGOQuuVR%2BYfbRuC9tt%2FjFUoFRYBTTo%3D&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&ts=1787675995"
+        - name: server
+          value: cloudflare
+        - name: vary
+          value: Origin, Accept-Encoding
+        - name: via
+          value: 2.0 heroku-router
+        - name: x-content-type-options
+          value: nosniff
+        - name: x-powered-by
+          value: Express
+        - name: x-ratelimit-limit
+          value: "1000"
+        - name: x-ratelimit-remaining
+          value: "999"
+        - name: x-ratelimit-reset
+          value: "1787676037"
+        - name: cf-cache-status
+          value: DYNAMIC
+        - name: cf-ray
+          value: a30c091cab16f58a-ATL
+        - name: alt-svc
+          value: h3=":443"; ma=86400
+      body:
+        type: json
+        data: "{}"

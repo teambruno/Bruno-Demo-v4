@@ -13,3 +13,44 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
+
+examples:
+  - name: HTTP Redirect (200)
+    request:
+      url: https://httpbin.org/redirect/1
+      method: GET
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Tue, 25 Aug 2026 16:40:10 GMT
+        - name: content-type
+          value: application/json
+        - name: content-length
+          value: "394"
+        - name: connection
+          value: keep-alive
+        - name: server
+          value: gunicorn/19.9.0
+        - name: access-control-allow-origin
+          value: "*"
+        - name: access-control-allow-credentials
+          value: "true"
+      body:
+        type: json
+        data: |-
+          {
+            "args": {},
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "Accept-Encoding": "gzip, compress, deflate, br",
+              "Host": "httpbin.org",
+              "Request-Start-Time": "1787676009948",
+              "User-Agent": "bruno-runtime/4.1.0",
+              "X-Amzn-Trace-Id": "Root=1-6a8dc56a-19299d0329a67b965224d1ff"
+            },
+            "origin": "104.178.200.102",
+            "url": "https://httpbin.org/get"
+          }

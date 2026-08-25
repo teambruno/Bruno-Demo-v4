@@ -1,7 +1,7 @@
 info:
   name: Get Post
   type: http
-  seq: 1
+  seq: 3
   tags:
     - smoke
     - regression
@@ -77,6 +77,74 @@ settings:
   timeout: 10000
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
+
+examples:
+  - name: Get Post (200)
+    request:
+      url: "{{baseUrl}}/posts/{{postId}}"
+      method: GET
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Tue, 25 Aug 2026 16:38:27 GMT
+        - name: content-type
+          value: application/json; charset=utf-8
+        - name: transfer-encoding
+          value: chunked
+        - name: connection
+          value: keep-alive
+        - name: access-control-allow-credentials
+          value: "true"
+        - name: cache-control
+          value: max-age=43200
+        - name: etag
+          value: W/"124-yiKdLzqO5gfBrJFrcdJ8Yq0LGnU"
+        - name: expires
+          value: "-1"
+        - name: nel
+          value: '{"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}'
+        - name: pragma
+          value: no-cache
+        - name: report-to
+          value: '{"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=R1AH2srwzj3iRZevml%2BnbaTpv7I91%2B2IAubvibpbKmU%3D\u0026sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d\u0026ts=1785186946"}],"max_age":3600}'
+        - name: reporting-endpoints
+          value: heroku-nel="https://nel.heroku.com/reports?s=R1AH2srwzj3iRZevml%2BnbaTpv7I91%2B2IAubvibpbKmU%3D&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&ts=1785186946"
+        - name: server
+          value: cloudflare
+        - name: vary
+          value: Origin, Accept-Encoding
+        - name: via
+          value: 2.0 heroku-router
+        - name: x-content-type-options
+          value: nosniff
+        - name: x-powered-by
+          value: Express
+        - name: x-ratelimit-limit
+          value: "1000"
+        - name: x-ratelimit-remaining
+          value: "999"
+        - name: x-ratelimit-reset
+          value: "1785186983"
+        - name: age
+          value: "23492"
+        - name: cf-cache-status
+          value: HIT
+        - name: cf-ray
+          value: a30c06f2e8fbe1de-ATL
+        - name: alt-svc
+          value: h3=":443"; ma=86400
+      body:
+        type: json
+        data: |-
+          {
+            "userId": 1,
+            "id": 1,
+            "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+          }
 
 docs: |-
   ## GET /posts/:id
