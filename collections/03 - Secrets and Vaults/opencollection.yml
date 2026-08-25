@@ -15,6 +15,96 @@ config:
         password: ""
       bypassProxy: ""
 
+request:
+  scripts:
+    - type: before-request
+      code: |-
+        // ─────────────────────────────────────────────────────────────────────────────
+        // Example: Fetching a secret from an external provider Bruno doesn't natively
+        // support (e.g. CyberArk Conjur, CyberArk CCP/AAM,
+        // Akeyless, Delinea, etc.).
+        //
+        // Strategy:
+        //   1. Read non-sensitive config (URLs, IDs, prefixes) from env/global vars.
+        //   2. Read the *bootstrap* credential used to authenticate to the secret
+        //      provider from a SECRET variable (never hard-code, never log it).
+        //   3. Call the provider's API via bru.sendRequest to exchange the bootstrap
+        //      credential for a short-lived access token.
+        //   4. Fetch the target secret with that token.
+        //   5. Cache the fetched secret in a *runtime* variable (in-memory only, wiped
+        //      when the Bruno process exits) — NOT in env/global/collection where it
+        //      could be persisted to disk or committed to git.
+        //   6. Attach the secret to the outgoing request (Authorization header, body,
+        //      etc.) and clear the local reference.
+        // ─────────────────────────────────────────────────────────────────────────────
+
+        // --- 1. Non-sensitive configuration ------------------------------------------
+        // In a real setup these would point at your CyberArk CCP / Conjur endpoint.
+        const cyberArkBaseUrl = bru.getGlobalEnvVar('baseUrl');           // e.g. https://cyberark.example.com
+        const appId           = bru.getGlobalEnvVar('tenantId');          // CyberArk AppID / Safe identifier
+        const secretPath      = 'AWS/prod/api-service/token';             // path/object inside the vault
+
+        // --- 2. Bootstrap credential (kept as a Bruno secret var) --------------------
+        // This is the ONLY long-lived credential stored locally. Rotate it regularly.
+        // We use getSecretVar so the value is never echoed to logs or the UI.
+        const clientSecret = bru.getSecretVar('secretStore.oauth-client-secret');
+
+        // --- 3. Simple in-memory cache to avoid hammering the vault on every request -
+        // Runtime vars live only for the current Bruno session — safe for short TTLs.
+        const cachedToken  = bru.getVar('cyberark.accessToken');
+        const cachedExpiry = bru.getVar('cyberark.accessTokenExpiry');
+        const now          = Date.now();
+
+        let accessToken = cachedToken;
+
+        if (!accessToken || !cachedExpiry || now >= Number(cachedExpiry)) {
+          // ---- 3a. Exchange the bootstrap credential for a short-lived token -------
+          const authRes = await bru.sendRequest({
+            url: `${cyberArkBaseUrl}/oauth2/token`,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `grant_type=client_credentials&client_id=${appId}&client_secret=${encodeURIComponent(clientSecret)}`
+          });
+
+          accessToken = authRes?.data?.access_token;
+          const ttlMs = ((authRes?.data?.expires_in || 300) - 30) * 1000; // refresh 30s early
+
+          if (!accessToken) {
+            throw new Error('CyberArk auth failed — no access_token returned');
+          }
+
+          // Cache in runtime scope only (never persisted to disk / git).
+          bru.setVar('cyberark.accessToken', accessToken);
+          bru.setVar('cyberark.accessTokenExpiry', String(now + ttlMs));
+        }
+
+        // --- 4. Fetch the actual secret ---------------------------------------------
+        // CCP-style example: /AIMWebService/api/Accounts?AppID=...&Object=...
+        const secretRes = await bru.sendRequest({
+          url: `${cyberArkBaseUrl}/AIMWebService/api/Accounts?AppID=${encodeURIComponent(appId)}&Object=${encodeURIComponent(secretPath)}`,
+          method: 'GET',
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        const fetchedSecret = secretRes?.data?.Content;
+        if (!fetchedSecret) {
+          throw new Error(`Failed to fetch secret "${secretPath}" from CyberArk`);
+        }
+
+        // --- 5. Use the secret for THIS request only --------------------------------
+        // Attach to the outgoing request. We deliberately do NOT write it to env or
+        // global vars — that would risk it being saved to the environment file on disk.
+        req.setHeader('Authorization', `Bearer ${fetchedSecret}`);
+
+        // Optional: add a correlation id so vault access can be traced in audit logs.
+        const corrPrefix = bru.getGlobalEnvVar('correlationIdPrefix') || 'bruno';
+        req.setHeader('X-Correlation-Id', `${corrPrefix}-${now}-${Math.random().toString(36).slice(2, 8)}`);
+
+        // --- 6. Best-effort scrub of local references -------------------------------
+        // JS can't truly zero memory, but dropping references lets GC reclaim sooner
+        // and prevents accidental reuse further down the script.
+        // (Do NOT bru.setVar the secret — keep it out of Bruno's variable store.)
+
 docs:
   content: |-
     # 03 - Secrets and Vaults
