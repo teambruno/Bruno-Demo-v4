@@ -1,0 +1,11 @@
+info:
+  name: Alerting
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Alerting](https://developer.pingidentity.com/pingone-api/platform/alerting.html).
+  type: text/markdown
