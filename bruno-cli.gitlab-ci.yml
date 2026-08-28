@@ -29,6 +29,9 @@ variables:
   BRU_WORKSPACE_PATH: "../.."
   REPORT_DIR: "reports"
   GIT_DEPTH: "1"
+  # Fallback for the secret-store demo in bru-basics. A CI/CD variable of the
+  # same name (Settings > CI/CD > Variables) takes precedence over this.
+  DEMO_POST_ID: "5"
 
 default:
   image:
@@ -117,11 +120,9 @@ bru-basics:
     # Same request, one variable overridden at run time (repeat --env-var to stack)
     - bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
 
-    # Same override, value from GitLab's secret store instead of the command
-    # line: Settings > CI/CD > Variables (masked). GitLab hands every CI/CD
-    # variable to the job as an env var, so $DEMO_POST_ID is simply there.
-    # The :-5 default only keeps this green before the variable exists.
-    - bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId="${DEMO_POST_ID:-5}"
+    # Same override, value supplied by GitLab instead of the command line:
+    # Settings > CI/CD > Variables > DEMO_POST_ID
+    - bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId="$DEMO_POST_ID"
 
     # A whole folder, in sequence: request 2 uses a variable request 1 set
     - bru run "03-Chained-Requests" --env Production
