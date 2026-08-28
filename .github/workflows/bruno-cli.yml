@@ -62,6 +62,10 @@ jobs:
 
       - name: bru run
         working-directory: collections/01 - Fundamentals
+        env:
+          # Mapped in for the last --env-var line below. Actions never puts
+          # secrets on the runner env by default, so this line is required.
+          DEMO_POST_ID: ${{ secrets.DEMO_POST_ID }}
         run: |
           # `bru` below is the pinned CLI image with this folder mounted at /c
           bru() { docker run --rm -v "$PWD:/c" -w /c "$BRUNO_CLI_IMAGE" "$@"; }
@@ -73,6 +77,12 @@ jobs:
 
           # Same request, one variable overridden at run time (repeat --env-var to stack)
           bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
+
+          # Same override, value from GitHub's secret store instead of the
+          # command line: Settings > Secrets and variables > Actions >
+          # DEMO_POST_ID, mapped into `env:` above. The :-5 default only keeps
+          # this green before the secret exists.
+          bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId="${DEMO_POST_ID:-5}"
 
           # A whole folder, in sequence: request 2 uses a variable request 1 set
           bru run "03-Chained-Requests" --env Production
