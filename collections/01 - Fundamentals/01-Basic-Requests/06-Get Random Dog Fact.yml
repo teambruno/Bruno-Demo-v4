@@ -25,6 +25,7 @@ runtime:
       code: |-
         const responseUrl = res.getUrl();
         console.log("Response URL:", responseUrl);
+        //update comment
   assertions:
     - expression: res.status
       operator: eq
