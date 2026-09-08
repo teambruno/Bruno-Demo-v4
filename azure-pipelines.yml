@@ -1,0 +1,400 @@
+# Bruno CLI x Azure Pipelines - Bruno V4 Demo Kit
+#
+# The third of three equivalent pipelines in this workspace. Same collections,
+# same commands, same reports:
+#
+#   GitHub Actions  .github/workflows/bruno-cli.yml
+#   GitLab CI       bruno-cli.gitlab-ci.yml  (root .gitlab-ci.yml just includes it)
+#   Azure Pipelines this file                (+ ci/azure/steps-bru-run.yml)
+#
+#   Overview  https://docs.usebruno.com/bru-cli/overview
+#   Docker    https://docs.usebruno.com/bru-cli/docker
+#   Options   https://docs.usebruno.com/bru-cli/commandOptions
+#   Reporters https://docs.usebruno.com/bru-cli/builtInReporters
+#   Secrets   https://docs.usebruno.com/bru-cli/secret-managers
+#
+# Optional pipeline variables (Pipelines > this pipeline > Edit > Variables, or
+# a linked variable group - both override the YAML defaults below):
+#
+#   BRUNO_GLOBAL_API_KEY - keep it secret. Read by environments/Globals-CI.yml
+#                          as {{process.env.BRUNO_GLOBAL_API_KEY}}
+#   DEMO_POST_ID         - the --env-var override demo in the Basics stage
+#
+# Azure Key Vault is deliberately NOT wired up yet - see the block at the
+# bottom of this file for the two ways in when you are ready.
+
+trigger:
+  # Keeps one run per branch in flight and rolls pending commits into the next
+  # one. It is not quite GitLab's `interruptible: true` or Actions'
+  # cancel-in-progress - those kill the running build; this one lets it finish
+  # and batches what arrived while it ran. Cancelling in-flight builds is a
+  # setting rather than YAML: Repos > Branches > main > Branch policies >
+  # Build validation > "Automatically cancel in-progress builds".
+  batch: true
+  branches:
+    include: [main]
+
+# NOTE: a `pr:` trigger is honoured for GitHub/Bitbucket repos only. This repo
+# lives in Azure Repos, where PR validation is a branch policy instead:
+# Repos > Branches > main > Branch policies > Build validation > add this
+# pipeline. Hence no `pr:` block - it would be silently ignored.
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  # Official image, pinned. Also published as ghcr.io/usebruno/cli, and as
+  # :4, :latest and :4.0.0-debian if you'd rather track a moving tag.
+  - name: BRUNO_CLI_IMAGE
+    value: usebruno/cli:4.0.0
+  # Workspace-level environment: environments/Globals-CI.yml
+  - name: BRU_GLOBAL_ENV
+    value: Globals-CI
+  # Path back to the workspace root from a collection root, so --global-env resolves
+  - name: BRU_WORKSPACE_PATH
+    value: ../..
+  - name: REPORT_DIR
+    value: reports
+
+  # Empty defaults for everything the step template reads. Without these an
+  # undefined $(BRU_TARGET) would reach bash as the literal string
+  # "$(BRU_TARGET)" - Azure Pipelines leaves macros it does not recognise
+  # alone rather than blanking them. Matrix legs override these per job.
+  - name: BRU_TARGET
+    value: ''
+  - name: BRU_ARGS
+    value: ''
+  - name: BRU_ENV_VARS
+    value: ''
+  - name: BRUNO_GLOBAL_API_KEY
+    value: ''
+  # Fallback for the --env-var demo in the Basics stage. A pipeline variable of
+  # the same name (or one from a variable group) takes precedence over this.
+  - name: DEMO_POST_ID
+    value: '5'
+
+  # Prefer a variable group over per-pipeline variables? Link it here and drop
+  # the two defaults above that it supplies:
+  # - group: bruno-demo-ci
+
+stages:
+  # ---------------------------------------------------------------------------
+  # Stage 1 - `bru run` on its own, no template, no matrix, no reporters
+  #
+  # Four commands, each its own line in the log. This is the whole CLI: point it
+  # at a request or a folder, pick an environment, and it runs your tests.
+  # Everything after this stage is the same command with more flags on it.
+  # ---------------------------------------------------------------------------
+  - stage: Basics
+    displayName: bru basics
+    jobs:
+      - job: basics
+        displayName: bru basics
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          - bash: |
+              # `bru` below is the pinned CLI image with this folder mounted at /c
+              bru() { docker run --rm -v "$PWD:/c" -w /c "$(BRUNO_CLI_IMAGE)" "$@"; }
+
+              bru --version
+
+              # One request, one environment -> 8 tests
+              bru run "01-Basic-Requests/01-Get Post.yml" --env Production
+
+              # Same request, one variable overridden at run time (repeat --env-var to stack)
+              bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
+
+              # Same override, value supplied by Azure DevOps instead of the
+              # command line: Edit > Variables > DEMO_POST_ID
+              bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId="$DEMO_POST_ID"
+
+              # A whole folder, in sequence: request 2 uses a variable request 1 set
+              bru run "03-Chained-Requests" --env Production
+            displayName: bru run
+            workingDirectory: $(Build.SourcesDirectory)/collections/01 - Fundamentals
+            env:
+              # Explicit mapping so this keeps working when DEMO_POST_ID is
+              # marked secret - secrets never land on the agent env by themselves.
+              DEMO_POST_ID: $(DEMO_POST_ID)
+
+  # ---------------------------------------------------------------------------
+  # Stage 2 - fast gate: only requests tagged `smoke`, stop at the first failure
+  #
+  # GitLab expresses the fan-out as `parallel: matrix:` on a job that
+  # `extends: [.bru, .all-collections]`. Azure's matrix is the same idea; the
+  # shared half lives in ci/azure/steps-bru-run.yml.
+  #
+  # "02 - Auth and Scripting"'s Prod-Env.yml is deliberately bare in this demo
+  # workspace, so CI injects the endpoints it needs with --env-var (repeatable).
+  #
+  # "03 - Secrets and Vaults" is deliberately NOT in this matrix. Its three
+  # environments bind to live secret managers (Azure Key Vault, AWS Secrets
+  # Manager, HashiCorp Vault) and every request needs data-plane credentials
+  # the pipeline does not hold yet.
+  # ---------------------------------------------------------------------------
+  - stage: Smoke
+    displayName: smoke
+    dependsOn: Basics
+    jobs:
+      - job: smoke
+        displayName: smoke
+        strategy:
+          # Azure runs every matrix leg to completion - there is no fail-fast to
+          # switch off, so one red collection still shows you the other two.
+          #
+          # The leg names are underscored because each one becomes a job
+          # identifier, and those take letters, digits and _ only - a hyphen
+          # here fails validation before the pipeline ever starts. The
+          # hyphenated slug lives in BRU_NAME instead, which is what the report
+          # filenames and artifact names are built from.
+          matrix:
+            fundamentals:
+              BRU_NAME: smoke-fundamentals
+              BRU_COLLECTION: 01 - Fundamentals
+              BRU_ENV: Production
+              BRU_ARGS: -r --tags smoke --bail
+            auth_scripting:
+              BRU_NAME: smoke-auth-scripting
+              BRU_COLLECTION: 02 - Auth and Scripting
+              BRU_ENV: Prod-Env
+              BRU_ARGS: -r --tags smoke --bail
+              BRU_ENV_VARS: >-
+                --env-var weatherUrl=https://api.open-meteo.com/v1
+                --env-var breweryUrl=https://api.openbrewerydb.org/v1
+                --env-var userId=1
+            v4_features:
+              BRU_NAME: smoke-v4-features
+              BRU_COLLECTION: 04 - CLI CI and V4 Features
+              BRU_ENV: Production
+              BRU_ARGS: -r --tags smoke --bail
+        steps:
+          - template: ci/azure/steps-bru-run.yml
+
+  # ---------------------------------------------------------------------------
+  # Stage 3 - the suite, one job per collection, all running in parallel
+  #
+  # Microsoft-hosted pools run one job at a time on the free tier, so these
+  # eight legs queue rather than fan out until you have parallel jobs granted.
+  # ---------------------------------------------------------------------------
+  - stage: Test
+    displayName: test
+    dependsOn: Smoke
+    jobs:
+      - job: test
+        displayName: test
+        strategy:
+          matrix:
+            # -- regression: --tags matches requests with ALL listed tags,
+            #    --exclude-tags drops ANY
+            regression_fundamentals:
+              BRU_NAME: regression-fundamentals
+              BRU_COLLECTION: 01 - Fundamentals
+              BRU_ENV: Production
+              BRU_ARGS: -r --tags regression --exclude-tags slow
+            regression_auth_scripting:
+              BRU_NAME: regression-auth-scripting
+              BRU_COLLECTION: 02 - Auth and Scripting
+              BRU_ENV: Prod-Env
+              BRU_ARGS: -r --tags regression --exclude-tags slow
+              BRU_ENV_VARS: >-
+                --env-var weatherUrl=https://api.open-meteo.com/v1
+                --env-var breweryUrl=https://api.openbrewerydb.org/v1
+                --env-var userId=1
+            regression_v4_features:
+              BRU_NAME: regression-v4-features
+              BRU_COLLECTION: 04 - CLI CI and V4 Features
+              BRU_ENV: Production
+              BRU_ARGS: -r --tags regression --exclude-tags slow
+
+            # -- shared-scripts: require()-ing /shared-scripts via
+            #    additionalContextRoots needs the developer sandbox
+            #    (default is `safe` since CLI 3.0.0)
+            shared_scripts_fundamentals:
+              BRU_NAME: shared-scripts-fundamentals
+              BRU_COLLECTION: 01 - Fundamentals
+              BRU_ENV: Production
+              BRU_ARGS: -r --tags shared-scripts --sandbox developer
+            shared_scripts_auth_scripting:
+              BRU_NAME: shared-scripts-auth-scripting
+              BRU_COLLECTION: 02 - Auth and Scripting
+              BRU_ENV: Prod-Env
+              BRU_ARGS: -r --tags shared-scripts --sandbox developer
+              BRU_ENV_VARS: >-
+                --env-var weatherUrl=https://api.open-meteo.com/v1
+                --env-var breweryUrl=https://api.openbrewerydb.org/v1
+                --env-var userId=1
+            shared_scripts_v4_features:
+              BRU_NAME: shared-scripts-v4-features
+              BRU_COLLECTION: 04 - CLI CI and V4 Features
+              BRU_ENV: Production
+              BRU_ARGS: -r --tags shared-scripts --sandbox developer
+
+            # -- data-driven: 9 CSV rows -> 9 iterations, each one a row in the
+            #    report. Swap the flag for --json-file-path /ws/data-files/req-users.json
+            #    to drive the same nine iterations from JSON instead. Both files
+            #    live in data-files/ at the repo root, shared with the
+            #    Runner-DD-Users reporter demo. The repo is mounted at /ws and
+            #    the workdir is the collection, so the data file needs the
+            #    absolute form - same as the reporter paths in the template.
+            data_driven:
+              BRU_NAME: data-driven
+              BRU_COLLECTION: 02 - Auth and Scripting
+              BRU_ENV: Prod-Env
+              BRU_TARGET: 05-Data-Driven
+              BRU_ARGS: -r --csv-file-path /ws/data-files/req-users.csv
+
+            # -- v4-features: scoped to this folder on purpose.
+            #    02-Additional-Request-Types holds WebSocket/gRPC/SSE requests,
+            #    which the CLI can't execute ("Unsupported protocol wss:") -
+            #    those stay app-only demos.
+            v4_updates:
+              BRU_NAME: v4-updates
+              BRU_COLLECTION: 04 - CLI CI and V4 Features
+              BRU_ENV: Production
+              BRU_TARGET: 03-v4 Updates
+              BRU_ARGS: -r --sandbox developer
+        steps:
+          - template: ci/azure/steps-bru-run.yml
+
+  # ---------------------------------------------------------------------------
+  # Stage 4 - collect every report into one artifact plus a run summary
+  #
+  # Azure DevOps has no Pages equivalent, so where GitLab's `pages:` job serves
+  # the HTML reports at a URL, this publishes them as one downloadable artifact
+  # (with the same index.html inside) and attaches a markdown summary to the
+  # run's Extensions tab via task.uploadsummary - the counterpart of Actions'
+  # $GITHUB_STEP_SUMMARY. The per-request detail is already in the Tests tab.
+  # ---------------------------------------------------------------------------
+  - stage: Report
+    displayName: report
+    dependsOn: [Smoke, Test]
+    condition: always() # the report matters most when the suite failed
+    jobs:
+      - job: report
+        displayName: report
+        steps:
+          - checkout: none
+
+          - task: DownloadPipelineArtifact@2
+            displayName: Download all reports
+            inputs:
+              patterns: bruno-reports-*/**
+              path: $(Pipeline.Workspace)/downloads
+
+          - bash: |
+              set -uo pipefail
+              cd "$(Pipeline.Workspace)"
+              mkdir -p public
+
+              # One artifact per matrix leg, so flatten the per-artifact
+              # directories back into a single folder.
+              find downloads -type f \( -name '*.html' -o -name '*.json' -o -name '*.xml' \) \
+                -exec cp {} public/ \; 2>/dev/null || true
+
+              {
+                echo "## Bruno CLI reports"
+                echo
+                echo "\`$(Build.SourceBranchName)\` @ \`$(Build.SourceVersion)\`"
+                echo
+                echo "| Job | Status | Requests | Tests | Assertions |"
+                echo "|---|---|---:|---:|---:|"
+              } > summary.md
+
+              # The JSON reporter emits an array of iterations, each with its own
+              # .summary - so a data-driven run with 9 CSV rows has 9 entries.
+              # Totals are summed across them.
+              for f in public/*.json; do
+                [ -e "$f" ] || continue
+                name=${f##*/}; name=${name%.json}
+                jq -r --arg n "$name" '
+                  [.[].summary] |
+                  (map(.failedRequests + .errorRequests) | add) as $fail |
+                  (map(.failedTests + .failedAssertions) | add) as $tfail |
+                  "| \($n) | \(if ($fail + $tfail) > 0 then "❌ fail" else "✅ pass" end) " +
+                  "| \(map(.passedRequests)|add)/\(map(.totalRequests)|add) " +
+                  "| \(map(.passedTests)|add)/\(map(.totalTests)|add) " +
+                  "| \(map(.passedAssertions)|add)/\(map(.totalAssertions)|add) |"
+                ' "$f" >> summary.md
+              done
+
+              {
+                echo "<!doctype html><meta charset=\"utf-8\">"
+                echo "<title>Bruno CLI reports - $(Build.SourceVersion)</title>"
+                echo "<h1>Bruno CLI reports</h1>"
+                echo "<p>Build $(Build.BuildNumber)"
+                echo " &middot; $(Build.SourceBranchName) @ $(Build.SourceVersion)</p><ul>"
+                for f in public/*.html; do
+                  [ -e "$f" ] || continue
+                  name=${f##*/}
+                  [ "$name" = "index.html" ] && continue
+                  echo "<li><a href=\"$name\">$name</a></li>"
+                done
+                echo "</ul>"
+              } > public/index.html
+
+              # Attaches summary.md to the run. Markdown tables render; the
+              # logging command is the only way to write to the run itself.
+              echo "##vso[task.uploadsummary]$(Pipeline.Workspace)/summary.md"
+            displayName: Build summary and index
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish combined reports
+            inputs:
+              targetPath: $(Pipeline.Workspace)/public
+              artifact: bruno-reports-all
+
+  # ---------------------------------------------------------------------------
+  # NEXT - Azure Key Vault, for "03 - Secrets and Vaults"
+  #
+  #   https://docs.usebruno.com/bru-cli/secret-managers
+  #
+  # That collection reads its credentials out of a real vault instead of out of
+  # the repo. Its Demo-Azure.yml environment binds the alias `secretStore` to
+  # the Key Vault, and nothing else:
+  #
+  #   externalSecrets:
+  #     type: azure-key-vault
+  #     variables:
+  #       - name: secretStore
+  #         vaultName: bruno-demo-kv
+  #
+  # Requests then use {{secretStore.basic-auth-password}} like any other
+  # variable. Note what is NOT in the collection: how to log in. That lives in
+  # the file behind --secrets-env-file, which is why the identical collection
+  # runs on a laptop and on a runner with no edits - only the file changes.
+  #
+  # Two ways in, both already proven in the `vault` job of
+  # .github/workflows/bruno-cli.yml:
+  #
+  #   1. Service connection. An AzureCLI@2 step with an ARM service connection
+  #      leaves an `az login` session behind, and an azure-key-vault
+  #      environment with no provider config falls back to the Azure CLI
+  #      credential - so the login session IS the configuration, and there is
+  #      no --secrets-env-file at all. Needs the `az` binary, so this leg runs
+  #      the CLI natively (npm i -g @usebruno/cli@4.0.0) rather than in the
+  #      container the stages above use.
+  #
+  #   2. Secrets env file. ci/azure-keyvault-service-principal.env.tpl is
+  #      committed with placeholders; render it with envsubst from three secret
+  #      variables (AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET, or
+  #      an AzureKeyVault@2 task) into $(Agent.TempDirectory) - never into the
+  #      checkout - and pass that path to --secrets-env-file. No az binary and
+  #      no session, so this one works inside usebruno/cli too.
+  #
+  # Two things that job learned the hard way and this one will need as well:
+  #
+  #   --verbose is not optional. A failed vault fetch (bad credentials, no
+  #   data-plane role, wrong vault name) is caught and swallowed, so without it
+  #   the run just reports ordinary 401s from the API under test and never says
+  #   the vault was the problem.
+  #
+  #   --exclude-tags app-only drops 03-Digest Auth Password. The CLI does not
+  #   interpolate digest auth credentials - it puts the literal
+  #   "{{secretStore.basic-auth-password}}" on the wire - so that request 401s
+  #   whatever the vault holds. Bug filed; see the request's docs.
+  #
+  # The identity needs the "Key Vault Secrets User" role on bruno-demo-kv.
+  # ---------------------------------------------------------------------------

@@ -1,0 +1,101 @@
+# Shared step template - Azure Pipelines' answer to GitLab's `extends: .bru`
+#
+# Every job that includes this sets $(BRU_COLLECTION) + $(BRU_ENV) + $(BRU_NAME),
+# optionally $(BRU_TARGET) (a folder inside the collection), $(BRU_ARGS) and
+# $(BRU_ENV_VARS), then gets all three reporters plus the Tests tab for free.
+#
+# It reads pipeline/matrix *variables* rather than template parameters on
+# purpose: matrix values arrive as $(...) macros at run time, so a
+# `${{ parameters.x }}` compile-time expression could never see them. This is
+# the same contract .bru has with $COLLECTION in bruno-cli.gitlab-ci.yml.
+#
+# Reports are named after $(BRU_NAME), so parallel matrix legs never overwrite
+# each other's files or artifacts.
+
+steps:
+  - checkout: self
+    fetchDepth: 1 # GitLab's GIT_DEPTH: "1"
+
+  - bash: |
+      set -uo pipefail
+      mkdir -p "$(Build.SourcesDirectory)/$(REPORT_DIR)"
+
+      # Unlike GitLab, this runs the CLI as a container per command instead of
+      # running the whole job inside the image. Azure container jobs need a
+      # glibc image with no ENTRYPOINT that can host the agent's Node.js;
+      # usebruno/cli is Alpine-based with `bru` as its ENTRYPOINT, so
+      # `docker run` on a plain ubuntu-latest agent is the reliable path - and
+      # it keeps the exact command visible in the log, which is the point of
+      # a demo pipeline. (usebruno/cli:4.0.0-debian in a `container:` block is
+      # the alternative if you would rather have the job itself be the image.)
+      #
+      # --user root: the image's default user is uid 1000 (node) but the agent
+      # workspace is owned by the `vsts` user, so the container cannot write
+      # its reports into the mount otherwise.
+      cmd=(docker run --rm --user root
+           -v "$(Build.SourcesDirectory):/ws"
+           -w "/ws/collections/$BRU_COLLECTION"
+           -e "BRUNO_GLOBAL_API_KEY=${BRUNO_GLOBAL_API_KEY:-}"
+           "$(BRUNO_CLI_IMAGE)" run)
+
+      # Quoted: folder names in this workspace contain spaces.
+      if [[ -n "$BRU_TARGET" ]]; then cmd+=("$BRU_TARGET"); fi
+      # Deliberately unquoted - multi-flag strings that must split into
+      # separate argv entries, same as $BRU_ARGS in the GitLab file.
+      if [[ -n "$BRU_ARGS" ]];     then cmd+=($BRU_ARGS);     fi
+      if [[ -n "$BRU_ENV_VARS" ]]; then cmd+=($BRU_ENV_VARS); fi
+
+      cmd+=(--env "$BRU_ENV"
+            --global-env "$(BRU_GLOBAL_ENV)"
+            --workspace-path "$(BRU_WORKSPACE_PATH)"
+            --reporter-html  "/ws/$(REPORT_DIR)/$BRU_NAME.html"
+            --reporter-json  "/ws/$(REPORT_DIR)/$BRU_NAME.json"
+            --reporter-junit "/ws/$(REPORT_DIR)/$BRU_NAME.xml"
+            --reporter-skip-headers authorization
+            --reporter-skip-headers x-api-key)
+
+      "${cmd[@]}"; status=$?
+      # Reports come back root-owned; open them up so the publish tasks below
+      # can read them. chmod rather than the usual chown "$(id -u):$(id -g)"
+      # because $(...) is also Azure Pipelines' own macro syntax - macros it
+      # does not recognise survive to bash, but not relying on that is one
+      # less thing to explain on a call.
+      sudo chmod -R a+rwX "$(Build.SourcesDirectory)/$(REPORT_DIR)" || true
+      exit $status
+    displayName: bru run
+    env:
+      # Secret variables are never placed on the agent environment by Azure
+      # Pipelines, so every one of them needs an explicit mapping like this.
+      BRUNO_GLOBAL_API_KEY: $(BRUNO_GLOBAL_API_KEY)
+      BRU_COLLECTION: $(BRU_COLLECTION)
+      BRU_ENV: $(BRU_ENV)
+      BRU_NAME: $(BRU_NAME)
+      BRU_TARGET: $(BRU_TARGET)
+      BRU_ARGS: $(BRU_ARGS)
+      BRU_ENV_VARS: $(BRU_ENV_VARS)
+
+  # The JUnit reporter feeds the run's native "Tests" tab - the same thing
+  # GitLab gets from `reports: junit:`. GitHub Actions has no equivalent, which
+  # is why that workflow hand-builds a markdown table from the JSON reporter.
+  #
+  # V4: the JUnit classname is now the collection path, so staging and prod
+  # runs of the same request no longer collapse into duplicates here.
+  - task: PublishTestResults@2
+    condition: succeededOrFailed() # the results matter most when the run went red
+    displayName: Publish JUnit results
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: $(REPORT_DIR)/*.xml
+      searchFolder: $(Build.SourcesDirectory)
+      testRunTitle: $(BRU_NAME)
+      mergeTestResults: true
+      # `bru run`'s own exit code already failed the step above; leaving this
+      # false keeps one red X per failure instead of two.
+      failTaskOnFailedTests: false
+
+  - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed() # keep the reports even when the run goes red
+    displayName: Publish HTML + JSON reports
+    inputs:
+      targetPath: $(Build.SourcesDirectory)/$(REPORT_DIR)
+      artifact: bruno-reports-$(BRU_NAME)
