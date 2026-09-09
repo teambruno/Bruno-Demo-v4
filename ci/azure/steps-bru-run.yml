@@ -20,6 +20,12 @@ steps:
       set -uo pipefail
       mkdir -p "$(Build.SourcesDirectory)/$(REPORT_DIR)"
 
+      # BRUNO_GLOBAL_API_KEY is intentionally not declared as a YAML variable
+      # (a YAML default would shadow the UI/variable-group secret), so when
+      # nobody has set it the macro arrives unexpanded as a literal. Normalise
+      # it rather than passing "$(BRUNO...)" into the container as an API key.
+      case "$BRUNO_GLOBAL_API_KEY" in '$('*')') BRUNO_GLOBAL_API_KEY='' ;; esac
+
       # Unlike GitLab, this runs the CLI as a container per command instead of
       # running the whole job inside the image. Azure container jobs need a
       # glibc image with no ENTRYPOINT that can host the agent's Node.js;

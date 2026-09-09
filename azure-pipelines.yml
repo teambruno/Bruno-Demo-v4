@@ -78,31 +78,36 @@ variables:
     value: ''
   - name: BRU_ENV_VARS
     value: ''
-  - name: BRUNO_GLOBAL_API_KEY
-    value: ''
-  # Fallback for the --env-var demo in the Basics stage. A pipeline variable of
-  # the same name (or one from a variable group) takes precedence over this.
-  - name: DEMO_POST_ID
-    value: '5'
+  # NOT declared here on purpose: BRUNO_GLOBAL_API_KEY, DEMO_POST_ID,
+  # RUN_AZURE_VAULT_DEMO and the AZURE_* trio.
+  #
+  # A YAML variable BEATS a same-named variable set in the pipeline settings UI
+  # or a variable group - the precedence runs queue-time > YAML > UI, not the
+  # other way round. So declaring `RUN_AZURE_VAULT_DEMO: false` here would pin
+  # it to false however you set it in the UI, and an empty
+  # `BRUNO_GLOBAL_API_KEY: ""` would blank out a real secret. Verified the hard
+  # way: build 37 skipped the Vault stage with the UI variable set to true.
+  #
+  # Leaving them undeclared makes the UI the single source of truth. The cost is
+  # that an undefined $(NAME) reaches bash as that literal string rather than as
+  # empty - Azure leaves macros it does not recognise alone - so every consumer
+  # below normalises it. Stage conditions need no such care: an undefined
+  # variable compares equal to '', which is why the Vault gate still defaults to
+  # off when nobody has set it.
 
   # -- Vault stage (Stage 5) --------------------------------------------------
-  # Off by default so a project without the service connection stays green.
-  # Flip it to true in Edit > Variables once the connection exists.
-  - name: RUN_AZURE_VAULT_DEMO
-    value: 'false'
+  # RUN_AZURE_VAULT_DEMO is deliberately NOT declared here - see above. Set it
+  # to true in Edit > Variables once the service connection exists; undefined
+  # means the stage stays skipped.
+  #
   # Name of the ARM service connection (Project settings > Service connections).
   # Leg 1 authenticates with this and nothing else.
   - name: AZURE_SERVICE_CONNECTION
     value: bruno-demo-azure
-  # Leg 2 only, and only if you want the service-principal path demoed. Set
-  # these three as SECRET pipeline variables; leg 2 fails with a clear message
-  # if they are empty. Leg 1 needs none of them.
-  - name: AZURE_TENANT_ID
-    value: ''
-  - name: AZURE_CLIENT_ID
-    value: ''
-  - name: AZURE_CLIENT_SECRET
-    value: ''
+  # Leg 2 needs AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET as
+  # SECRET pipeline variables. Not declared here either, for the same reason -
+  # a YAML default would shadow them. Leg 2 fails with a clear message when they
+  # are missing. Leg 1 needs none of them.
 
   # Prefer a variable group over per-pipeline variables? Link it here and drop
   # the defaults above that it supplies:
@@ -138,8 +143,11 @@ stages:
               bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
 
               # Same override, value supplied by Azure DevOps instead of the
-              # command line: Edit > Variables > DEMO_POST_ID
-              bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId="$DEMO_POST_ID"
+              # command line: Edit > Variables > DEMO_POST_ID. An undeclared
+              # variable arrives as the literal "$(DEMO_POST_ID)", so normalise
+              # that to empty and then fall back to 5.
+              case "$DEMO_POST_ID" in '$('*')') DEMO_POST_ID='' ;; esac
+              bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId="${DEMO_POST_ID:-5}"
 
               # A whole folder, in sequence: request 2 uses a variable request 1 set
               bru run "03-Chained-Requests" --env Production
@@ -522,6 +530,13 @@ stages:
           # committed by accident or swept into the artifact published below.
           - bash: |
               set -euo pipefail
+
+              # These three are undeclared in YAML so the UI owns them, which
+              # means an unset one arrives as the literal "$(AZURE_TENANT_ID)".
+              # Normalise that to empty so the check below catches it.
+              for v in AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET; do
+                case "${!v}" in '$('*')') declare "$v=" ;; esac
+              done
 
               # envsubst turns an unset variable into an empty value and the CLI
               # would then fail somewhere less obvious. Say it here instead.
