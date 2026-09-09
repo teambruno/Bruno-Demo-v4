@@ -1,0 +1,87 @@
+# Bruno CLI x Bitbucket Pipelines - Bruno V4 Demo Kit
+#
+# A deliberately short pipeline: two core `bru run` use cases, then the same
+# command with reporters attached so Bitbucket renders the results.
+# The GitLab and Azure configs in this repo are the full-length versions.
+#
+#   Overview  https://docs.usebruno.com/bru-cli/overview
+#   Docker    https://docs.usebruno.com/bru-cli/docker
+#   Options   https://docs.usebruno.com/bru-cli/commandOptions
+#   Reporters https://docs.usebruno.com/bru-cli/builtInReporters
+#
+# Optional repository variable (Repository settings > Repository variables):
+#   BRUNO_GLOBAL_API_KEY - read by environments/Globals-CI.yml as
+#                          {{process.env.BRUNO_GLOBAL_API_KEY}}
+#
+# "03 - Secrets and Vaults" is intentionally absent: its environments bind to
+# live secret managers and need data-plane credentials this pipeline has none of.
+
+image: usebruno/cli:4.0.0
+
+definitions:
+  # Bitbucket auto-detects JUnit XML under test-results/, so reports land there.
+  BRU_COMMON: &bru-common |
+    bru --version
+    mkdir -p "$BITBUCKET_CLONE_DIR/test-results" "$BITBUCKET_CLONE_DIR/reports"
+
+pipelines:
+  default:
+    # -----------------------------------------------------------------------
+    # Step 1 - the CLI on its own. No reporters, no flags to decode.
+    # Point `bru run` at a request or a folder, pick an environment, done.
+    # -----------------------------------------------------------------------
+    - step:
+        name: bru basics
+        script:
+          - bru --version
+          - cd "collections/01 - Fundamentals"
+
+          # One request, one environment -> 8 tests
+          - bru run "01-Basic-Requests/01-Get Post.yml" --env Production
+
+          # Same request, one variable overridden at run time
+          - bru run "01-Basic-Requests/01-Get Post.yml" --env Production --env-var postId=42
+
+          # A whole folder, in sequence: request 2 uses a variable request 1 set
+          - bru run "03-Chained-Requests" --env Production
+
+    # -----------------------------------------------------------------------
+    # Step 2 - fast gate. Only requests tagged `smoke`, stop at first failure.
+    # -----------------------------------------------------------------------
+    - step:
+        name: smoke
+        script:
+          - *bru-common
+          - cd "collections/01 - Fundamentals"
+          - |
+            bru run -r --tags smoke --bail \
+              --env Production \
+              --global-env Globals-CI \
+              --workspace-path ../..
+
+    # -----------------------------------------------------------------------
+    # Step 3 - the suite, with all three reporters. Same command as above,
+    # just carrying --reporter-* flags. HTML + JSON download from the
+    # Artifacts tab; the JUnit XML feeds Bitbucket's own Tests tab.
+    # -----------------------------------------------------------------------
+    - step:
+        name: regression + reports
+        script:
+          - *bru-common
+          - cd "collections/04 - CLI CI and V4 Features"
+          - |
+            bru run -r \
+              --env Production \
+              --global-env Globals-CI \
+              --workspace-path ../.. \
+              --reporter-html  "$BITBUCKET_CLONE_DIR/reports/regression.html" \
+              --reporter-json  "$BITBUCKET_CLONE_DIR/reports/regression.json" \
+              --reporter-junit "$BITBUCKET_CLONE_DIR/test-results/regression.xml" \
+              --reporter-skip-headers authorization \
+              --reporter-skip-headers x-api-key
+        after-script:
+          # Runs whether the suite passed or failed, so red runs still report.
+          - echo "reports:" && ls -la "$BITBUCKET_CLONE_DIR/reports"
+        artifacts:
+          - reports/**
+          - test-results/**
