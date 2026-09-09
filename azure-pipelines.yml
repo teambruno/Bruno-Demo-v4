@@ -20,8 +20,19 @@
 #                          as {{process.env.BRUNO_GLOBAL_API_KEY}}
 #   DEMO_POST_ID         - the --env-var override demo in the Basics stage
 #
-# Azure Key Vault is deliberately NOT wired up yet - see the block at the
-# bottom of this file for the two ways in when you are ready.
+# Azure Key Vault (Stage 5, off until RUN_AZURE_VAULT_DEMO=true):
+#   AZURE_SERVICE_CONNECTION - ARM service connection name, leg 1's only input
+#   AZURE_TENANT_ID          - leg 2 only, all three secret. Not needed at all
+#   AZURE_CLIENT_ID            if you only want leg 1, which is the path with
+#   AZURE_CLIENT_SECRET        no stored credential anywhere.
+#
+# Setup, in order:
+#   1. Project settings > Service connections > New > Azure Resource Manager >
+#      Workload identity federation (automatic) > pick the subscription >
+#      name it to match AZURE_SERVICE_CONNECTION
+#   2. Grant that identity "Key Vault Secrets User" on bruno-demo-kv - the
+#      vault uses RBAC, so an access policy entry will not do it
+#   3. Set RUN_AZURE_VAULT_DEMO = true
 
 trigger:
   # Keeps one run per branch in flight and rolls pending commits into the next
@@ -74,8 +85,27 @@ variables:
   - name: DEMO_POST_ID
     value: '5'
 
+  # -- Vault stage (Stage 5) --------------------------------------------------
+  # Off by default so a project without the service connection stays green.
+  # Flip it to true in Edit > Variables once the connection exists.
+  - name: RUN_AZURE_VAULT_DEMO
+    value: 'false'
+  # Name of the ARM service connection (Project settings > Service connections).
+  # Leg 1 authenticates with this and nothing else.
+  - name: AZURE_SERVICE_CONNECTION
+    value: bruno-demo-azure
+  # Leg 2 only, and only if you want the service-principal path demoed. Set
+  # these three as SECRET pipeline variables; leg 2 fails with a clear message
+  # if they are empty. Leg 1 needs none of them.
+  - name: AZURE_TENANT_ID
+    value: ''
+  - name: AZURE_CLIENT_ID
+    value: ''
+  - name: AZURE_CLIENT_SECRET
+    value: ''
+
   # Prefer a variable group over per-pipeline variables? Link it here and drop
-  # the two defaults above that it supplies:
+  # the defaults above that it supplies:
   # - group: bruno-demo-ci
 
 stages:
@@ -346,55 +376,250 @@ stages:
               targetPath: $(Pipeline.Workspace)/public
               artifact: bruno-reports-all
 
+
   # ---------------------------------------------------------------------------
-  # NEXT - Azure Key Vault, for "03 - Secrets and Vaults"
+  # Stage 5 - Azure Key Vault, two ways to authenticate
   #
   #   https://docs.usebruno.com/bru-cli/secret-managers
   #
-  # That collection reads its credentials out of a real vault instead of out of
-  # the repo. Its Demo-Azure.yml environment binds the alias `secretStore` to
-  # the Key Vault, and nothing else:
+  # Careful: there are TWO different Key Vault integrations in play, and they
+  # solve different problems.
   #
-  #   externalSecrets:
-  #     type: azure-key-vault
-  #     variables:
-  #       - name: secretStore
-  #         vaultName: bruno-demo-kv
+  #   Azure Pipelines' integration (the AzureKeyVault@2 task, or a variable
+  #   group linked to a vault) has *Azure* fetch secrets and expose them as
+  #   pipeline variables. Bruno never sees the vault. Good for things the
+  #   pipeline itself needs - see the note at the bottom of this stage.
   #
-  # Requests then use {{secretStore.basic-auth-password}} like any other
-  # variable. Note what is NOT in the collection: how to log in. That lives in
-  # the file behind --secrets-env-file, which is why the identical collection
-  # runs on a laptop and on a runner with no edits - only the file changes.
+  #   Bruno's integration (this stage) has the *CLI* fetch secrets at request
+  #   time. "03 - Secrets and Vaults" is built for this: its Demo-Azure.yml
+  #   binds the alias `secretStore` to the vault and nothing else -
   #
-  # Two ways in, both already proven in the `vault` job of
-  # .github/workflows/bruno-cli.yml:
+  #     externalSecrets:
+  #       type: azure-key-vault
+  #       variables:
+  #         - name: secretStore
+  #           vaultName: bruno-demo-kv
   #
-  #   1. Service connection. An AzureCLI@2 step with an ARM service connection
-  #      leaves an `az login` session behind, and an azure-key-vault
-  #      environment with no provider config falls back to the Azure CLI
-  #      credential - so the login session IS the configuration, and there is
-  #      no --secrets-env-file at all. Needs the `az` binary, so this leg runs
-  #      the CLI natively (npm i -g @usebruno/cli@4.0.0) rather than in the
-  #      container the stages above use.
+  #   - and requests use {{secretStore.basic-auth-password}} the same way they
+  #   use any other variable. Values resolve per request and are never written
+  #   to disk, never become pipeline variables, and never reach the log.
   #
-  #   2. Secrets env file. ci/azure-keyvault-service-principal.env.tpl is
-  #      committed with placeholders; render it with envsubst from three secret
-  #      variables (AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET, or
-  #      an AzureKeyVault@2 task) into $(Agent.TempDirectory) - never into the
-  #      checkout - and pass that path to --secrets-env-file. No az binary and
-  #      no session, so this one works inside usebruno/cli too.
+  # Note what is NOT in the collection: how to log in. That lives in the file
+  # behind --secrets-env-file, which is why the identical collection runs on a
+  # laptop and on a hosted agent with no edits - only the file changes.
   #
-  # Two things that job learned the hard way and this one will need as well:
+  # The matrix is the demo: same requests, same vault, two ways in.
   #
-  #   --verbose is not optional. A failed vault fetch (bad credentials, no
-  #   data-plane role, wrong vault name) is caught and swallowed, so without it
-  #   the run just reports ordinary 401s from the API under test and never says
-  #   the vault was the problem.
+  #   azure-cli        an AzureCLI@2 task with an ARM service connection. It
+  #                    leaves an `az login` session behind, and for an
+  #                    azure-key-vault environment with no provider config the
+  #                    CLI falls back to the Azure CLI credential - so the
+  #                    service connection IS the configuration. No
+  #                    --secrets-env-file, nothing rendered, nothing to clean
+  #                    up, and with workload identity federation no secret
+  #                    exists anywhere to leak. This is the one to show.
+  #   secrets-env-file service principal credentials rendered from secret
+  #                    pipeline variables at run time. Needs no `az` binary and
+  #                    no session, so this is the path for a self-hosted agent
+  #                    or for running inside the usebruno/cli container.
   #
-  #   --exclude-tags app-only drops 03-Digest Auth Password. The CLI does not
-  #   interpolate digest auth credentials - it puts the literal
-  #   "{{secretStore.basic-auth-password}}" on the wire - so that request 401s
-  #   whatever the vault holds. Bug filed; see the request's docs.
+  # Reports publish as `vault-reports-*` rather than `bruno-reports-*` so they
+  # stay out of the Report stage's aggregate - this stage is independent of the
+  # rest of the pipeline, and Report runs alongside it rather than after it.
+  # ---------------------------------------------------------------------------
+  - stage: Vault
+    displayName: azure key vault
+    dependsOn: Test
+    # Off until you flip RUN_AZURE_VAULT_DEMO to true, so a fork or a project
+    # without the service connection never goes red here. Create the service
+    # connection FIRST - a run that reaches an AzureCLI@2 task naming a
+    # connection that does not exist fails the stage.
+    condition: and(always(), eq(variables['RUN_AZURE_VAULT_DEMO'], 'true'))
+    jobs:
+      - job: vault
+        displayName: azure key vault
+        strategy:
+          matrix:
+            azure_cli:
+              BRU_AUTH: azure-cli
+              BRU_NAME: vault-azure-cli
+            secrets_env_file:
+              BRU_AUTH: secrets-env-file
+              BRU_NAME: vault-secrets-env-file
+        steps:
+          - checkout: self
+            fetchDepth: 1
+
+          # Native install rather than the container the other stages use:
+          # Azure CLI auth needs the `az` binary and its login session, both of
+          # which are on the agent and neither of which is in usebruno/cli. The
+          # service-principal leg has no such constraint and would run fine in
+          # the image - mount the rendered file in with -v and pass the
+          # container path.
+          - bash: |
+              set -euo pipefail
+              # Version tracks BRUNO_CLI_IMAGE at the top of this file so the
+              # container stages and this one cannot drift apart.
+              npm install -g "@usebruno/cli@${BRUNO_CLI_IMAGE##*:}"
+              bru --version
+            displayName: Install Bruno CLI
+            env:
+              BRUNO_CLI_IMAGE: $(BRUNO_CLI_IMAGE)
+
+          # -- Leg 1 ------------------------------------------------------------
+          # AzureCLI@2 runs its script inside an authenticated az context, so
+          # `bru run` goes here rather than in a later step - that way the login
+          # session is guaranteed live rather than relying on it leaking
+          # forward. No --secrets-env-file: the session is the credential.
+          - task: AzureCLI@2
+            condition: eq(variables['BRU_AUTH'], 'azure-cli')
+            displayName: bru run (Azure CLI credential)
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: $(Build.SourcesDirectory)/collections/03 - Secrets and Vaults
+              inlineScript: |
+                set -uo pipefail
+                mkdir -p "$(Build.SourcesDirectory)/$(REPORT_DIR)"
+
+                # Proof the session is real, and a nice thing to point at on a
+                # call. --query keeps it to the app id, no tokens in the log.
+                az account show --query "user.name" -o tsv
+
+                # --exclude-tags app-only drops 03-Digest Auth Password. The CLI
+                # does not interpolate digest auth credentials - it puts the
+                # literal "{{secretStore.basic-auth-password}}" on the wire - so
+                # that request 401s whatever the vault holds. Bug filed; see the
+                # request's docs. The other four all resolve real vault values,
+                # so this stays an honest test of the store.
+                #
+                # --verbose is not optional. A vault fetch that fails (bad
+                # credentials, no data-plane role, wrong vault name) is caught
+                # and swallowed, so without it the run just reports ordinary
+                # 401s from the API under test and never says the vault was the
+                # problem. It logs the vault name and whether each fetch
+                # succeeded, never a secret value, and "1. Fetched secret for:
+                # bruno-demo-kv" is worth showing anyway.
+                bru run "02-External-Secrets" -r \
+                  --env Demo-Azure \
+                  --exclude-tags app-only \
+                  --verbose \
+                  --global-env "$(BRU_GLOBAL_ENV)" \
+                  --workspace-path "$(BRU_WORKSPACE_PATH)" \
+                  --reporter-html  "$(Build.SourcesDirectory)/$(REPORT_DIR)/$(BRU_NAME).html" \
+                  --reporter-json  "$(Build.SourcesDirectory)/$(REPORT_DIR)/$(BRU_NAME).json" \
+                  --reporter-junit "$(Build.SourcesDirectory)/$(REPORT_DIR)/$(BRU_NAME).xml" \
+                  --reporter-skip-headers authorization \
+                  --reporter-skip-headers x-api-key \
+                  --reporter-skip-headers x-secret-probe
+
+          # -- Leg 2 ------------------------------------------------------------
+          # ci/azure-keyvault-service-principal.env.tpl is committed with
+          # placeholders; the real values arrive as secret pipeline variables and
+          # are substituted in here. The rendered file goes to
+          # $(Agent.TempDirectory) - never inside the checkout, so it cannot be
+          # committed by accident or swept into the artifact published below.
+          - bash: |
+              set -euo pipefail
+
+              # envsubst turns an unset variable into an empty value and the CLI
+              # would then fail somewhere less obvious. Say it here instead.
+              for v in AZURE_TENANT_ID AZURE_CLIENT_ID AZURE_CLIENT_SECRET; do
+                if [[ -z "${!v}" ]]; then
+                  echo "##vso[task.logissue type=error]pipeline variable $v is unset or empty"
+                  exit 1
+                fi
+              done
+
+              # 600 before anything is written, and the explicit variable list
+              # keeps envsubst from expanding anything else in scope.
+              install -m 600 /dev/null "$(Agent.TempDirectory)/azure-keyvault-service-principal.env"
+              envsubst '${AZURE_TENANT_ID} ${AZURE_CLIENT_ID} ${AZURE_CLIENT_SECRET}' \
+                < ci/azure-keyvault-service-principal.env.tpl \
+                > "$(Agent.TempDirectory)/azure-keyvault-service-principal.env"
+            displayName: Render secrets env file
+            condition: eq(variables['BRU_AUTH'], 'secrets-env-file')
+            workingDirectory: $(Build.SourcesDirectory)
+            env:
+              # Secret variables are never on the agent env by themselves.
+              AZURE_TENANT_ID: $(AZURE_TENANT_ID)
+              AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(AZURE_CLIENT_SECRET)
+
+          - bash: |
+              set -uo pipefail
+              mkdir -p "$(Build.SourcesDirectory)/$(REPORT_DIR)"
+
+              # Identical to leg 1 apart from --secrets-env-file. Same command,
+              # same environment, same collection, same vault.
+              bru run "02-External-Secrets" -r \
+                --env Demo-Azure \
+                --exclude-tags app-only \
+                --secrets-env-file "$(Agent.TempDirectory)/azure-keyvault-service-principal.env" \
+                --verbose \
+                --global-env "$(BRU_GLOBAL_ENV)" \
+                --workspace-path "$(BRU_WORKSPACE_PATH)" \
+                --reporter-html  "$(Build.SourcesDirectory)/$(REPORT_DIR)/$(BRU_NAME).html" \
+                --reporter-json  "$(Build.SourcesDirectory)/$(REPORT_DIR)/$(BRU_NAME).json" \
+                --reporter-junit "$(Build.SourcesDirectory)/$(REPORT_DIR)/$(BRU_NAME).xml" \
+                --reporter-skip-headers authorization \
+                --reporter-skip-headers x-api-key \
+                --reporter-skip-headers x-secret-probe
+            displayName: bru run (service principal)
+            condition: eq(variables['BRU_AUTH'], 'secrets-env-file')
+            workingDirectory: $(Build.SourcesDirectory)/collections/03 - Secrets and Vaults
+
+          # Agent.TempDirectory is wiped with a hosted agent anyway, but on a
+          # self-hosted one it may not be. Drop the file the moment it stops
+          # being needed.
+          - bash: rm -f "$(Agent.TempDirectory)/azure-keyvault-service-principal.env"
+            displayName: Remove rendered credentials
+            condition: and(always(), eq(variables['BRU_AUTH'], 'secrets-env-file'))
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            displayName: Publish JUnit results
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: $(REPORT_DIR)/$(BRU_NAME).xml
+              searchFolder: $(Build.SourcesDirectory)
+              testRunTitle: $(BRU_NAME)
+              mergeTestResults: true
+              failTaskOnFailedTests: false
+
+          - task: PublishPipelineArtifact@1
+            condition: succeededOrFailed()
+            displayName: Publish reports
+            inputs:
+              targetPath: $(Build.SourcesDirectory)/$(REPORT_DIR)
+              artifact: vault-reports-$(BRU_AUTH)
+
+  # ---------------------------------------------------------------------------
+  # The other Key Vault integration - Azure fetching secrets FOR the pipeline
   #
-  # The identity needs the "Key Vault Secrets User" role on bruno-demo-kv.
+  # Everything above is Bruno reading the vault. The reverse is Azure reading it
+  # and handing values to the pipeline as variables:
+  #
+  #   - task: AzureKeyVault@2
+  #     inputs:
+  #       azureSubscription: $(AZURE_SERVICE_CONNECTION)
+  #       KeyVaultName: bruno-demo-kv
+  #       SecretsFilter: bruno-global-api-key
+  #       RunAsPreJob: true
+  #
+  # ...after which $(bruno-global-api-key) is a secret variable like any other.
+  # A variable group linked to a vault (Library > Variable group > "Link secrets
+  # from an Azure key vault as variables") does the same thing without YAML.
+  #
+  # Where that is genuinely useful here: BRUNO_GLOBAL_API_KEY for the Smoke and
+  # Test stages, so even that value stops living in pipeline variables. It would
+  # need adding to the vault first - bruno-demo-kv currently holds only the four
+  # secrets collection 03 consumes.
+  #
+  # Where it does NOT work: sourcing leg 2's AZURE_CLIENT_SECRET from the vault.
+  # That secret is what authenticates to the vault, so reading it from there is
+  # circular. Leg 2's three values have to come from pipeline variables (or a
+  # non-vault-linked group) - which is exactly why leg 1 is the better story:
+  # federation means there is no client secret to store in the first place.
   # ---------------------------------------------------------------------------
