@@ -141,7 +141,7 @@ Details: [`data-files/README.md`](data-files/README.md).
   successor), `newsapi.org` (free tier blocks non-localhost production
   traffic, fine for a local live demo).
 
-## Bruno V4 features covered
+## Bruno V4 features covered - 4.1.0 Release
 
 See `04 - CLI CI and V4 Features/03-v4 Updates` for runnable examples
 of: secrets manager migration, `bru.setVar()` vs `bru.setEnvVar()`
