@@ -7,7 +7,7 @@ info:
 
 http:
   method: GET
-  url: https://dogapi.dog/api/v2/facts
+  url: https://dogapi.dog/api/v2/facts?max_length=
   headers:
     - name: Content-Type
       value: application/json
@@ -16,15 +16,9 @@ http:
     - name: max_length
       value: ""
       type: query
-      disabled: true
   auth: inherit
 
 runtime:
-  scripts:
-    - type: after-response
-      code: |-
-        const responseUrl = res.getUrl();
-        console.log("Response URL:", responseUrl);
   assertions:
     - expression: res.status
       operator: eq
