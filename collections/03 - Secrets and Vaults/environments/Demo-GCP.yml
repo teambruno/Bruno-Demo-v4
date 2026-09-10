@@ -14,4 +14,4 @@ externalSecrets:
   type: gcp-secrets-manager
   variables:
     - name: secretStore
-      projectId: basic-auth-password
+      projectId: bruno-vault-sandbox
