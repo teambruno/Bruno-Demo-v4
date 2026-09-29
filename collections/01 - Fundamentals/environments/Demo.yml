@@ -1,4 +1,6 @@
 name: Demo
+extends: Base
+color: "#2E8A54"
 variables:
   - name: baseUrl
     value: https://jsonplaceholder.typicode.com
@@ -44,18 +46,16 @@ variables:
           "maxBatchSize": 25
         }
     description: object - read nested keys, e.g. bru.getEnvVar("featureFlags").betaSearch
-  - secret: true
-    name: password
-    description: ""
-  - secret: true
-    name: username
-    description: ""
   - name: tokenVar
     value: demoToken
     description: ""
   - name: header-content-language
     value: demo-en
     description: ""
+  - secret: true
+    name: password
+  - secret: true
+    name: username
 externalSecrets:
   type: azure-key-vault
   variables:

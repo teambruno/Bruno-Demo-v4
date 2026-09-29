@@ -1,0 +1,12 @@
+name: Base
+color: "#B491E5"
+variables:
+  - name: baseUrl
+    value: https://Inherited-Var.com
+    description: ""
+  - name: username
+    value: james-demo
+    description: ""
+  - name: demo-pw
+    value: brunoRule$
+    description: ""
