@@ -7,7 +7,7 @@ info:
 
 http:
   method: GET
-  url: "{{newsUrl}}/everything?q=tesla&sortBy=publishedAt&from={{validDate}}"
+  url: "{{newsUrl}}/everything?q=tesla&sortBy=publishedAt&from=2025-10-01"
   params:
     - name: q
       value: tesla
@@ -18,14 +18,14 @@ http:
     - name: from
       value: "{{validDate}}"
       type: query
+      disabled: true
     - name: from
       value: 2025-10-01
       type: query
-      disabled: true
   auth:
     type: apikey
     key: apiKey
-    value: "{{secretStore.news-api-key}}"
+    value: "{{news-api-key}}"
     placement: query
 
 runtime:

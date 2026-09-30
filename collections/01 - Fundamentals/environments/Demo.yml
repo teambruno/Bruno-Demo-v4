@@ -54,8 +54,13 @@ variables:
     description: ""
   - secret: true
     name: password
+    description: ""
   - secret: true
     name: username
+    description: ""
+  - secret: true
+    name: news-api-key
+    description: ""
 externalSecrets:
   type: azure-key-vault
   variables:
