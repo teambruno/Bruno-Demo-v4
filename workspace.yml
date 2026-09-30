@@ -12,6 +12,10 @@ collections:
     path: "collections/03 - Secrets and Vaults"
   - name: "04 - CLI CI and V4 Features"
     path: "collections/04 - CLI CI and V4 Features"
+  - name: "PingOne Platform API - 2"
+    path: "collections/PingOne Platform API - 2"
+  - name: "Sportmonks API3"
+    path: "collections/Sportmonks API3"
 
 specs:
   - name: "checkout-v71"

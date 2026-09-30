@@ -7,10 +7,10 @@ info:
 
 http:
   method: GET
-  url: "{{newsUrl}}/everything?q=tesla&sortBy=publishedAt&from={{validDate}}"
+  url: "{{newsUrl}}/everything?q=bruno&sortBy=publishedAt&from={{validDate}}"
   params:
     - name: q
-      value: tesla
+      value: bruno
       type: query
     - name: sortBy
       value: publishedAt
