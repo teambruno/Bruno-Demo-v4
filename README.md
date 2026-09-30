@@ -149,3 +149,10 @@ persistence, descriptions + typed variables, multiple WebSocket messages
 (in `02-Additional-Request-Types/echo-websocket.yml`), shared scripts across
 collections via `additionalContextRoots`, and the CLI JUnit `classname`
 change. Full release notes: https://www.usebruno.com/v4-release
+
+**4.2 - gRPC scripting (beta):**
+`04 - CLI CI and V4 Features/02-Additional-Request-Types/gRPC-Scripting` has
+three requests that cover all four gRPC hooks (Before Call Start, Before
+Message Send, After Message Receive, After Call End) against `grpcb.in`. They
+run in the app only, because the CLI can't run gRPC. They are tagged
+`app-only` and kept out of `03-v4 Updates`, the folder CI runs.

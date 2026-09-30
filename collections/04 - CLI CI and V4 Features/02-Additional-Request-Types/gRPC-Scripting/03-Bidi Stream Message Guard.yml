@@ -1,0 +1,88 @@
+info:
+  name: 03-Bidi Stream Message Guard
+  type: grpc
+  seq: 3
+  tags:
+    - v4-feature
+    - app-only
+
+grpc:
+  url: https://grpcb.in/
+  method: /hello.HelloService/BidiHello
+  methodType: bidi-streaming
+  message:
+    - title: 1 - Ada
+      message: |-
+        {
+          "greeting": "Ada"
+        }
+    - title: 2 - Grace
+      message: |-
+        {
+          "greeting": "Grace"
+        }
+    - title: 3 - empty greeting (blocked by script)
+      message: |-
+        {
+          "greeting": ""
+        }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: grpc:before-message-send
+      code: |-
+        // Before every outgoing message. Throwing blocks that one message and
+        // leaves the stream open. Message 3 is deliberately invalid.
+        const { greeting } = bru.grpc.request.message.data;
+
+        if (!greeting || !greeting.trim()) {
+          throw new Error('greeting is empty - message blocked, stream still open');
+        }
+
+        console.log(`sending #${bru.grpc.request.messages.count() + 1}: ${greeting}`);
+    - type: grpc:after-message-receive
+      code: |-
+        // Pair each reply with the message that caused it. A blocked message
+        // never joins request.messages, so reply N lines up with sent message N.
+        const n = bru.grpc.response.messages.count();
+        const sent = bru.grpc.request.messages.get(n - 1).data;
+
+        test(`reply answers "${sent.greeting}"`, () => {
+          expect(bru.grpc.response.message.data.reply).to.equal(`hello ${sent.greeting}`);
+        });
+    - type: grpc:after-call-end
+      code: |-
+        const res = bru.grpc.response;
+        const sent = bru.grpc.request.messages;
+
+        test('stream closed with status 0 (OK)', () => {
+          expect(res.statusCode).to.equal(0);
+        });
+
+        test('one reply per message actually sent', () => {
+          expect(res.messages.count()).to.equal(sent.count());
+        });
+
+        test('blocked message never reached the server', () => {
+          expect(sent.filter((m) => !m.data.greeting.trim())).to.have.lengthOf(0);
+        });
+
+docs: |-
+  ## Before Message Send: guard a live stream
+
+  **Say:** "On a bidirectional stream you send messages one at a time. Before
+  Message Send sees each one before it goes out, and can refuse it."
+
+  **Click:** Send to open the stream, then **Send message** on messages 1, 2
+  and 3 in order, then end the stream from the URL bar.
+
+  - 1 and 2 go out, and each reply is tested against the message that caused
+    it.
+  - 3 has an empty greeting. The hook throws, Bruno shows **Message not
+    sent**, and the stream stays open - send 1 again to prove it.
+  - After you end the stream, After Call End checks that every sent message
+    got exactly one reply and that the blocked one never reached the server.
+
+  Hand-sent stream messages go out exactly as typed - `{{vars}}` in them are
+  not interpolated - so keep these messages literal.

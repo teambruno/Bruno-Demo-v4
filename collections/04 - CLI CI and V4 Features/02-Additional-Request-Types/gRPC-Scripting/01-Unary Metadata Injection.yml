@@ -1,0 +1,106 @@
+info:
+  name: 01-Unary Metadata Injection
+  type: grpc
+  seq: 1
+  tags:
+    - v4-feature
+    - app-only
+
+grpc:
+  url: https://grpcb.in/
+  method: /grpcbin.GRPCBin/HeadersUnary
+  methodType: unary
+  metadata:
+    - name: x-client
+      value: bruno-demo
+  message:
+    - title: empty
+      message: "{}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: grpc:before-call-start
+      code: |-
+        // Once per call, before the connection opens - the gRPC version of a
+        // pre-request script, and the only hook where metadata is writable.
+        const { v4: uuid } = require('uuid');
+
+        // A real token from the httpfaker OAuth2 demo server (public demo creds).
+        let token;
+        try {
+          const res = await bru.sendRequest({
+            method: 'POST',
+            url: 'https://www.httpfaker.org/api/auth/oauth2/client-credentials/token',
+            headers: { 'content-type': 'application/x-www-form-urlencoded' },
+            data: 'grant_type=client_credentials&client_id=demo-client-id&client_secret=demo-client-secret&scope=user:read'
+          });
+          token = res.data.access_token;
+        } catch (err) {
+          // Throwing here means Bruno never opens the call.
+          throw new Error(`Token request failed (${err.status || err.message}) - call not sent`);
+        }
+
+        // setVar, not setEnvVar: V4 writes env vars to disk, and this is a token.
+        const requestId = uuid();
+        bru.setVar('grpcToken', token);
+        bru.setVar('grpcRequestId', requestId);
+
+        // Added on top of the Metadata tab (x-client), not instead of it.
+        bru.grpc.request.metadata.upsert('authorization', `Bearer ${token}`);
+        bru.grpc.request.metadata.upsert('x-request-id', requestId);
+
+        console.log(bru.grpc.request.method, bru.grpc.request.metadata.toObject());
+    - type: grpc:after-call-end
+      code: |-
+        // Once, after the server's final status.
+        const res = bru.grpc.response;
+
+        // HeadersUnary replies with the metadata it received:
+        // { Metadata: [{ key, value: { values: [...] } }] }
+        const received = {};
+        for (const { key, value } of res.messages.get(0)?.data.Metadata ?? []) {
+          received[key] = value.values[0];
+        }
+
+        test('call succeeded (gRPC status 0 = OK)', () => {
+          expect(res.statusCode).to.equal(0);
+        });
+
+        test('server received the exact token fetched in Before Call Start', () => {
+          expect(received.authorization).to.equal(`Bearer ${bru.getVar('grpcToken')}`);
+        });
+
+        test('server received the scripted x-request-id', () => {
+          expect(received['x-request-id']).to.equal(bru.getVar('grpcRequestId'));
+        });
+
+        test('Metadata tab entries are still sent', () => {
+          expect(received['x-client']).to.equal('bruno-demo');
+        });
+
+docs: |-
+  ## Before Call Start + After Call End (unary)
+
+  **Say:** "Our gRPC services want a bearer token in the metadata. Before
+  Call Start fetches a fresh one from the OAuth2 server with
+  `bru.sendRequest`, then adds it to the call."
+
+  **Click:** Send, then the **Tests** tab. Four passes under **After Call
+  End Tests**. The one that matters: `HeadersUnary` replies with the
+  metadata the server received, and it's the exact token this run fetched -
+  a new one every Send.
+
+  **Point at:** `x-client` in the Metadata tab still goes out. Scripted
+  metadata is layered on top, not a replacement.
+
+  **Break it (optional):** change `client_secret` in the script and Send.
+  The token call 401s, the hook throws, and Bruno never opens the gRPC call -
+  no unauthenticated request goes out. Change it back after.
+
+  If a fixed token is enough, the request's **Auth** tab does this without a
+  script. Script it when the flow is custom: token exchange, signed metadata,
+  per-call trace IDs.
+
+  Token server: the httpfaker client-credentials demo, with the same public
+  demo creds as `02 - Auth and Scripting/01-Authentication/Client-Credentials`.

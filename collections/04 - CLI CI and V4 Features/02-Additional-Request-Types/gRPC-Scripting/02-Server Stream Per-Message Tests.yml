@@ -1,0 +1,71 @@
+info:
+  name: 02-Server Stream Per-Message Tests
+  type: grpc
+  seq: 2
+  tags:
+    - v4-feature
+    - app-only
+
+grpc:
+  url: https://grpcb.in/
+  method: /hello.HelloService/LotsOfReplies
+  methodType: server-streaming
+  message:
+    - title: greeting
+      message: |-
+        {
+          "greeting": "{{grpcGreeting}}"
+        }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: grpc:before-call-start
+      code: |-
+        // Bruno fills {{placeholders}} after this hook runs, so a variable set
+        // here shapes the message. (Scripts can't edit a message directly in 4.2.)
+        bru.setVar('grpcGreeting', `Bruno ${new Date().toISOString().slice(11, 19)}`);
+    - type: grpc:after-message-receive
+      code: |-
+        // Once per streamed message, as it arrives. Results are grouped per
+        // message under "After Message Receive Tests".
+        const { reply } = bru.grpc.response.message.data;
+
+        test('reply greets the name set in Before Call Start', () => {
+          expect(reply).to.equal(`hello ${bru.getVar('grpcGreeting')}`);
+        });
+    - type: grpc:after-call-end
+      code: |-
+        // Once, after the stream closes: checks on the call as a whole.
+        const res = bru.grpc.response;
+        const sent = bru.grpc.request.messages.get(0).data; // as sent, after interpolation
+
+        test('stream finished with status 0 (OK)', () => {
+          expect(res.statusCode).to.equal(0);
+        });
+
+        test('server streamed 10 replies', () => {
+          expect(res.messages.count()).to.equal(10);
+        });
+
+        test('sent message carried the scripted greeting', () => {
+          expect(sent.greeting).to.equal(bru.getVar('grpcGreeting'));
+        });
+
+        console.log(`${res.messages.count()} replies in ${res.duration} ms`);
+
+docs: |-
+  ## After Message Receive: a test per streamed message
+
+  **Say:** "On a stream, a test at the end only sees the result. After
+  Message Receive runs on every message as it arrives, so each one gets
+  checked."
+
+  **Click:** Send, then the **Tests** tab. **After Message Receive Tests**
+  lists Message 1 to Message 10, one test each. **After Call End Tests**
+  then checks the call as a whole: status, reply count, and what was sent.
+
+  **Point at:** the Message tab says `{{grpcGreeting}}`. Before Call Start
+  sets it with `bru.setVar()` just before Bruno fills in the placeholders,
+  so every Send greets a new timestamp. Scripts can't rewrite a message
+  directly in 4.2, so a variable is how a script shapes the payload.

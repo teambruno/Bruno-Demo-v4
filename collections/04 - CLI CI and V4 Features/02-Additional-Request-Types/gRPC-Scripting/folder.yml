@@ -1,0 +1,60 @@
+info:
+  name: gRPC-Scripting
+  type: folder
+  seq: 6
+
+docs:
+  content: |-
+    ## gRPC Scripting (4.2, beta)
+
+    In 4.2, gRPC calls get their own script lifecycle: four hooks, one for
+    each point in a call, instead of HTTP's pre-request / post-response pair.
+    Open any request here and go to the **Script** tab (it has a Beta badge):
+
+    | Hook | Runs | Shown in |
+    |---|---|---|
+    | Before Call Start | once, before the connection opens | 01, 02 |
+    | Before Message Send | before each outgoing message | 03 |
+    | After Message Receive | on each incoming message | 02, 03 |
+    | After Call End | once, after the final status | 01, 02, 03 |
+
+    Scripts use `bru.grpc.request` and `bru.grpc.response`. There are no `req`
+    / `res` globals. `test()` and `expect()` work in every hook, and results
+    show in the response pane's **Tests** tab, grouped by hook and, for the
+    message hooks, by message. gRPC requests have no Tests or Assert tab, so
+    tests go in the hooks.
+
+    1. **01-Unary Metadata Injection** - fetches a real OAuth2 token with
+       `bru.sendRequest`, adds it as `authorization` metadata, and proves the
+       server received that exact token.
+    2. **02-Server Stream Per-Message Tests** - a variable set in Before Call
+       Start fills `{{grpcGreeting}}` in the message, and each of the 10
+       streamed replies gets its own test.
+    3. **03-Bidi Stream Message Guard** - Before Message Send refuses an
+       invalid message while the stream stays open, and each reply is paired
+       with the message that caused it.
+
+    All three call `grpcb.in`, a public gRPC sandbox with server reflection,
+    so no proto file is needed. Verified live 2026-09-29.
+
+    ### Worth knowing before someone asks
+
+    - **Metadata can only be changed in Before Call Start.** In later hooks it
+      is read-only, and `upsert()` throws "not available once the call has been
+      sent".
+    - **Messages are read-only in 4.2.** A script can inspect, test or block a
+      message, but not rewrite it. To shape the payload, set a variable in
+      Before Call Start (request 02).
+    - **Hand-sent stream messages are not interpolated.** On client and bidi
+      streams, each **Send message** click sends the text exactly as typed, so
+      `{{vars}}` go out literally. Unary and server-stream messages are
+      interpolated.
+    - **int64 fields arrive as strings** (protobuf JSON mapping), for example
+      `addsvc.Add/Sum` returns `{"v": "1055"}`. Use `Number()` before comparing.
+    - **OK is `statusCode === 0`**, and `statusText` is empty, not `"OK"`.
+    - **`bru.runRequest` is rejected in gRPC scripts.** `bru.sendRequest`
+      works.
+    - **These run in the app only.** The 4.2.0 CLI still can't run gRPC; it
+      fails with `Method must be a valid HTTP token`. All three are tagged
+      `app-only`, so `--exclude-tags app-only` skips them.
+  type: text/markdown
