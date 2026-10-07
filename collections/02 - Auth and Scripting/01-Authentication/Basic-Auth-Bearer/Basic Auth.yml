@@ -9,6 +9,7 @@ http:
   headers:
     - name: content-type
       value: application/json
+      disabled: true
   body:
     type: json
     data: "{}"
@@ -19,12 +20,6 @@ http:
 
 runtime:
   scripts:
-    - type: after-response
-      code: |-
-        // Runner-only: hand control to the request with this exact name
-        // instead of carrying on in file order. The string has to match the
-        // request name character for character. No effect on a single Send.
-        bru.setNextRequest("Get all products");
     - type: tests
       code: |-
         const echo = res.getBody();
@@ -38,6 +33,13 @@ runtime:
           expect(res.getStatus()).to.equal(200);
           expect(echo.headers.authorization).to.equal(expected);
         });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
 
 docs: |-
   ## Basic authentication
@@ -58,9 +60,3 @@ docs: |-
   Note the old test asserted `accessToken` on the response, which
   httpbin's basic-auth endpoint never returned - it could not pass. Replaced
   with an assertion that actually holds.
-
-settings:
-  encodeUrl: true
-  timeout: 0
-  followRedirects: true
-  maxRedirects: 5
