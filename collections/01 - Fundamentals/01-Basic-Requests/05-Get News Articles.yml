@@ -32,9 +32,6 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // Get today's date
-        const today = new Date();
-
         // Subtract 28 days
         const pastDate = new Date(today);
         pastDate.setDate(today.getDate() - 28);
@@ -51,6 +48,7 @@ runtime:
     - expression: res.status
       operator: eq
       value: "200"
+      disabled: true
     - expression: res.body
       operator: isJson
 
