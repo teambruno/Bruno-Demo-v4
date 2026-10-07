@@ -75,6 +75,32 @@ bru run --env Production --tags shared-scripts --sandbox=developer
 Details and the local-vs-shared comparison: [`shared-scripts/README.md`](shared-scripts/README.md).
 Docs: https://docs.usebruno.com/testing/script/js-file
 
+## Local HashiCorp Vault
+
+`03 - Secrets and Vaults` can run against a throwaway Vault on your laptop
+instead of a hosted one. Requires the `vault` CLI (`brew install
+hashicorp/tap/vault`).
+
+```bash
+./scripts/vault-dev.sh          # start an in-memory dev server and seed the demo secrets
+./scripts/vault-dev.sh status   # print the seeded secret
+./scripts/vault-dev.sh stop
+```
+
+It listens on `http://127.0.0.1:8200` with a fixed root token,
+`bruno-demo-root`, and writes the four keys the collection reads to
+`secret/bruno-demo-vault`, which is the path `Demo-HashiCorp.yml` already
+binds to. Values match the Azure and AWS stores, so the same five requests
+pass on every provider.
+
+One-time setup in Bruno: Preferences -> Secret Providers -> HashiCorp Vault,
+address `http://127.0.0.1:8200`, auth method Token, token `bruno-demo-root`.
+Then pick the `Demo-HashiCorp` environment.
+
+`start` on a running server just re-seeds, and every value can be overridden
+(`OAUTH_CLIENT_SECRET=wrong ./scripts/vault-dev.sh`) to show a request fail
+and recover live. Dev mode is in-memory and gone on `stop` - demo use only.
+
 ## Data files
 
 [`data-files/`](data-files/) holds the CSV and JSON inputs for the data-driven

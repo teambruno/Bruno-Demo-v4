@@ -208,14 +208,37 @@ docs:
         "basic-auth-password":"passwd","dummyjson-password":"jamesdpass",
         "webhook-signing-secret":"whsec_9c2f7ab3e14d5680bf3a1e2c4d8b60f7"}'
 
-    # HashiCorp - KV v2. Write to secret/bruno-demo; the read path in
-    # Demo-HashiCorp.yml is secret/data/bruno-demo (the /data/ segment is a
-    # KV v2 API requirement, not a typo)
-    vault kv put secret/bruno-demo \
+    # HashiCorp - KV v2. Write to secret/bruno-demo-vault; the read path in
+    # Demo-HashiCorp.yml is secret/data/bruno-demo-vault (the /data/ segment
+    # is a KV v2 API requirement, not a typo)
+    vault kv put secret/bruno-demo-vault \
       oauth-client-secret=demo-client-secret basic-auth-password=passwd \
       dummyjson-password=jamesdpass \
       webhook-signing-secret=whsec_9c2f7ab3e14d5680bf3a1e2c4d8b60f7
     ```
+
+    ### HashiCorp without a server: the local dev script
+
+    You do not need a hosted Vault to demo `Demo-HashiCorp`. From the
+    workspace root:
+
+    ```bash
+    ./scripts/vault-dev.sh          # start an in-memory Vault and seed the four keys
+    ./scripts/vault-dev.sh status   # show what is stored (handy on a call)
+    ./scripts/vault-dev.sh stop
+    ```
+
+    It runs `vault server -dev` on `http://127.0.0.1:8200` with a fixed root
+    token, `bruno-demo-root`, so the provider you configure once in Bruno
+    keeps working across restarts. One-time setup in the app: Preferences ->
+    Secret Providers -> HashiCorp Vault, address `http://127.0.0.1:8200`,
+    auth method Token, token `bruno-demo-root`. Then select `Demo-HashiCorp`
+    and run `01-Resolve Secret Value`.
+
+    Running `start` while it is already up just re-seeds, so you can change
+    a value live (`OAUTH_CLIENT_SECRET=wrong ./scripts/vault-dev.sh`) and
+    show request 2 fail, then put it back. Dev mode is in-memory - `stop`
+    wipes everything - which is also why it is demo-only.
 
     On Azure, creating a vault does **not** grant permission to read secrets
     out of it - that is a separate data-plane role and the most common way
