@@ -47,3 +47,5 @@ variables:
   - name: globalApiKey
     value: "{{process.env.BRUNO_GLOBAL_API_KEY}}"
     description: Injected by the CI runner from a repository secret
+  - name: newsApiTimestamp
+    value: 2026-10-21T16:03:42.805Z
