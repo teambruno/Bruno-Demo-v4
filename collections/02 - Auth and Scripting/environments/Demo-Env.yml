@@ -50,9 +50,12 @@ variables:
       type: number
       data: "1"
     description: 06-Request-Chaining branch selector - 1 = open todo (07), 4 = completed todo (06)
+  - name: latestArticleCount
+    value:
+      type: number
+      data: "99"
 externalSecrets:
   type: azure-key-vault
   variables:
     - name: secretStore
       vaultName: bruno-demo-kv
-      enabled: true
