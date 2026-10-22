@@ -1,0 +1,743 @@
+info:
+  name: Fundamentals Dashboard
+  type: app
+  seq: 5
+code: |-
+  <html>
+  <head>
+  <meta charset="utf-8" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #f7f8fa;
+      --panel-2: #ffffff;
+      --border: #e3e6ea;
+      --text: #1f2328;
+      --muted: #656d76;
+      --accent: #4f46e5;
+      --accent-hover: #4338ca;
+      --success: #16a34a;
+      --error: #dc2626;
+      --warn: #d97706;
+      --chip: #eef0f4;
+    }
+    body.dark {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --panel-2: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #7c6cff;
+      --accent-hover: #9b8dff;
+      --success: #3fb950;
+      --error: #f85149;
+      --warn: #e3b341;
+      --chip: #21262d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .app { display: flex; flex-direction: column; height: 100vh; }
+
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    header h1 { margin: 0; font-size: 16px; font-weight: 600; }
+    header .sub { color: var(--muted); font-size: 12px; }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    input[type="text"], select {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      outline: none;
+      min-width: 180px;
+    }
+    input[type="text"]:focus, select:focus { border-color: var(--accent); }
+
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover:not(:disabled) { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    button.secondary:hover:not(:disabled) { background: var(--chip); }
+    button.ghost {
+      background: transparent;
+      color: var(--accent);
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+    button.ghost:hover:not(:disabled) { background: var(--chip); }
+
+    .status-bar {
+      padding: 10px 20px;
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--border);
+      display: none;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-bar.active { display: flex; }
+    .progress-wrap {
+      flex: 1;
+      min-width: 160px;
+      height: 8px;
+      background: var(--chip);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.2s;
+    }
+    .progress.done { background: var(--success); }
+    .progress.hasErrors { background: var(--warn); }
+    .status-text { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .status-counts { display: flex; gap: 10px; font-size: 12px; align-items: center; }
+    .status-counts .ok { color: var(--success); }
+    .status-counts .err { color: var(--error); }
+    .status-counts .sep { color: var(--border); }
+
+    main { flex: 1; overflow: auto; padding: 16px 20px; }
+
+    .folder {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .folder-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .folder-header:hover { background: var(--chip); }
+    .caret { transition: transform 0.15s; display: inline-block; width: 10px; color: var(--muted); }
+    .folder.collapsed .caret { transform: rotate(-90deg); }
+    .folder.collapsed .folder-body { display: none; }
+    .folder-title { font-weight: 600; flex: 1; }
+    .folder-count {
+      font-size: 11px;
+      background: var(--chip);
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .folder-tests {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--chip);
+    }
+    .folder-tests .pass { color: var(--success); font-weight: 600; }
+    .folder-tests .fail { color: var(--error); font-weight: 600; }
+    .folder-body {
+      border-top: 1px solid var(--border);
+      background: var(--panel-2);
+    }
+
+    .request {
+      display: grid;
+      grid-template-columns: 60px 1fr auto auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .request-wrap { border-bottom: 1px solid var(--border); }
+    .request-wrap:last-child { border-bottom: none; }
+    .request-wrap:last-child .request { border-bottom: none; }
+    .request:hover { background: var(--chip); }
+
+    .method {
+      font-weight: 700;
+      font-size: 10px;
+      text-align: center;
+      padding: 3px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+    .method.GET { background: rgba(22,163,74,.15); color: var(--success); }
+    .method.POST { background: rgba(217,119,6,.18); color: var(--warn); }
+    .method.PUT { background: rgba(79,70,229,.18); color: var(--accent); }
+    .method.DELETE { background: rgba(220,38,38,.18); color: var(--error); }
+    .method.PATCH { background: rgba(124,108,255,.18); color: var(--accent); }
+
+    .req-name { font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .req-url { color: var(--muted); font-size: 11px; margin-top: 2px; font-family: ui-monospace, monospace; word-break: break-all; }
+
+    .status-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      min-width: 56px;
+      text-align: center;
+    }
+    .status-pill.idle { background: var(--chip); color: var(--muted); }
+    .status-pill.running { background: rgba(79,70,229,.18); color: var(--accent); }
+    .status-pill.ok { background: rgba(22,163,74,.18); color: var(--success); }
+    .status-pill.err { background: rgba(220,38,38,.18); color: var(--error); }
+
+    .test-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      border: 1px solid transparent;
+    }
+    .test-pill:hover { border-color: var(--border); }
+    .test-pill.none { background: var(--chip); color: var(--muted); cursor: default; }
+    .test-pill.none:hover { border-color: transparent; }
+    .test-pill.pass { background: rgba(22,163,74,.15); color: var(--success); }
+    .test-pill.fail { background: rgba(220,38,38,.15); color: var(--error); }
+    .test-pill .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+    .test-pill.pass .dot { background: var(--success); }
+    .test-pill.fail .dot { background: var(--error); }
+
+    .test-details {
+      background: var(--bg);
+      border-top: 1px dashed var(--border);
+      padding: 10px 14px 10px 86px;
+      font-size: 11px;
+    }
+    .test-section-title {
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-size: 10px;
+      margin: 4px 0 6px;
+    }
+    .test-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 4px 0;
+      font-family: ui-monospace, monospace;
+    }
+    .test-item .mark {
+      flex: 0 0 auto;
+      width: 14px;
+      font-weight: 700;
+    }
+    .test-item.pass .mark { color: var(--success); }
+    .test-item.fail .mark { color: var(--error); }
+    .test-item .desc { flex: 1; word-break: break-word; }
+    .test-item .err-msg {
+      display: block;
+      margin-top: 2px;
+      color: var(--error);
+      white-space: pre-wrap;
+    }
+    .test-empty { color: var(--muted); font-style: italic; padding: 4px 0; }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+    }
+    .spinner {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border: 2px solid var(--accent);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  </head>
+  <body>
+  <div class="app">
+    <header>
+      <div>
+        <h1 id="collName">Collection Dashboard</h1>
+        <div class="sub" id="collSub">Loading…</div>
+      </div>
+      <div class="controls">
+        <input type="text" id="search" placeholder="Search by name, method, URL…" />
+        <select id="methodFilter">
+          <option value="">All methods</option>
+          <option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option>
+        </select>
+        <select id="statusFilter">
+          <option value="">Any status</option>
+          <option value="idle">Idle</option>
+          <option value="ok">Passed</option>
+          <option value="err">Failed</option>
+          <option value="tests-fail">Tests failed</option>
+          <option value="tests-pass">Tests passed</option>
+        </select>
+        <button class="secondary" id="refreshBtn">Refresh</button>
+        <button id="runAllBtn">▶ Run All</button>
+      </div>
+    </header>
+
+    <div class="status-bar" id="statusBar">
+      <div class="status-text" id="statusLabel">Idle</div>
+      <div class="progress-wrap"><div class="progress" id="progressBar"></div></div>
+      <div class="status-counts">
+        <span class="ok">✓ <span id="okCount">0</span></span>
+        <span class="err">✕ <span id="errCount">0</span></span>
+        <span class="sep">|</span>
+        <span>Tests:</span>
+        <span class="ok">✓ <span id="testPassCount">0</span></span>
+        <span class="err">✕ <span id="testFailCount">0</span></span>
+        <span id="totalLabel">0 / 0</span>
+      </div>
+      <button class="secondary" id="cancelBtn" style="display:none">Cancel</button>
+    </div>
+
+    <main id="main">
+      <div class="empty">Loading requests…</div>
+    </main>
+  </div>
+
+  <script>
+  (function () {
+    const state = {
+      requests: [],
+      groups: [],
+      statuses: {},       // pathname -> { state, code, duration, tests: [...], assertions: [...], testError }
+      expanded: {},       // pathname -> bool (test detail expansion)
+      running: false,
+      cancelRequested: false,
+      search: '',
+      methodFilter: '',
+      statusFilter: '',
+      collapsed: {}
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function folderNameFor(req) {
+      const coll = (bru.ctx.collection && bru.ctx.collection.pathname) || '';
+      const path = req.pathname || '';
+      let rel = coll && path.startsWith(coll) ? path.slice(coll.length) : path;
+      rel = rel.replace(/^[\\/]+/, '');
+      const parts = rel.split(/[\\/]/);
+      if (parts.length <= 1) return '(root)';
+      return parts[0];
+    }
+
+    function groupRequests(list) {
+      const map = new Map();
+      for (const r of list) {
+        const g = folderNameFor(r);
+        if (!map.has(g)) map.set(g, []);
+        map.get(g).push(r);
+      }
+      const groups = [];
+      for (const [name, requests] of map.entries()) {
+        requests.sort((a, b) => a.name.localeCompare(b.name));
+        groups.push({ name, requests });
+      }
+      groups.sort((a, b) => a.name.localeCompare(b.name));
+      return groups;
+    }
+
+    async function loadRequests() {
+      try {
+        const list = await bru.ctx.listRequests();
+        state.requests = list || [];
+        state.groups = groupRequests(state.requests);
+        for (const r of state.requests) {
+          if (!state.statuses[r.pathname]) state.statuses[r.pathname] = { state: 'idle' };
+        }
+        render();
+      } catch (e) {
+        bru.ctx.log('listRequests failed', e);
+        $('main').innerHTML = '<div class="empty">Failed to load requests.</div>';
+      }
+    }
+
+    // Normalise test/assertion results that may live in different places on the response object
+    function extractTestResults(res) {
+      if (!res || typeof res !== 'object') return { tests: [], assertions: [], error: null };
+
+      // Common locations Bruno uses for runtime results
+      const candidates = [
+        res.testResults,
+        res.tests,
+        res.results && res.results.tests,
+        res.response && res.response.testResults,
+        res.data && res.data.testResults
+      ];
+      const assertCandidates = [
+        res.assertionResults,
+        res.assertions,
+        res.results && res.results.assertions,
+        res.response && res.response.assertionResults
+      ];
+
+      const tests = (candidates.find(c => Array.isArray(c)) || []).map(normalizeResult);
+      const assertions = (assertCandidates.find(c => Array.isArray(c)) || []).map(normalizeResult);
+      const error = res.error || (res.response && res.response.error) || null;
+      return { tests, assertions, error };
+    }
+
+    function normalizeResult(r) {
+      if (!r || typeof r !== 'object') return { description: String(r), status: 'pass' };
+      const description = r.description || r.name || r.title || r.lhsExpr || 'test';
+      // status may be 'pass' / 'fail' / boolean / 'passed' / 'failed'
+      let status = r.status || r.state || r.result;
+      if (status === true || status === 'passed') status = 'pass';
+      if (status === false || status === 'failed') status = 'fail';
+      if (!status) status = (r.error || r.err) ? 'fail' : 'pass';
+      const error = r.error || r.err || r.actualError || r.message || null;
+      return { description, status, error };
+    }
+
+    function testSummary(st) {
+      const t = st.tests || [];
+      const a = st.assertions || [];
+      const all = t.concat(a);
+      if (!all.length) return { total: 0, pass: 0, fail: 0 };
+      let pass = 0, fail = 0;
+      for (const r of all) {
+        if (r.status === 'pass') pass++;
+        else fail++;
+      }
+      return { total: all.length, pass, fail };
+    }
+
+    function matches(req) {
+      const st = state.statuses[req.pathname] || { state: 'idle' };
+      if (state.methodFilter && (req.method || '').toUpperCase() !== state.methodFilter) return false;
+
+      if (state.statusFilter) {
+        const sum = testSummary(st);
+        if (state.statusFilter === 'tests-fail') {
+          if (sum.fail === 0) return false;
+        } else if (state.statusFilter === 'tests-pass') {
+          if (sum.total === 0 || sum.fail > 0) return false;
+        } else if (st.state !== state.statusFilter) {
+          return false;
+        }
+      }
+
+      if (state.search) {
+        const q = state.search.toLowerCase();
+        const hay = `${req.name} ${req.method} ${req.url}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    }
+
+    function render() {
+      const coll = bru.ctx.collection;
+      if (coll) {
+        $('collName').textContent = coll.name || 'Collection Dashboard';
+        $('collSub').textContent = `${state.requests.length} requests · ${state.groups.length} folders`;
+      }
+
+      const main = $('main');
+      if (!state.groups.length) {
+        main.innerHTML = '<div class="empty">No requests found in this collection.</div>';
+        return;
+      }
+
+      const parts = [];
+      let visibleTotal = 0;
+
+      for (const g of state.groups) {
+        const visible = g.requests.filter(matches);
+        visibleTotal += visible.length;
+        if (!visible.length) continue;
+        const collapsed = state.collapsed[g.name] ? 'collapsed' : '';
+
+        // Folder-level test totals (across all requests in group, not just visible)
+        let gPass = 0, gFail = 0, gTotal = 0;
+        for (const r of g.requests) {
+          const s = testSummary(state.statuses[r.pathname] || {});
+          gPass += s.pass; gFail += s.fail; gTotal += s.total;
+        }
+        const folderTests = gTotal > 0
+          ? `<span class="folder-tests"><span class="pass">✓ ${gPass}</span> · <span class="${gFail?'fail':'pass'}">✕ ${gFail}</span></span>`
+          : '';
+
+        parts.push(`
+          <div class="folder ${collapsed}" data-folder="${escapeAttr(g.name)}">
+            <div class="folder-header" data-toggle="${escapeAttr(g.name)}">
+              <span class="caret">▾</span>
+              <span class="folder-title">${escapeHtml(g.name)}</span>
+              <span class="folder-count">${visible.length} / ${g.requests.length}</span>
+              ${folderTests}
+              <button class="ghost" data-run-folder="${escapeAttr(g.name)}" ${state.running ? 'disabled' : ''}>▶ Run folder</button>
+            </div>
+            <div class="folder-body">
+              ${visible.map(renderRequest).join('')}
+            </div>
+          </div>
+        `);
+      }
+
+      if (!visibleTotal) {
+        main.innerHTML = '<div class="empty">No requests match your filters.</div>';
+      } else {
+        main.innerHTML = parts.join('');
+      }
+
+      main.querySelectorAll('[data-toggle]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('[data-run-folder]')) return;
+          const name = el.getAttribute('data-toggle');
+          state.collapsed[name] = !state.collapsed[name];
+          render();
+        });
+      });
+      main.querySelectorAll('[data-run-folder]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const name = el.getAttribute('data-run-folder');
+          const group = state.groups.find(g => g.name === name);
+          if (group) runSequence(group.requests, `Folder: ${name}`);
+        });
+      });
+      main.querySelectorAll('[data-run-request]').forEach(el => {
+        el.addEventListener('click', () => {
+          const path = el.getAttribute('data-run-request');
+          const req = state.requests.find(r => r.pathname === path);
+          if (req) runSequence([req], req.name);
+        });
+      });
+      main.querySelectorAll('[data-toggle-tests]').forEach(el => {
+        el.addEventListener('click', () => {
+          const path = el.getAttribute('data-toggle-tests');
+          state.expanded[path] = !state.expanded[path];
+          render();
+        });
+      });
+    }
+
+    function renderRequest(r) {
+      const st = state.statuses[r.pathname] || { state: 'idle' };
+      let pill = `<span class="status-pill idle">Idle</span>`;
+      if (st.state === 'running') pill = `<span class="status-pill running"><span class="spinner"></span> Running</span>`;
+      else if (st.state === 'ok') pill = `<span class="status-pill ok">${st.code || 'OK'}${st.duration != null ? ' · ' + st.duration + 'ms' : ''}</span>`;
+      else if (st.state === 'err') pill = `<span class="status-pill err">${st.code || 'Error'}${st.duration != null ? ' · ' + st.duration + 'ms' : ''}</span>`;
+
+      const sum = testSummary(st);
+      let testPill;
+      if (st.state === 'idle' || st.state === 'running') {
+        testPill = `<span class="test-pill none" title="No test results yet">— tests</span>`;
+      } else if (sum.total === 0) {
+        testPill = `<span class="test-pill none" title="No tests or assertions defined">no tests</span>`;
+      } else {
+        const cls = sum.fail === 0 ? 'pass' : 'fail';
+        testPill = `<span class="test-pill ${cls}" data-toggle-tests="${escapeAttr(r.pathname)}" title="Click to show details">
+            <span class="dot"></span>${sum.pass}/${sum.total} tests${sum.fail ? ' · ' + sum.fail + ' failed' : ''}
+          </span>`;
+      }
+
+      const expanded = state.expanded[r.pathname] && sum.total > 0;
+      const details = expanded ? renderTestDetails(st) : '';
+
+      return `
+        <div class="request-wrap">
+          <div class="request">
+            <span class="method ${(r.method||'').toUpperCase()}">${escapeHtml((r.method||'').toUpperCase() || '—')}</span>
+            <div>
+              <div class="req-name">${escapeHtml(r.name)}</div>
+              <div class="req-url">${escapeHtml(r.url || '')}</div>
+            </div>
+            ${testPill}
+            ${pill}
+            <button class="secondary" data-run-request="${escapeAttr(r.pathname)}" ${state.running ? 'disabled' : ''}>▶ Run</button>
+          </div>
+          ${details}
+        </div>
+      `;
+    }
+
+    function renderTestDetails(st) {
+      const sections = [];
+      if ((st.tests || []).length) {
+        sections.push(`
+          <div class="test-section-title">Tests</div>
+          ${st.tests.map(renderTestItem).join('')}
+        `);
+      }
+      if ((st.assertions || []).length) {
+        sections.push(`
+          <div class="test-section-title">Assertions</div>
+          ${st.assertions.map(renderTestItem).join('')}
+        `);
+      }
+      if (!sections.length) {
+        sections.push(`<div class="test-empty">No tests or assertions were run.</div>`);
+      }
+      return `<div class="test-details">${sections.join('')}</div>`;
+    }
+
+    function renderTestItem(t) {
+      const pass = t.status === 'pass';
+      const errBlock = (!pass && t.error) ? `<span class="err-msg">${escapeHtml(typeof t.error === 'string' ? t.error : (t.error.message || JSON.stringify(t.error)))}</span>` : '';
+      return `
+        <div class="test-item ${pass ? 'pass' : 'fail'}">
+          <span class="mark">${pass ? '✓' : '✕'}</span>
+          <span class="desc">${escapeHtml(t.description)}${errBlock}</span>
+        </div>
+      `;
+    }
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function escapeAttr(s) { return escapeHtml(s); }
+
+    function setRunningUI(running) {
+      state.running = running;
+      $('runAllBtn').disabled = running;
+      $('refreshBtn').disabled = running;
+      $('statusBar').classList.toggle('active', running || Object.values(state.statuses).some(s => s.state !== 'idle'));
+      render();
+    }
+
+    function updateProgress(done, total, ok, err, label, finished) {
+      $('statusBar').classList.add('active');
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      const bar = $('progressBar');
+      bar.style.width = pct + '%';
+      bar.classList.toggle('done', finished && err === 0);
+      bar.classList.toggle('hasErrors', finished && err > 0);
+      $('statusLabel').textContent = label;
+      $('okCount').textContent = ok;
+      $('errCount').textContent = err;
+      $('totalLabel').textContent = `${done} / ${total}`;
+
+      // Aggregate test totals across all known statuses
+      let tp = 0, tf = 0;
+      for (const s of Object.values(state.statuses)) {
+        const sum = testSummary(s);
+        tp += sum.pass; tf += sum.fail;
+      }
+      $('testPassCount').textContent = tp;
+      $('testFailCount').textContent = tf;
+    }
+
+    async function runSequence(requests, label) {
+      if (state.running) return;
+      state.cancelRequested = false;
+      setRunningUI(true);
+      $('cancelBtn').style.display = '';
+      for (const r of requests) {
+        state.statuses[r.pathname] = { state: 'idle' };
+      }
+      render();
+
+      let ok = 0, err = 0;
+      const total = requests.length;
+      updateProgress(0, total, 0, 0, `${label} — starting…`, false);
+
+      for (let i = 0; i < requests.length; i++) {
+        if (state.cancelRequested) break;
+        const r = requests[i];
+        state.statuses[r.pathname] = { state: 'running' };
+        updateProgress(i, total, ok, err, `${label} — ${r.name}`, false);
+        render();
+
+        const t0 = performance.now();
+        try {
+          const res = await bru.ctx.runRequest(r.pathname);
+          const dur = Math.round(performance.now() - t0);
+          const code = res && (res.status || res.statusCode || (res.response && res.response.status));
+          const { tests, assertions } = extractTestResults(res);
+          const anyTestFail = tests.some(t => t.status !== 'pass') || assertions.some(t => t.status !== 'pass');
+          const httpOk = code == null ? true : (code >= 200 && code < 400);
+          const success = httpOk && !anyTestFail;
+          state.statuses[r.pathname] = {
+            state: success ? 'ok' : 'err',
+            code: code != null ? code : (httpOk ? 'OK' : 'ERR'),
+            duration: dur,
+            tests,
+            assertions
+          };
+          if (success) ok++; else err++;
+        } catch (e) {
+          const dur = Math.round(performance.now() - t0);
+          state.statuses[r.pathname] = { state: 'err', code: 'Error', duration: dur, tests: [], assertions: [], testError: String(e && e.message || e) };
+          err++;
+          bru.ctx.log('Run failed', r.pathname, e);
+        }
+        updateProgress(i + 1, total, ok, err, `${label} — ${r.name}`, false);
+        render();
+      }
+
+      const finishedLabel = state.cancelRequested
+        ? `${label} — cancelled`
+        : `${label} — complete`;
+      updateProgress(total, total, ok, err, finishedLabel, true);
+      $('cancelBtn').style.display = 'none';
+      setRunningUI(false);
+    }
+
+    $('search').addEventListener('input', (e) => { state.search = e.target.value; render(); });
+    $('methodFilter').addEventListener('change', (e) => { state.methodFilter = e.target.value; render(); });
+    $('statusFilter').addEventListener('change', (e) => { state.statusFilter = e.target.value; render(); });
+    $('refreshBtn').addEventListener('click', loadRequests);
+    $('runAllBtn').addEventListener('click', () => {
+      const flat = state.groups.flatMap(g => g.requests);
+      runSequence(flat, 'Run all');
+    });
+    $('cancelBtn').addEventListener('click', () => { state.cancelRequested = true; });
+
+    bru.ctx.onInit = function () {
+      document.body.className = (bru.ctx.theme && bru.ctx.theme.mode) || 'light';
+      loadRequests();
+    };
+    bru.ctx.onThemeChange = function (theme) {
+      document.body.className = (theme && theme.mode) || 'light';
+    };
+    bru.ctx.onCollectionChange = function () { loadRequests(); };
+  })();
+  </script>
+  </body>
+  </html>
