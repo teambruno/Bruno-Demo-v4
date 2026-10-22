@@ -1,0 +1,11 @@
+info:
+  name: Language Management
+  type: folder
+  seq: 16
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Language Management](https://developer.pingidentity.com/pingone-api/platform/language-management.html).
+  type: text/markdown

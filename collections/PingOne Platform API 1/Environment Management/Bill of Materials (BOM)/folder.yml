@@ -1,0 +1,11 @@
+info:
+  name: Bill of Materials (BOM)
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Bill of Materials (BOM)](https://developer.pingidentity.com/pingone-api/platform/bill-of-materials-bom.html).
+  type: text/markdown

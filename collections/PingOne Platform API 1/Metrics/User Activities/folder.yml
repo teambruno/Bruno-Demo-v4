@@ -1,0 +1,11 @@
+info:
+  name: User Activities
+  type: folder
+  seq: 6
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [User Activities](https://developer.pingidentity.com/pingone-api/platform/user-activities.html).
+  type: text/markdown

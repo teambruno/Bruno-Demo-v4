@@ -1,0 +1,11 @@
+info:
+  name: Audit Activities
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Audit Activities](https://developer.pingidentity.com/pingone-api/platform/audit-activities.html).
+  type: text/markdown
