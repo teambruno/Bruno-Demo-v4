@@ -1,0 +1,79 @@
+info:
+  name: SOAP 1.1 - NumberToWords
+  type: http
+  seq: 1
+  tags:
+    - api-parity
+    - soap
+
+http:
+  method: POST
+  url: "{{soapUrl}}/NumberConversion.wso"
+  headers:
+    - name: Content-Type
+      value: text/xml; charset=utf-8
+    - name: SOAPAction
+      value: "http://www.dataaccess.com/webservicesserver/NumberToWords"
+  body:
+    type: xml
+    data: |-
+      <?xml version="1.0" encoding="utf-8"?>
+      <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+          <NumberToWords xmlns="http://www.dataaccess.com/webservicesserver/">
+            <ubiNum>{{soapNumber}}</ubiNum>
+          </NumberToWords>
+        </soap:Body>
+      </soap:Envelope>
+  auth: inherit
+
+runtime:
+  variables:
+    - name: soapNumber
+      value: "500"
+  scripts:
+    - type: tests
+      code: |-
+        // SOAP is plain HTTP + XML. res.getBody() is the raw envelope string,
+        // so pull the result element out with a regex - no XML library needed.
+        const xml = res.getBody();
+        const words = (xml.match(/<m:NumberToWordsResult>([^<]*)</) || [])[1];
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("response is a SOAP 1.1 envelope", () => {
+          expect(res.getHeader("content-type")).to.include("text/xml");
+          expect(xml).to.include("http://schemas.xmlsoap.org/soap/envelope/");
+        });
+
+        test("500 -> 'five hundred'", () => {
+          expect(words.trim()).to.equal("five hundred");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 15000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## SOAP 1.1 - NumberToWords
+
+  A SOAP call is an HTTP POST with an XML envelope and two headers -
+  `Content-Type: text/xml` and `SOAPAction`. Nothing special is needed in
+  Bruno: pick **Body -> XML**, paste the envelope, send.
+
+  The response panel renders the XML envelope with syntax highlighting, and
+  the Tests tab reads the result element out of the raw body.
+
+  Change `soapNumber` in the Vars tab to convert a different number.
+
+  **WSDL import:** `Import Collection -> WSDL` builds one request per
+  operation straight from the service's WSDL, envelope included.
+  This service's WSDL: `https://www.dataaccess.com/webservicesserver/NumberConversion.wso?WSDL`

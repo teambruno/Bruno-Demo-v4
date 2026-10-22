@@ -1,0 +1,51 @@
+info:
+  name: PUT
+  type: http
+  seq: 3
+  tags:
+    - api-parity
+    - http-methods
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/posts/{{postId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {"id": 1, "title": "Bruno demo (replaced)", "body": "full replacement", "userId": 1}
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("whole resource replaced", () => {
+          expect(res.getBody().title).to.equal("Bruno demo (replaced)");
+          expect(res.getBody().body).to.equal("full replacement");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## PUT /posts/{{postId}}
+
+  PUT: full replacement of a resource.
+
+  Same request shape as the old tool - method dropdown, URL, Params / Body /
+  Headers / Auth / Vars / Script / Assert / Tests / Docs. JSONPlaceholder is
+  a free fake REST API that answers every verb with a realistic response.

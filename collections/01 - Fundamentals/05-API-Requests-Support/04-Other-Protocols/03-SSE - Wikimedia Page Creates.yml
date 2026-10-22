@@ -1,0 +1,35 @@
+info:
+  name: SSE - Wikimedia Page Creates
+  type: http
+  seq: 3
+  tags:
+    - api-parity
+    - sse
+    - app-only
+
+http:
+  method: GET
+  url: https://stream.wikimedia.org/v2/stream/page-create
+  headers:
+    - name: Accept
+      value: text/event-stream
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Server-Sent Events
+
+  Bruno sees the `text/event-stream` response and renders each event as it
+  arrives instead of waiting for a body that never ends. This is Wikimedia's
+  public feed of every page created across its wikis - about one event per
+  second, readable on a call. Swap `page-create` for `recentchange` for the
+  full firehose.
+
+  **App-only.** The stream never closes, so the CLI waits forever on it
+  (the request timeout does not cut a stream short). Always run this
+  folder with `--exclude-tags app-only` on the CLI.

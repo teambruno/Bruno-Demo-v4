@@ -1,0 +1,44 @@
+info:
+  name: HEAD
+  type: http
+  seq: 6
+  tags:
+    - api-parity
+    - http-methods
+
+http:
+  method: HEAD
+  url: "{{baseUrl}}/posts/{{postId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("headers only - content-length set, body empty", () => {
+          expect(res.getHeader("content-type")).to.include("application/json");
+          expect(res.getBody()).to.satisfy((b) => b === null || b === undefined || b === "");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## HEAD /posts/{{postId}}
+
+  HEAD: same headers as GET, no body - cheap existence / size check.
+
+  Same request shape as the old tool - method dropdown, URL, Params / Body /
+  Headers / Auth / Vars / Script / Assert / Tests / Docs. JSONPlaceholder is
+  a free fake REST API that answers every verb with a realistic response.

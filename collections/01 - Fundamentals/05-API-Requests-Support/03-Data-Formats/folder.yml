@@ -1,0 +1,21 @@
+info:
+  name: 03-Data-Formats
+  type: folder
+  seq: 3
+
+docs:
+  content: |-
+    ## 03 - Data Formats
+
+    The four body types teams send every day - **JSON**, **XML**,
+    **form URL-encoded**, **multipart** (text fields + a file) - all POSTed
+    to the echo service. Each Tests tab checks the `Content-Type` Bruno set
+    and that the payload came back intact.
+
+    `sample-statement.txt` is the file attached by the multipart request;
+    the path is relative to the collection root so it ships with the collection.
+
+    ```bash
+    bru run "05-API-Parity/03-Data-Formats" --env Demo
+    ```
+  type: text/markdown

@@ -1,0 +1,62 @@
+info:
+  name: XML Body
+  type: http
+  seq: 2
+  tags:
+    - api-parity
+    - data-formats
+
+http:
+  method: POST
+  url: "{{echoUrl}}/api/echo"
+  headers:
+    - name: Content-Type
+      value: application/xml
+  body:
+    type: xml
+    data: |-
+      <?xml version="1.0" encoding="utf-8"?>
+      <order id="1001">
+        <customer>ACME Corp</customer>
+        <items>
+          <item sku="A-1" qty="2"/>
+          <item sku="B-7" qty="1"/>
+        </items>
+      </order>
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const echo = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("sent as application/xml", () => {
+          expect(echo.headers["content-type"]).to.include("application/xml");
+        });
+
+        test("XML arrived byte-for-byte", () => {
+          // The raw body comes back under `body`; the server does not parse XML
+          expect(echo.body).to.include('<order id="1001">');
+          expect(echo.body).to.include('<item sku="B-7" qty="1"/>');
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## XML body
+
+  Body -> XML. Same editor as the SOAP envelopes in `02-SOAP-and-GraphQL`,
+  just a plain XML document and `Content-Type: application/xml`.

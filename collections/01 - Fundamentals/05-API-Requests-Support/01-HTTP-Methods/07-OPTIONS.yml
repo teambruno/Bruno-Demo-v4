@@ -1,0 +1,44 @@
+info:
+  name: OPTIONS
+  type: http
+  seq: 7
+  tags:
+    - api-parity
+    - http-methods
+
+http:
+  method: OPTIONS
+  url: "{{baseUrl}}/posts/{{postId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 204 No Content", () => {
+          expect(res.status).to.equal(204);
+        });
+
+        test("server advertises the verbs it accepts", () => {
+          const allowed = res.getHeader("access-control-allow-methods") || "";
+          ["GET", "POST", "PUT", "PATCH", "DELETE"].forEach((v) => expect(allowed).to.include(v));
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## OPTIONS /posts/{{postId}}
+
+  OPTIONS: capability probe - the answer is in the headers, not the body.
+
+  Same request shape as the old tool - method dropdown, URL, Params / Body /
+  Headers / Auth / Vars / Script / Assert / Tests / Docs. JSONPlaceholder is
+  a free fake REST API that answers every verb with a realistic response.

@@ -1,0 +1,74 @@
+info:
+  name: GraphQL - Country Lookup
+  type: graphql
+  seq: 3
+  tags:
+    - api-parity
+    - graphql
+
+graphql:
+  method: POST
+  url: "{{graphqlUrl}}"
+  body:
+    query: |
+      query CountryLookup($code: ID!) {
+        country(code: $code) {
+          name
+          capital
+          currency
+          continent {
+            name
+          }
+        }
+      }
+    variables: |-
+      {
+        "code": "{{countryCode}}"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: countryCode
+      value: US
+  scripts:
+    - type: tests
+      code: |-
+        const { data, errors } = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("no GraphQL errors", () => {
+          // GraphQL returns 200 even on failure - check the errors array, not the status
+          expect(errors).to.be.undefined;
+        });
+
+        test("country resolved from the $code variable", () => {
+          expect(data.country.name).to.equal("United States");
+          expect(data.country.continent.name).to.equal("North America");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## GraphQL - Country Lookup
+
+  A native GraphQL request type: the Query tab has schema-aware
+  autocomplete and the Variables tab takes JSON. `{{countryCode}}` is a
+  request-level var (Vars tab) - change it to `DE` or `JP` and resend.
+
+  Click **Docs** in the query editor to load the schema from the endpoint
+  and browse the types, same as the old tool's schema explorer.
+
+  Compare with `04 - CLI CI and V4 Features/02-Additional-Request-Types/graphql-query`
+  for a second public endpoint (PokeAPI).

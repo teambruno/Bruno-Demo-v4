@@ -1,0 +1,43 @@
+info:
+  name: DELETE
+  type: http
+  seq: 5
+  tags:
+    - api-parity
+    - http-methods
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/posts/{{postId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("empty object back, nothing else", () => {
+          expect(res.getBody()).to.deep.equal({});
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## DELETE /posts/{{postId}}
+
+  DELETE: delete. No body sent, empty object back.
+
+  Same request shape as the old tool - method dropdown, URL, Params / Body /
+  Headers / Auth / Vars / Script / Assert / Tests / Docs. JSONPlaceholder is
+  a free fake REST API that answers every verb with a realistic response.

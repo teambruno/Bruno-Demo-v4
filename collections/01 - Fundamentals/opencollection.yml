@@ -30,7 +30,8 @@ docs:
     | 01 | 🌐 **Basic-Requests** | 8 | Core CRUD operations & HTTP verbs |
     | 02 | 🔧 **Variables-and-Environments** | 2 | Variable precedence & scoping |
     | 03 | 🔗 **Chained-Requests** | 2 | Passing data between requests |
-    | 05 | 🧩 **Shared-Scripts** | 1 | Reusable workspace scripts |
+    | 04 | 🧩 **Shared-Scripts** | 1 | Reusable workspace scripts |
+    | 05 | 🤝 **API-Parity** | 17 | Demo 02: all HTTP verbs, SOAP 1.1/1.2, GraphQL, JSON/XML/form/multipart bodies, gRPC/WS/SSE |
 
     ---
 
@@ -44,6 +45,10 @@ docs:
     ### 📁 Run a specific folder
     ```bash
     bru run "01-Basic-Requests" --env Production
+
+    # folders with nested sub-folders need -r; API-Parity also holds app-only
+    # gRPC/WebSocket/SSE requests, so exclude those on the CLI
+    bru run "05-API-Parity" -r --env Production --exclude-tags app-only
     ```
 
     ### 📈 Generate reports (JSON + HTML + JUnit)

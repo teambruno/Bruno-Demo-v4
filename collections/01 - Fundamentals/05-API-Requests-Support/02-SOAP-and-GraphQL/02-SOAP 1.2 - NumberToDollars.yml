@@ -1,0 +1,63 @@
+info:
+  name: SOAP 1.2 - NumberToDollars
+  type: http
+  seq: 2
+  tags:
+    - api-parity
+    - soap
+
+http:
+  method: POST
+  url: "{{soapUrl}}/NumberConversion.wso"
+  headers:
+    - name: Content-Type
+      value: application/soap+xml; charset=utf-8
+  body:
+    type: xml
+    data: |-
+      <?xml version="1.0" encoding="utf-8"?>
+      <soap12:Envelope xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+        <soap12:Body>
+          <NumberToDollars xmlns="http://www.dataaccess.com/webservicesserver/">
+            <dNum>1234.56</dNum>
+          </NumberToDollars>
+        </soap12:Body>
+      </soap12:Envelope>
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const xml = res.getBody();
+        const words = (xml.match(/<m:NumberToDollarsResult>([^<]*)</) || [])[1];
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("response is a SOAP 1.2 envelope", () => {
+          expect(xml).to.include("http://www.w3.org/2003/05/soap-envelope");
+        });
+
+        test("1234.56 -> dollars and cents in words", () => {
+          expect(words).to.include("one thousand two hundred and thirty four dollars");
+          expect(words).to.include("fifty six cents");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 15000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## SOAP 1.2 - NumberToDollars
+
+  Same service, SOAP 1.2 flavour: the envelope namespace changes and the
+  action moves out of the `SOAPAction` header into the
+  `application/soap+xml` content type. Still just a POST with an XML body.

@@ -1,0 +1,25 @@
+info:
+  name: 04-Other-Protocols
+  type: folder
+  seq: 4
+
+docs:
+  content: |-
+    ## 04 - Other Protocols (gRPC, WebSocket, SSE)
+
+    Lower priority for this prospect than REST/SOAP, but on the slide, so
+    one request each: a gRPC unary call, a WebSocket echo with two saved
+    messages, and a live Server-Sent Events feed. All public, no auth.
+
+    These are **app-only** - open them in Bruno and hit Send (gRPC and
+    WebSocket) or watch the pane fill (SSE). All three carry the `app-only`
+    tag: the CLI cannot run gRPC/WebSocket and the SSE stream never ends, so
+    on the CLI always add `--exclude-tags app-only`:
+
+    ```bash
+    bru run "05-API-Parity" -r --env Demo --exclude-tags app-only
+    ```
+
+    The fuller tour (gRPC scripting, server/bidi streams) lives in
+    `04 - CLI CI and V4 Features / 02-Additional-Request-Types`.
+  type: text/markdown

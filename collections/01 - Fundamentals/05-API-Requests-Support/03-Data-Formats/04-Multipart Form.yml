@@ -1,0 +1,67 @@
+info:
+  name: Multipart Form
+  type: http
+  seq: 4
+  tags:
+    - api-parity
+    - data-formats
+
+http:
+  method: POST
+  url: "{{echoUrl}}/api/echo"
+  body:
+    type: multipart-form
+    data:
+      - name: description
+        type: text
+        value: quarterly statement upload
+      - name: statement
+        type: file
+        value:
+          - 05-API-Parity/03-Data-Formats/sample-statement.txt
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const echo = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("sent as multipart/form-data with a boundary", () => {
+          expect(echo.headers["content-type"]).to.include("multipart/form-data; boundary=");
+        });
+
+        test("text field arrived as a form part", () => {
+          // httpfaker echoes the raw multipart body, boundaries and all
+          expect(echo.body).to.include('name="description"');
+          expect(echo.body).to.include("quarterly statement upload");
+        });
+
+        test("file part arrived with filename and contents", () => {
+          expect(echo.body).to.include('filename="sample-statement.txt"');
+          expect(echo.body).to.include("ACCOUNT 1001");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Multipart Form
+
+  Body -> Multipart Form: text fields and file parts in one table. The file
+  path is stored relative to the collection root, so `sample-statement.txt`
+  sits next to this request and travels with the collection in Git.
+
+  The echo service returns the raw multipart body, so you can see the
+  boundaries, each part's `Content-Disposition`, and the file contents.

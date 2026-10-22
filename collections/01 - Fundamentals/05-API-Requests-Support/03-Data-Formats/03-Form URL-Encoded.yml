@@ -1,0 +1,68 @@
+info:
+  name: Form URL-Encoded
+  type: http
+  seq: 3
+  tags:
+    - api-parity
+    - data-formats
+
+http:
+  method: POST
+  url: "{{echoUrl}}/api/echo"
+  body:
+    type: form-urlencoded
+    data:
+      - name: username
+        value: "{{formUser}}"
+      - name: grant_type
+        value: password
+      - name: scope
+        value: read write
+  auth: inherit
+
+runtime:
+  variables:
+    - name: formUser
+      value: edward.demo
+  scripts:
+    - type: tests
+      code: |-
+        const echo = res.getBody();
+        // httpfaker returns the raw body - decode the key=value pairs here
+        const form = Object.fromEntries(
+          (echo.body || "")
+            .split("&")
+            .filter(Boolean)
+            .map((pair) => pair.split("=").map((s) => decodeURIComponent(s.replace(/\+/g, " "))))
+        );
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("Content-Type set automatically", () => {
+          expect(echo.headers["content-type"]).to.include("application/x-www-form-urlencoded");
+        });
+
+        test("fields decoded server-side, {{formUser}} var interpolated", () => {
+          expect(form.username).to.equal("edward.demo");
+          expect(form.grant_type).to.equal("password");
+          expect(form.scope).to.equal("read write");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## Form URL-Encoded
+
+  Body -> Form URL Encoded: a key/value table, with the content type and
+  the URL-encoding handled for you (`scope=read+write`). This is the shape
+  of most OAuth2 token endpoints and legacy login forms.

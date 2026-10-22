@@ -1,0 +1,25 @@
+info:
+  name: 02-SOAP-and-GraphQL
+  type: folder
+  seq: 2
+
+docs:
+  content: |-
+    ## 02 - SOAP and GraphQL
+
+    - **SOAP 1.1** and **SOAP 1.2** against a public number-conversion
+      service. SOAP in Bruno is an ordinary HTTP request with an XML body -
+      there is no separate mode to learn.
+    - **GraphQL** is its own request type: query editor with schema
+      autocomplete, a Variables tab, and a Docs explorer loaded from the
+      endpoint.
+
+    **WSDL import** (app): `Import Collection -> WSDL`, paste
+    `https://www.dataaccess.com/webservicesserver/NumberConversion.wso?WSDL`
+    and Bruno generates a request per operation with the envelope filled in.
+    Worth doing live - the audience sees the requests appear.
+
+    ```bash
+    bru run "05-API-Parity/02-SOAP-and-GraphQL" --env Demo
+    ```
+  type: text/markdown

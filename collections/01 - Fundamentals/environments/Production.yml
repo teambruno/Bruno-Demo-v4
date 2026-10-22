@@ -16,6 +16,15 @@ variables:
   - name: newsUrl
     value: https://newsapi.org/v2
     description: ""
+  - name: echoUrl
+    value: https://www.httpfaker.org
+    description: Bruno-owned echo service (github.com/usebruno/httpfaker) - POST /api/echo returns url, method, headers and raw body as JSON
+  - name: soapUrl
+    value: https://www.dataaccess.com/webservicesserver
+    description: public SOAP 1.1 / 1.2 service (NumberConversion.wso)
+  - name: graphqlUrl
+    value: https://countries.trevorblades.com/graphql
+    description: public GraphQL endpoint, no auth
   - name: postId
     value: "1"
     description: ""

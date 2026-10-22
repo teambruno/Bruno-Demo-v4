@@ -1,0 +1,45 @@
+info:
+  name: WebSocket - Echo
+  type: websocket
+  seq: 2
+  tags:
+    - api-parity
+    - websocket
+    - app-only
+
+websocket:
+  url: wss://echo.websocket.org
+  message:
+    - title: Greeting
+      selected: true
+      message:
+        type: json
+        data: |-
+          {
+            "type": "message",
+            "content": "Hello from Bruno!",
+            "user": {
+              "id": 123,
+              "name": "{{username}}"
+            }
+          }
+    - title: Ping
+      selected: false
+      message:
+        type: text
+        data: ping
+  auth: inherit
+
+docs:
+  content: |-
+    ## WebSocket - echo
+
+    Connect, then fire either saved message ("Greeting" JSON, "Ping" text)
+    and watch the server echo it back in the Messages pane. One request can
+    hold several saved messages, and `{{username}}` interpolates inside the
+    payload like any HTTP body.
+
+    Endpoint: `wss://echo.websocket.org`. It sends a "Request served by ..."
+    banner frame on connect, then echoes each message. Backup if it is down
+    on demo day: `wss://ws.ifelse.io`.
+  type: text/markdown

@@ -1,0 +1,44 @@
+info:
+  name: 05-API-Requests-Support
+  type: folder
+  seq: 5
+
+docs:
+  content: |-
+    ## 05 - API Parity
+
+    > **Demo 02 - "Day-to-day API Parity".** REST, SOAP and the core HTTP
+    > methods have to work as-is, like the old tool, because teams use them
+    > daily. This folder is that proof, one row of the slide per sub-folder.
+
+    | Slide row | Where | What to show |
+    |---|---|---|
+    | 01 REST and all HTTP methods | `01-HTTP-Methods` | GET / POST / PUT / PATCH / DELETE / HEAD / OPTIONS, each verified by the echo response |
+    | 02 SOAP (incl. WSDL import) and GraphQL | `02-SOAP-and-GraphQL` | SOAP 1.1 + 1.2 envelopes, GraphQL with variables; import the WSDL live |
+    | 03 gRPC, WebSocket, SSE | `04-Other-Protocols` | one of each, app-only; the deeper gRPC streaming tour is in collection 04 |
+    | 04 JSON, XML, form, multipart | `03-Data-Formats` | one request per body type, file attached from the folder |
+    | 05 Code generation | any request -> **Generate Code** (`...` menu) | cURL, Python, Java, C#, Node, Go and more from the same request |
+
+    Everything here hits free public endpoints with no auth, so it runs on
+    any laptop or in CI:
+
+    ```bash
+    # whole folder: 14 HTTP/SOAP/GraphQL requests. Nested folders need -r, and
+    # the gRPC/WebSocket/SSE requests are app-only (SSE never ends and would hang the run)
+    bru run "05-API-Parity" -r --env Demo --exclude-tags app-only
+
+    # just the verbs, or just the formats
+    bru run "05-API-Parity/01-HTTP-Methods" --env Demo
+    bru run "05-API-Parity/03-Data-Formats" --env Demo
+
+    # by tag, from anywhere in the collection (same exclusion applies)
+    bru run --env Demo --tags api-parity --exclude-tags app-only
+    ```
+
+    Endpoints: JSONPlaceholder (`baseUrl`, REST verbs), httpfaker.org
+    (`echoUrl`, Bruno's own echo service - github.com/usebruno/httpfaker),
+    dataaccess.com NumberConversion (`soapUrl`), countries.trevorblades.com
+    (`graphqlUrl`), grpcb.in, echo.websocket.org, stream.wikimedia.org.
+    The four URL vars are set in the Demo, Staging and Production
+    environments.
+  type: text/markdown

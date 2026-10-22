@@ -1,0 +1,23 @@
+info:
+  name: 01-HTTP-Methods
+  type: folder
+  seq: 1
+
+docs:
+  content: |-
+    ## 01 - HTTP Methods
+
+    One request per verb - GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS -
+    against JSONPlaceholder (`{{baseUrl}}`), a free fake REST API that
+    answers each verb the way a real service would: `201` + new id on POST,
+    merged fields on PATCH, headers-only on HEAD, `Access-Control-Allow-Methods`
+    on OPTIONS. Every Tests tab asserts on that, so the proof is in the
+    response, not on a slide.
+
+    Open any request and point at the layout: method dropdown, URL,
+    Params / Body / Headers / Auth / Vars / Script / Assert / Tests / Docs.
+
+    ```bash
+    bru run "05-API-Parity/01-HTTP-Methods" --env Demo
+    ```
+  type: text/markdown

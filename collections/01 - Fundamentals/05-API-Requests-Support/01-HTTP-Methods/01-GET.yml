@@ -1,0 +1,44 @@
+info:
+  name: GET
+  type: http
+  seq: 1
+  tags:
+    - api-parity
+    - http-methods
+
+http:
+  method: GET
+  url: "{{baseUrl}}/posts/{{postId}}"
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("returns the requested post", () => {
+          expect(res.getBody().id).to.equal(Number(bru.getEnvVar("postId")));
+          expect(res.getBody()).to.have.all.keys("userId", "id", "title", "body");
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## GET /posts/{{postId}}
+
+  GET: read one resource. The URL carries `{{postId}}` from the environment.
+
+  Same request shape as the old tool - method dropdown, URL, Params / Body /
+  Headers / Auth / Vars / Script / Assert / Tests / Docs. JSONPlaceholder is
+  a free fake REST API that answers every verb with a realistic response.

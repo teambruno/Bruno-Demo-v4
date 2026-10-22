@@ -1,0 +1,61 @@
+info:
+  name: JSON Body
+  type: http
+  seq: 1
+  tags:
+    - api-parity
+    - data-formats
+
+http:
+  method: POST
+  url: "{{echoUrl}}/api/echo"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "format": "json",
+        "nested": { "ok": true, "count": 3 },
+        "tags": ["bruno", "demo"]
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const echo = res.getBody();
+
+        test("status is 200", () => {
+          expect(res.status).to.equal(200);
+        });
+
+        test("sent as application/json", () => {
+          expect(echo.headers["content-type"]).to.include("application/json");
+        });
+
+        test("JSON round-tripped, nested values intact", () => {
+          // httpfaker echoes the raw body as a string - parse it to inspect
+          const sent = JSON.parse(echo.body);
+          expect(sent.nested.count).to.equal(3);
+          expect(sent.tags).to.deep.equal(["bruno", "demo"]);
+        });
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  ## JSON body
+
+  Body -> JSON. The editor validates and formats, `{{vars}}` interpolate
+  inside the body, and the echo service returns exactly what it received
+  under `body`.
