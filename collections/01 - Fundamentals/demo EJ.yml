@@ -1,0 +1,29 @@
+info:
+  name: demo EJ
+  type: http
+  seq: 7
+
+http:
+  method: get
+  url: https://newsapi.org/v2/everything?q=tesla&sortBy=publishedAt&from=2026-09-24&apiKey=%7B%7BsecretStore.news-api-key%7D%7D
+  params:
+    - name: q
+      value: tesla
+      type: query
+    - name: sortBy
+      value: publishedAt
+      type: query
+    - name: from
+      value: 2026-09-24
+      type: query
+    - name: apiKey
+      value: "%7B%7BsecretStore.news-api-key%7D%7D"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: false
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

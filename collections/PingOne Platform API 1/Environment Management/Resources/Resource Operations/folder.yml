@@ -1,0 +1,11 @@
+info:
+  name: Resource Operations
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Resource Operations](https://developer.pingidentity.com/pingone-api/platform/resources/resources-1.html).
+  type: text/markdown

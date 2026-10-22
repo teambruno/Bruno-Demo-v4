@@ -1,0 +1,11 @@
+info:
+  name: Early Access Features
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Early Access Features](https://developer.pingidentity.com/pingone-api/platform/environments/early-access-features.html).
+  type: text/markdown

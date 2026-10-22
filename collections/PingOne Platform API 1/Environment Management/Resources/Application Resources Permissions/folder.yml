@@ -1,0 +1,11 @@
+info:
+  name: Application Resources Permissions
+  type: folder
+  seq: 6
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Application Resources Permissions](https://developer.pingidentity.com/pingone-api/platform/resources/application-resources-permissions.html).
+  type: text/markdown

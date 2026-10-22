@@ -7,7 +7,7 @@ info:
 
 http:
   method: GET
-  url: "{{newsUrl}}/everything?q=tesla&sortBy=publishedAt&from={{validDate}}"
+  url: "{{newsUrl}}/everything?q=tesla&sortBy=publishedAt"
   params:
     - name: q
       value: tesla
@@ -18,6 +18,7 @@ http:
     - name: from
       value: "{{validDate}}"
       type: query
+      disabled: true
     - name: from
       value: 2025-10-01
       type: query
