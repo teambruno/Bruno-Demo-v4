@@ -1,0 +1,58 @@
+info:
+  name: Get Issue Comments (Paths)
+  type: http
+  seq: 8
+  tags:
+    - smoke
+
+http:
+  method: GET
+  url: https://api.github.com/repos/:owner/:repo/issues/:issueNumber/comments
+  params:
+    - name: owner
+      value: usebruno
+      type: path
+    - name: repo
+      value: bruno
+      type: path
+    - name: issueNumber
+      value: "100"
+      type: path
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        // Each :name segment in the URL is a path param - Bruno swaps in the
+        // values from the Params tab before sending, so the wire URL is
+        // /repos/usebruno/bruno/issues/100/comments.
+        test("status code is 200", function() {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("all path params resolved in the URL", function() {
+          expect(req.getUrl()).to.not.match(/\/:\w+/);
+        });
+
+        test("every comment belongs to the requested issue", function() {
+          expect(res.getBody()).to.be.an('array').that.is.not.empty;
+          res.getBody().forEach(c => expect(c.issue_url).to.match(/\/repos\/usebruno\/bruno\/issues\/100$/));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 10000
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true
+
+docs: |-
+  ## GET /repos/:owner/:repo/issues/:issueNumber/comments
+
+  Shows **path parameters**. Every `:name` segment in the URL becomes a row in
+  the Params tab under *Path*. Change `issueNumber` (or point `owner`/`repo` at
+  another public repo) and the URL updates without editing it by hand.
+
+  Uses the public GitHub REST API with no auth, which allows 60 requests per
+  hour per IP.
