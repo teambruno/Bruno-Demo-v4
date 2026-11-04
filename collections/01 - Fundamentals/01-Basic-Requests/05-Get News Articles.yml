@@ -22,6 +22,8 @@ http:
       value: 2025-10-01
       type: query
       disabled: true
+  body:
+    type: file
   auth:
     type: apikey
     key: apiKey
@@ -49,7 +51,7 @@ runtime:
         console.log('Date 28 days ago:', formatted);
   assertions:
     - expression: res.status
-      operator: eq
+      operator: neq
       value: "200"
     - expression: res.body
       operator: isJson

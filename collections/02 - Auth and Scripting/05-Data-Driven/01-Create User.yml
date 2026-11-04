@@ -3,10 +3,6 @@ info:
   type: http
   seq: 1
   tags:
-    # Deliberately NOT tagged `regression`. The regression CI job runs
-    # --tags regression with no data file attached, and this request fails by
-    # design in that situation (see the not.include("{{") test). It is driven
-    # by the dedicated data-driven job instead.
     - data-driven
 
 http:
@@ -76,6 +72,7 @@ settings:
   timeout: 10000
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
 
 docs: |-
   ## Data-driven - Create User

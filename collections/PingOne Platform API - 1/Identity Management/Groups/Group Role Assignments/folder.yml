@@ -1,0 +1,11 @@
+info:
+  name: Group Role Assignments
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Group Role Assignments](https://developer.pingidentity.com/pingone-api/platform/group-role-assignments/group-role-assignments.html).
+  type: text/markdown
