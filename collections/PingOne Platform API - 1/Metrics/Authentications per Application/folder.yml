@@ -1,0 +1,11 @@
+info:
+  name: Authentications per Application
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit
+
+docs:
+  content: This PingOne collection contains only the requests without documentation. For the official Platform SSO APIs documentation, see [Authentications per Application](https://developer.pingidentity.com/pingone-api/platform/authentications-per-application.html).
+  type: text/markdown
