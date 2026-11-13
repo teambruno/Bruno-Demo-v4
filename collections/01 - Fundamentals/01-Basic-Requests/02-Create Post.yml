@@ -132,6 +132,79 @@ examples:
             "title": "Bruno CLI Demo Post",
             "body": "This post was created by a Bruno CLI collection run.",
             "userId": 1,
+            "id": 'VISA 2'
+          }
+  - name: example 2
+    request:
+      url: "{{baseUrl}}/posts"
+      method: POST
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "title": "Bruno VISA Demo",
+            "body": "This post was created by a Bruno CLI collection run."
+          }
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Thu, 12 Nov 2026 15:49:36 GMT
+        - name: content-type
+          value: application/json; charset=utf-8
+        - name: content-length
+          value: "130"
+        - name: connection
+          value: keep-alive
+        - name: access-control-allow-credentials
+          value: "true"
+        - name: access-control-expose-headers
+          value: Location
+        - name: cache-control
+          value: no-cache
+        - name: etag
+          value: W/"82-j/D3BP+qsg7979RHQLgBdR9Rw+U"
+        - name: expires
+          value: "-1"
+        - name: location
+          value: https://jsonplaceholder.typicode.com/posts/101
+        - name: pragma
+          value: no-cache
+        - name: vary
+          value: Origin, X-HTTP-Method-Override, Accept-Encoding
+        - name: x-content-type-options
+          value: nosniff
+        - name: x-powered-by
+          value: Express
+        - name: x-ratelimit-limit
+          value: "3600000"
+        - name: x-ratelimit-remaining
+          value: "3599995"
+        - name: x-ratelimit-reset
+          value: "1794499219"
+        - name: cf-cache-status
+          value: DYNAMIC
+        - name: nel
+          value: '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+        - name: report-to
+          value: '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=mL81DtJ57tpaQJJfbyFVxupJmCpOSWmPp7DATRDJWFwvAbpBMLsfNK%2Fvp1gYSMQByGkuBUs9LbDlnYV%2BuewwrvecdG2lAWBg4g0jGFNjnOmDYpGmlOKN6SiCLJxDqxqHz4jkIqcHve9BkVM%2BbAGth5svFeE6JqXpCTCg"}]}'
+        - name: server
+          value: cloudflare
+        - name: cf-ray
+          value: a596b006bd2a4bd0-ATL
+        - name: alt-svc
+          value: h3=":443"; ma=86400
+      body:
+        type: json
+        data: |-
+          {
+            "title": "Bruno CLI Demo Post",
+            "body": "This post was created by a Bruno CLI collection run.",
+            "userId": 1,
             "id": 101
           }
 

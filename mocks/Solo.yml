@@ -1,0 +1,17 @@
+info:
+  name: Solo
+  type: mock
+
+mock:
+  port: 4001
+
+routes:
+  - name: Demo
+    request:
+      method: GET
+      url: /
+    response:
+      status: 200
+      body:
+        type: json
+        data: ""

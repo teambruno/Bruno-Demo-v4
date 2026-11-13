@@ -12,6 +12,10 @@ collections:
     path: "collections/03 - Secrets and Vaults"
   - name: "04 - CLI CI and V4 Features"
     path: "collections/04 - CLI CI and V4 Features"
+  - name: "Untitled Collection"
+    path: "collections/Untitled Collection"
+  - name: "Untitled Collection - 1"
+    path: "collections/Untitled Collection - 1"
 
 specs:
   - name: "checkout-v71"

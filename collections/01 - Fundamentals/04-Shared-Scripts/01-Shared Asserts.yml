@@ -60,6 +60,7 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
 
 docs: |-
   ### Shared asserts from `/shared-scripts/`

@@ -12,7 +12,7 @@ routes:
   - name: Get Post (200) (mock)
     request:
       method: GET
-      url: /posts/{{postId}}
+      url: /posts/:postId
     response:
       status: 200
       statusText: OK
@@ -161,7 +161,7 @@ routes:
   - name: Update Post (200) (mock)
     request:
       method: PUT
-      url: /posts/{{postId}}
+      url: /posts/:postId
       headers:
         - name: Content-Type
           value: application/json
@@ -239,7 +239,7 @@ routes:
   - name: Delete Post (200) (mock)
     request:
       method: DELETE
-      url: /posts/{{postId}}
+      url: /posts/:postId
     response:
       status: 200
       statusText: OK
@@ -337,3 +337,72 @@ routes:
     copiedFrom:
       example: HTTP Redirect (200)
       requestPath: /Users/james/Bruno/Bruno-Demo/Workspaces/Bruno-v4-demo/collections/01 - Fundamentals/01-Basic-Requests/HTTP Redirect.yml
+  - name: example dog response (mock)
+    request:
+      method: GET
+      url: /api/v2/facts
+      headers:
+        - name: Content-Type
+          value: application/json
+          disabled: true
+      params:
+        - name: max_length
+          value: ""
+          type: query
+          disabled: true
+    response:
+      status: 200
+      statusText: OK
+      headers:
+        - name: date
+          value: Thu, 12 Nov 2026 16:00:34 GMT
+        - name: content-type
+          value: application/vnd.api+json; charset=utf-8
+        - name: transfer-encoding
+          value: chunked
+        - name: connection
+          value: keep-alive
+        - name: alt-svc
+          value: h3=":443"; ma=86400
+        - name: cache-control
+          value: no-store
+        - name: content-security-policy
+          value: "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; font-src 'self' data:; img-src 'self' data: https: blob:; script-src 'self' https://good.lasagna.pizza 'nonce-lDU6BGiX9hKbVI+8PwX0gA=='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://good.lasagna.pizza"
+        - name: etag
+          value: W/"62d1f199942127c85de92fd2e6dd1c12"
+        - name: referrer-policy
+          value: strict-origin-when-cross-origin
+        - name: strict-transport-security
+          value: max-age=63072000; includeSubDomains
+        - name: vary
+          value: Origin
+        - name: via
+          value: 1.1 Caddy
+        - name: x-content-type-options
+          value: nosniff
+        - name: x-frame-options
+          value: SAMEORIGIN
+        - name: x-permitted-cross-domain-policies
+          value: none
+        - name: x-request-id
+          value: 149c8941-b34a-4a7b-8019-2ed55333a786
+        - name: x-runtime
+          value: "0.007504"
+        - name: x-xss-protection
+          value: "0"
+        - name: cf-cache-status
+          value: BYPASS
+        - name: nel
+          value: '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+        - name: report-to
+          value: '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=zLkaOPTywDyrVul%2B6lGGbLwtkQfDtp5E0G2ungXsRMo072M%2BbXW%2F534akmI5MdfD2rEx12odA2ob9jym3FaGpXMIFQeRXVFljSTEvO5Yen1OyKRuBfJkQ5UslMwiF8Bjsz1Exd7mp5%2FQ"}]}'
+        - name: server
+          value: cloudflare
+        - name: cf-ray
+          value: a596c0149b5e4537-ATL
+      body:
+        type: text
+        data: '{"data":[{"id":"86270753-3d60-46b8-84a0-c192611be68f","type":"fact","attributes":{"body":"The oldest known breed is likely the Saluki, originally trained by Egyptians to help them track game."}}]}'
+    copiedFrom:
+      example: example dog response
+      requestPath: /Users/james/Bruno/Bruno-Demo/Workspaces/Bruno-v4-demo/collections/01 - Fundamentals/01-Basic-Requests/06-Get Random Dog Fact.yml
