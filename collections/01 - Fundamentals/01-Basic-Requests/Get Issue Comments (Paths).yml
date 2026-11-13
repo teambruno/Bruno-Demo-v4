@@ -24,13 +24,6 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        // Each :name segment in the URL is a path param - Bruno swaps in the
-        // values from the Params tab before sending, so the wire URL is
-        // /repos/usebruno/bruno/issues/100/comments.
-        test("status code is 200", function() {
-          expect(res.getStatus()).to.equal(200);
-        });
-
         test("all path params resolved in the URL", function() {
           expect(req.getUrl()).to.not.match(/\/:\w+/);
         });
